@@ -1,0 +1,15 @@
+{
+  "name": "react-native-iaphub",
+  "version": "1.0.0",
+  "description": "IAPHUB for react-native",
+  "main": "src/index.js",
+  "license": "MIT",
+  "peerDependencies": {
+    "react": "*",
+    "react-native": "*"
+  },
+  "devDependencies": {},
+  "dependencies": {
+    "react-native-iap": "^4.4.1"
+  }
+}
