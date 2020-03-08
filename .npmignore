@@ -1,2 +1,7 @@
+npm-debug.log*
+.DS_Store
+.npmrc
+node_modules
+*.todo
+*~
 Example
-.npmignore
