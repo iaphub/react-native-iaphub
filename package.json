@@ -1,9 +1,10 @@
 {
   "name": "react-native-iaphub",
   "version": "1.0.0",
-  "description": "IAPHUB for react-native",
+  "description": "The easiest way to implement IAP (In-app purchase) in your React Native app",
   "main": "src/index.js",
-  "license": "MIT",
+  "license": "GNU GPL V3.0",
+  "keywords": ["react-native", "in app purchase", "in-app-purchase", "in-app-billing", "billing", "google-play", "itunes"],
   "peerDependencies": {
     "react": "*",
     "react-native": "*"
