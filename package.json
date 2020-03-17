@@ -1,6 +1,6 @@
 {
   "name": "react-native-iaphub",
-  "version": "1.0.1",
+  "version": "1.0.2",
   "description": "The easiest way to implement IAP (In-app purchase) in your React Native app",
   "main": "src/index.js",
   "license": "GNU GPL V3.0",
@@ -15,8 +15,8 @@
   ],
   "homepage": "https://github.com/iaphub/react-native-iaphub",
   "repository": {
-    "type" : "git",
-    "url" : "https://github.com/iaphub/react-native-iaphub.git"
+    "type": "git",
+    "url": "https://github.com/iaphub/react-native-iaphub.git"
   },
   "peerDependencies": {
     "react": "*",
