@@ -114,8 +114,8 @@ npm install react-native-iaphub@latest --save
 					webhookStatus: "success"
 				}
 				/*
-				 * The purchase has been successful but we need to check that we webhook to our server was successful as well
-				 * IAPHUB will retry sending the webhook 3 more times after 10 minutes, 1 hour and 24 hours
+				 * The purchase has been successful but we need to check that the webhook to our server was successful as well
+				 * If the webhook request failed, IAPHUB will send you an alert and retry again in 1 minute, 10 minutes, 1 hour and 24 hours.
 				 * You can retry the webhook directly from the dashboard as well
 				 */
 				if (purchase.webhookStatus == "failed") {
@@ -202,19 +202,35 @@ npm install react-native-iaphub@latest --save
 			purchaseDate: "2020-03-11T00:42:28.000Z",
 			expirationDate: "2021-03-11T00:42:28.000Z",
 			isSubscriptionRenewable: true,
-			isSubscriptionRetryPeriod: false
+			isSubscriptionRetryPeriod: false,
+			title: "Membership",
+			description: "Become a member of the community"
+			localizedPrice: "$4.99",
+			introductoryPrice: "$1.99",
+			price: 4.99,
+			currency: "USD"
 		}],
 		// The products the user is able to buy
 		productsForSale: [
 			{
 				id: "5e5198930c48ed07aa275fd9",
 				type: "renewable_subscription",
-				sku: "membership2_tier10"
+				sku: "membership2_tier10",
+				title: "Membership",
+				description: "Become a member of the community",
+				localizedPrice: "$9.99",
+				price: 9.99,
+				currency: "USD"
 			},
 			{
 				id: "5e5198930c48ed07aa275fd9",
 				type: "consumable",
-				sku: "pack10_tier15"
+				sku: "pack10_tier15",
+				title: "Pack 10",
+				description: "Pack of 10 coins",
+				localizedPrice: "$14.99",
+				price: 14.99,
+				currency: "USD"
 			}
 		]
 	}
