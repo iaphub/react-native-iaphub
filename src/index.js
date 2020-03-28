@@ -82,7 +82,7 @@ class Iaphub {
       }
     }
     // Init listeners
-    RNIap.purchaseUpdatedListener(async purchase => {
+    RNIap.purchaseUpdatedListener(async (purchase) => {
       // If the user isn't logged we save the event in a queue (that will be executed when the user login)
       if (!this.isLogged) {
         this.purchaseUpdatedEvents.push(purchase);
@@ -92,7 +92,7 @@ class Iaphub {
         await this.processReceipt(purchase);
       }
     });
-    RNIap.purchaseErrorListener(err => {
+    RNIap.purchaseErrorListener((err) => {
       // If the user isn't logged we save the event in a queue (that will be executed when the user login)
       if (!this.isLogged) {
         this.purchaseErrorEvents.push(err);
@@ -149,9 +149,7 @@ class Iaphub {
       throw this.error("Login required", "login_required");
     }
     try {
-      var product = this.user.productsForSale.find(
-        product => product.sku == productSku
-      );
+      var product = this.user.productsForSale.find((product) => product.sku == productSku);
 
       if (!product) {
         throw this.error(
@@ -205,7 +203,7 @@ class Iaphub {
       );
     }
 
-    var formatProduct = product => {
+    var formatProduct = (product) => {
       var infos = productsInfos.find(info => info.productId == product.sku);
 
       if (!infos) {
@@ -226,12 +224,8 @@ class Iaphub {
     };
 
     this.user = {
-      productsForSale: data.productsForSale
-        .map(formatProduct)
-        .filter(product => product),
-      activeProducts: data.activeProducts
-        .map(formatProduct)
-        .filter(product => product)
+      productsForSale: data.productsForSale.map(formatProduct).filter(product => product),
+      activeProducts: data.activeProducts.map(formatProduct).filter(product => product)
     };
 
     try {
@@ -252,7 +246,7 @@ class Iaphub {
       throw this.error("Login required", "login_required");
     }
     try {
-      await this.request("post", "", { tags: tags });
+      await this.request("post", "", {tags: tags});
     } catch (err) {
       throw this.error(
         `Set user tags failed (Err: ${err.message})`,
@@ -274,9 +268,9 @@ class Iaphub {
       var purchases = [];
 
       // Filter duplicate receipts
-      availablePurchases.forEach(purchase => {
+      availablePurchases.forEach((purchase) => {
         var hasDuplicate = purchases.find(
-          item => this.getReceiptToken(item) == this.getReceiptToken(purchase)
+          (item) => this.getReceiptToken(item) == this.getReceiptToken(purchase)
         );
         if (!hasDuplicate) purchases.push(purchase);
       });
@@ -303,9 +297,7 @@ class Iaphub {
    * @param {Object} purchase Purchase
    */
   getReceiptToken(purchase) {
-    return this.platform == "android"
-      ? purchase.purchaseToken
-      : purchase.transactionReceipt;
+    return this.platform == "android" ? purchase.purchaseToken : purchase.transactionReceipt;
   }
 
   /*
@@ -313,7 +305,7 @@ class Iaphub {
    * @param {Array} products Array of products
    */
   async setPricing(products) {
-    products = products.map(product => {
+    products = products.map((product) => {
       var item = {
         id: product.id,
         price: product.price,
@@ -326,7 +318,7 @@ class Iaphub {
       return item;
     });
 
-    await this.request("post", "/pricing", { products: products });
+    await this.request("post", "/pricing", {products: products});
   }
 
   /*
@@ -414,25 +406,19 @@ class Iaphub {
       } catch (err) {}
     }
     if (this.user && this.user.productsForSale) {
-      var product = this.user.productsForSale.find(
-        product => product.sku == sku
-      );
+      var product = this.user.productsForSale.find((product) => product.sku == sku);
       if (product) productType = product.type;
     }
     // Otherwise, try to get the product type in the new transactions
     if (productType == null && Array.isArray(newTransactions)) {
-      var transaction = newTransactions.find(
-        transaction => transaction.sku == sku
-      );
+      var transaction = newTransactions.find((transaction) => transaction.sku == sku);
       if (transaction) {
         productType = transaction.type;
       }
     }
     // Otherwise, try to get the product type in the response old transactions
     if (productType == null && Array.isArray(oldTransactions)) {
-      var transaction = oldTransactions.find(
-        transaction => transaction.sku == sku
-      );
+      var transaction = oldTransactions.find((transaction) => transaction.sku == sku);
       if (transaction) {
         productType = transaction.type;
       }
@@ -452,15 +438,12 @@ class Iaphub {
       // If we didn't find the product type we cannot finish the transaction properly
       if (!productType) {
         throw this.error(
-          `Cannot finish android receipt, product type required`,
+          "Cannot finish android receipt, product type required",
           "product_type_required"
         );
       }
       // We have to consume 'consumable' and 'subscription' types (The subscription because it is a managed product on android that an user should be able to buy again in the future)
-      var shouldBeConsumed =
-        ["consumable", "subscription"].indexOf(productType) != -1
-          ? true
-          : false;
+      var shouldBeConsumed = (["consumable", "subscription"].indexOf(productType) != -1) ? true : false;
       await RNIap.finishTransaction(purchase, shouldBeConsumed);
     }
     // Finish ios transaction
@@ -473,7 +456,7 @@ class Iaphub {
    * Api request to IAPHUB
    */
   async request(type, url = "", params = {}) {
-    var opts = { method: type, headers: {} };
+    var opts = {method: type, headers: {}};
 
     // Check appId and userId
     if (!this.appId) throw "app_id_empty";
