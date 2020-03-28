@@ -112,6 +112,9 @@ class Iaphub {
     if (!userId) {
       throw this.error("Missing userId", "user_id_empty");
     }
+    if (typeof userId != "string") {
+      throw this.error("Invalid userId, it must be a string", "user_id_invalid");
+    }
     if (!this.isInitialized) {
       throw this.error("IAPHUB hasn't been initialized", "init_missing");
     }
