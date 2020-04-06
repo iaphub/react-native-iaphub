@@ -30,6 +30,7 @@ class Iaphub {
    * @param {Object} opts Options
    * @param {String} opts.appId - The app id is available on the settings page of your app
    * @param {String} opts.apiKey - The (client) api key is available on the settings page of your app
+   * @param {String} opts.environment - Environment used to determine the webhook configuration
    * @param {Function} opts.onReceiptSuccess - Event called when a receipt validation has been successful
    * @param {Function} opts.onReceiptError - Event called when a receipt validation has failed
    * @param {Function} opts.onPurchaseSuccess - Event called when a purchase has been processed successfully
@@ -56,6 +57,7 @@ class Iaphub {
     }
     this.appId = opts.appId;
     this.apiKey = opts.apiKey;
+    this.environment = opts.environment || "production";
     this.isInitialized = true;
 
     this.onReceiptSuccess = opts.onReceiptSuccess;
@@ -342,7 +344,8 @@ class Iaphub {
     try {
       var response = await this.request("post", "/receipt", {
         token: receipt.token,
-        sku: receipt.sku
+        sku: receipt.sku,
+        environment: this.environment
       });
       // If the receipt validation is a success
       if (response.status == "success") {

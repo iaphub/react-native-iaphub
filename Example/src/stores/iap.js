@@ -17,6 +17,8 @@ class IAPStore {
 				appId: "5e4890f6c61fc971cf46db4d",
 				// The (client) api key is available on the settings page of your app
 				apiKey: "SDp7aY220RtzZrsvRpp4BGFm6qZqNkNf",
+				// The environment is used to determine the webhooks configuration ('production', 'staging', 'development')
+				environment: "production",
 				/*
 				 * Event called before a receipt is validated with the IAPHUB server
 				 * @param {Object} receipt Receipt
