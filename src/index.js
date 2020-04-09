@@ -1,5 +1,6 @@
 import { Platform } from "react-native";
 import * as RNIap from "react-native-iap";
+import pkg from '../package.json';
 
 class Iaphub {
   constructor() {
@@ -470,6 +471,8 @@ class Iaphub {
     if (!this.userId) throw "user_id_empty";
     // Default params
     params.platform = this.platform;
+    params.libraryName = 'react_native';
+    params.libraryVersion = pkg.version;
     // Handle get request
     if (type == "get") {
       var query = "";
