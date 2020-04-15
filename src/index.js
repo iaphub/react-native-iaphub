@@ -217,9 +217,7 @@ class Iaphub {
         return null;
       }
       return {
-        id: product.id,
-        type: product.type,
-        sku: product.sku,
+        ...product,
         title: infos.title,
         description: infos.description,
         price: infos.price,
