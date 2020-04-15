@@ -343,8 +343,7 @@ class Iaphub {
     try {
       var response = await this.request("post", "/receipt", {
         token: receipt.token,
-        sku: receipt.sku,
-        environment: this.environment
+        sku: receipt.sku
       });
       // If the receipt validation is a success
       if (response.status == "success") {
@@ -469,6 +468,7 @@ class Iaphub {
     if (!this.userId) throw "user_id_empty";
     // Default params
     params.platform = this.platform;
+    params.environment = this.environment;
     params.libraryName = 'react_native';
     params.libraryVersion = pkg.version;
     // Handle get request
