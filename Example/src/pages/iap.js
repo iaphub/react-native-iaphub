@@ -1,10 +1,47 @@
 import React from 'react';
-import {StyleSheet, View, Text, Button, TouchableOpacity, ActivityIndicator} from 'react-native';
+import {StyleSheet, View, ScrollView, Text, Button, TouchableOpacity, ActivityIndicator} from 'react-native';
 import {Observer} from 'mobx-react/custom';
 import app from '../stores/app';
 import iap from '../stores/iap';
 
 export default class IAPPage extends React.Component {
+
+  renderPrice = (product) => {
+    // Convert iso duration to human
+    var isoToHuman = (isoDuration) => {
+      if (!isoDuration) return;
+      if (isoDuration == "P7D") isoDuration = "P1W";
+      var number = isoDuration.match(/\d+/g);
+      var periods = {"D": "day", "W": "week", "M": "month", "Y": "year"};
+      var period = isoDuration[isoDuration.length - 1];
+
+      return `${number > 1 ? `${number} ` : ''}${periods[period]}${number > 1 ? 's' : ''}`;
+    };
+
+    // Renewable subscriptions
+    if (product.type == "renewable_subscription") {
+      // Trial
+      if (product.subscriptionPeriodType == "trial") {
+        return `Enjoy a free trial during ${isoToHuman(product.subscriptionTrialDuration)} (then ${product.price} every ${isoToHuman(product.subscriptionDuration)})`;
+      }
+      // As you go introductory offer
+      else if (product.subscriptionPeriodType == "intro" && product.subscriptionIntroPayment == "as_you_go") {
+        return `Enjoy an introductory offer of ${product.subscriptionIntroPrice} every ${isoToHuman(product.subscriptionIntroDuration)} (then ${product.price} every ${isoToHuman(product.subscriptionDuration)})`;
+      }
+      // Upfront introductory offer
+      else if (product.subscriptionPeriodType == "intro" && product.subscriptionIntroPayment == "upfront") {
+        return `Enjoy an introductory offer of ${product.subscriptionIntroPrice} for ${isoToHuman(product.subscriptionIntroDuration)} (then ${product.price} every ${isoToHuman(product.subscriptionDuration)})`;
+      }
+    }
+    // Non-renewable subscriptions
+    if (product.type == "subscription") {
+      return `${product.price} for ${isoToHuman(product.subscriptionDuration)}`;
+    }
+    // Everything else
+    else {
+      return product.price;
+    }
+  }
 
 	renderProduct = (product, onPress) => {
     var {skuProcessing} = iap;
@@ -14,7 +51,7 @@ export default class IAPPage extends React.Component {
         <View style={styles.product}>
           <View style={styles.productDetails}>
             <Text style={styles.productTitle}>{product.title}</Text>
-            <Text style={styles.productPrice}>{product.localizedPrice}</Text>
+            <Text style={styles.productPrice}>{this.renderPrice(product)}</Text>
           </View>
           {skuProcessing == product.sku && <ActivityIndicator/>}
         </View>
@@ -32,13 +69,26 @@ export default class IAPPage extends React.Component {
 
   renderProductsForSale = () => {
     var {user} = iap;
-    var productsForSale = user.productsForSale || [];
+    var groups = {};
 
+    user.productsForSale.forEach((product) => {
+      var groupName = product.groupName || "default";
+
+      if (!groups[groupName]) {
+        groups[groupName] = [];
+      }
+      groups[groupName].push(product);
+    });
     return (
       <View>
         <Text style={styles.title}>Products for sale</Text>
-        {!productsForSale.length && this.renderEmpty("No products for sale")}
-				{productsForSale.map((product) => this.renderProduct(product, () => iap.buy(product.sku)))}
+        {!user.productsForSale.length && this.renderEmpty("No products for sale")}
+        {Object.keys(groups).map((groupName) => (
+          <View key={groupName}>
+            <Text style={styles.groupTitle}>{groupName}</Text>
+            {groups[groupName].map((product) => this.renderProduct(product, () => iap.buy(product.sku)))}
+          </View>
+        ))}
 			</View>
     );
   }
@@ -85,12 +135,14 @@ export default class IAPPage extends React.Component {
       )
     }
     return (
-			<View style={styles.root}>
-        {this.renderProductsForSale()}
-        {this.renderActiveProducts()}
-        {this.renderRestore()}
-        {this.renderLogout()}
-			</View>
+      <ScrollView>
+        <View style={styles.root}>
+          {this.renderProductsForSale()}
+          {this.renderActiveProducts()}
+          {this.renderRestore()}
+          {this.renderLogout()}
+        </View>
+      </ScrollView>
     );
 	}
 
@@ -107,7 +159,8 @@ export default class IAPPage extends React.Component {
 const styles = StyleSheet.create({
 	root: {
 		flex: 1,
-		paddingTop: 40,
+    paddingTop: 40,
+    paddingBottom: 40,
 		paddingLeft: 20,
 		paddingRight: 20
 	},
@@ -128,6 +181,14 @@ const styles = StyleSheet.create({
   empty: {
     textAlign: 'center',
     color: 'black'
+  },
+  // Group
+  groupTitle: {
+    color: '#111566',
+		fontWeight: 'bold',
+		fontSize: 16,
+		marginTop: 20,
+		marginBottom: 10
   },
 	// Product
 	product: {
