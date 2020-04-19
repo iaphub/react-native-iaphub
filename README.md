@@ -25,13 +25,11 @@ Implementing In-app purchases in your app should be a piece of cake!<br/>
 This module implements the IAPHUB API on top of the [react-native-iap](https://github.com/dooboolab/react-native-iap) module 👏
 
 1. Create an account on [IAPHUB](https://www.iaphub.com)
-<br/>
 
 2. Install the package
 ``
 npm install react-native-iaphub@latest --save
 ``
-<br/>
 
 ## Init
 Call the `init` method at the start of your app to initialize your configuration<br/><br/>
