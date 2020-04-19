@@ -209,6 +209,20 @@ class Iaphub {
       );
     }
 
+    var convertToISO8601 = (numberOfPeriods, periodType) => {
+      if (!numberOfPeriods || !periodType) {
+        return undefined;
+      }
+      var periodTypes = {
+        "DAY": `P${numberOfPeriods}D`,
+        "WEEK": `P${numberOfPeriods}W`,
+        "MONTH": `P${numberOfPeriods}M`,
+        "YEAR": `P${numberOfPeriods}Y`
+      };
+
+      return periodTypes[periodType];
+    }
+
     var formatProduct = (product) => {
       var infos = productsInfos.find(info => info.productId == product.sku);
 
@@ -218,12 +232,98 @@ class Iaphub {
       }
       return {
         ...product,
+        // Product title
         title: infos.title,
+        // Product description
         description: infos.description,
-        price: infos.price,
-        currency: infos.currency,
-        localizedPrice: infos.localizedPrice,
-        introductoryPrice: infos.introductoryPrice
+        // Localized price
+        price: infos.localizedPrice,
+        // Price currency
+        priceCurrency: infos.currency,
+        // Price amount
+        priceAmount: parseFloat(infos.price),
+        // Only for a renewable subscription
+        ...(product.type == "renewable_subscription" ? {
+          // Duration of the subscription cycle specified in the ISO 8601 format
+          subscriptionDuration: (() => {
+            // Ios
+            if (this.platform == "ios") {
+              return convertToISO8601(infos.subscriptionPeriodNumberIOS, infos.subscriptionPeriodUnitIOS);
+            }
+            // Android
+            else if (this.platform == "android") {
+              return infos.subscriptionPeriodAndroid;
+            }
+          })()
+        } : {}),
+        // Only for a renewable subscription with an intro mode
+        ...((product.type == "renewable_subscription" && product.subscriptionPeriodType == 'intro') ? {
+          // Localized introductory price
+          subscriptionIntroPrice: infos.introductoryPrice,
+          // Introductory price amount
+          subscriptionIntroPriceAmount: infos.introductoryPrice ? parseFloat(infos.introductoryPrice.match(/\b\d+(?:.\d+)?/)[0]) : undefined,
+          // Payment type of the introductory offer
+          subscriptionIntroPayment: (() => {
+            // Ios
+            if (this.platform == "ios") {
+              return {
+                "PAYASYOUGO": "as_you_go",
+                "PAYUPFRONT": "upfront"
+              }[infos.introductoryPricePaymentModeIOS];
+            }
+            // Android
+            else if (this.platform == "android") {
+              return "as_you_go";
+            }
+          })(),
+          // Duration of an introductory cycle specified in the ISO 8601 format
+          subscriptionIntroDuration: (() => {
+            // Ios
+            if (this.platform == "ios") {
+              // The user pays directly a price for a number of weeks, months...
+              if (infos.introductoryPricePaymentModeIOS == "PAYUPFRONT") {
+                return convertToISO8601(infos.introductoryPriceNumberOfPeriodsIOS, infos.introductoryPriceSubscriptionPeriodIOS);
+              }
+              // The introductory subscription duration is the same as a regular subscription (Only the number of cycles can change)
+              else if (infos.introductoryPricePaymentModeIOS == "PAYASYOUGO") {
+                return convertToISO8601(infos.subscriptionPeriodNumberIOS, infos.subscriptionPeriodUnitIOS);
+              }
+            }
+            // Android
+            else if (this.platform == "android") {
+              return infos.introductoryPricePeriodAndroid;
+            }
+          })(),
+          // Number of cycles in the introductory offer
+          subscriptionIntroCycles: (() => {
+            // Ios
+            if (this.platform == "ios") {
+              if (infos.introductoryPricePaymentModeIOS == "PAYUPFRONT") {
+                return 1;
+              }
+              else if (infos.introductoryPricePaymentModeIOS == "PAYASYOUGO") {
+                return parseInt(infos.introductoryPriceNumberOfPeriodsIOS, 10);
+              }
+            }
+            // Android
+            else if (this.platform == "android") {
+              return parseInt(infos.introductoryPriceCyclesAndroid, 10);
+            }
+          })(),
+        } : {}),
+        // Only for a renewable subscription with a trial mode
+        ...((product.type == "renewable_subscription" && product.subscriptionPeriodType == 'trial') ? {
+          subscriptionTrialDuration: (() => {
+            // Ios
+            if (this.platform == "ios") {
+              return convertToISO8601(infos.introductoryPriceNumberOfPeriodsIOS, infos.introductoryPriceSubscriptionPeriodIOS);
+            }
+            // Android
+            else if (this.platform == "android") {
+              return infos.freeTrialPeriodAndroid;
+            }
+          })()
+        } : {})
       };
     };
 
@@ -312,12 +412,12 @@ class Iaphub {
     products = products.map((product) => {
       var item = {
         id: product.id,
-        price: product.price,
-        currency: product.currency
+        price: product.priceAmount,
+        currency: product.priceCurrency
       };
 
-      if (product.introductoryPrice) {
-        item.introPrice = product.introductoryPrice.match(/\b\d+(?:.\d+)?/)[0];
+      if (product.subscriptionIntroPriceAmount) {
+        item.introPrice = product.subscriptionIntroPriceAmount;
       }
       return item;
     });
