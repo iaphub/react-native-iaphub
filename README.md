@@ -32,9 +32,10 @@ This module implements the IAPHUB API on top of the [react-native-iap](https://g
 npm install react-native-iaphub@latest --save
 ``
 <br/>
+
 ## Init
-Call the ``init`` method at the start of your app to initialize your configuration<br/><br/>
-*It should be called as soon as possible, no event will be triggered until you call the ``login`` method.*
+Call the `init` method at the start of your app to initialize your configuration<br/><br/>
+*It should be called as soon as possible, no event will be triggered until you call the `login` method.*
 
 ```js
   await Iaphub.init({
