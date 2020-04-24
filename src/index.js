@@ -3,6 +3,7 @@ import * as RNIap from "react-native-iap";
 import pkg from '../package.json';
 
 class Iaphub {
+
   constructor() {
     this.apiUrl = "https://api.iaphub.com/v1";
     this.platform = Platform.OS;
@@ -14,12 +15,8 @@ class Iaphub {
     this.isInitialized = false;
     this.isLogged = false;
     this.canMakePayments = true;
-
-    this.onReceiptSuccess = null;
-    this.onReceiptError = null;
-    this.onPurchaseSuccess = null;
-    this.onPurchaseError = null;
-
+    this.onReceiptProcessed = null;
+    this.buyRequest = null;
     this.purchaseUpdatedEvents = [];
     this.purchaseErrorEvents = [];
   }
@@ -32,10 +29,7 @@ class Iaphub {
    * @param {String} opts.appId - The app id is available on the settings page of your app
    * @param {String} opts.apiKey - The (client) api key is available on the settings page of your app
    * @param {String} opts.environment - Environment used to determine the webhook configuration
-   * @param {Function} opts.onReceiptSuccess - Event called when a receipt validation has been successful
-   * @param {Function} opts.onReceiptError - Event called when a receipt validation has failed
-   * @param {Function} opts.onPurchaseSuccess - Event called when a purchase has been processed successfully
-   * @param {Function} opts.onPurchaseError - Event called when a purchase has failed
+   * @param {Function} opts.onReceiptProcessed - Event triggered after IAPHUB processed a receipt
    */
   async init(opts = {}) {
     if (!opts.appId) {
@@ -44,27 +38,11 @@ class Iaphub {
     if (!opts.apiKey) {
       throw this.error("Missing apiKey option", "api_key_empty");
     }
-    if (!opts.onPurchaseSuccess) {
-      throw this.error(
-        "Missing onPurchaseSuccess option",
-        "on_purchase_success_empty"
-      );
-    }
-    if (!opts.onPurchaseError) {
-      throw this.error(
-        "Missing onPurchaseError option",
-        "on_purchase_error_empty"
-      );
-    }
     this.appId = opts.appId;
     this.apiKey = opts.apiKey;
     this.environment = opts.environment || "production";
     this.isInitialized = true;
-
-    this.onReceiptSuccess = opts.onReceiptSuccess;
-    this.onReceiptError = opts.onReceiptError;
-    this.onPurchaseSuccess = opts.onPurchaseSuccess;
-    this.onPurchaseError = opts.onPurchaseError;
+    this.onReceiptProcessed = opts.onReceiptProcessed;
 
     // Init connection
     try {
@@ -100,9 +78,9 @@ class Iaphub {
       if (!this.isLogged) {
         this.purchaseErrorEvents.push(err);
       }
-      // Otherwise we trigger the error
+      // Otherwise process the error
       else {
-        this.emitPurchaseError(err);
+        this.processError(err);
       }
     });
   }
@@ -132,7 +110,7 @@ class Iaphub {
     // Execute purchase error events received prior to initialize
     await this.purchaseErrorEvents.reduce(async (promise, err) => {
       await promise;
-      await this.emitPurchaseError(err);
+      this.processError(err);
     }, Promise.resolve());
     this.purchaseErrorEvents = [];
   }
@@ -148,32 +126,40 @@ class Iaphub {
 
   /*
    * Buy product
-   * @param {String} productSku Product sku
+   * @param {String} sku Product sku
    */
-  async buy(productSku) {
+  async buy(sku) {
+    // The user has to be logged in
     if (!this.isLogged) {
       throw this.error("Login required", "login_required");
     }
+    // Get product of the sku
+    var product = this.user.productsForSale.find((product) => product.sku == sku);
+    // Prevent buying a product that isn't in the products for sale list
+    if (!product) {
+      throw this.error(
+        `Buy failed, product sku not in the products for sale`,
+        "sku_not_for_sale"
+      );
+    }
+    // Create promise than will be resolved (or rejected) after process of the receipt is complete
+    var buyPromise = new Promise((resolve, reject) => {
+      this.buyRequest = {resolve, reject, sku};
+    });
+    // Request purchase
     try {
-      var product = this.user.productsForSale.find((product) => product.sku == productSku);
-
-      if (!product) {
-        throw this.error(
-          `Buy failed, product sku not in the products for sale`,
-          "sku_not_found"
-        );
-      }
       if (product.type.indexOf("subscription") != -1) {
         await RNIap.requestSubscription(product.sku, false);
       } else {
         await RNIap.requestPurchase(product.sku, false);
       }
-    } catch (err) {
-      throw this.error(
-        `Buy failed (Err: ${err.message})`,
-        err.code || "unknown"
-      );
     }
+    // Transform request purchase/subscription errors
+    catch (err) {
+      this.processError(err);
+    }
+    // Return promise
+    return buyPromise;
   }
 
   /*
@@ -426,6 +412,44 @@ class Iaphub {
   }
 
   /*
+   * Process an error
+   * @param {Object} err Error
+   */
+  processError(err) {
+    var errors = {
+      // Unknown error
+      "E_UNKNOWN": "unknown",
+      // Billing is unavailable
+      "E_SERVICE_ERROR": "billing_unavailable",
+      // Purchase popup closed by the user
+      "E_USER_CANCELLED": "user_cancelled",
+      // Item not available for purchase
+      "E_ITEM_UNAVAILABLE": "item_unavailable",
+      // Remote error
+      "E_REMOTE_ERROR": "remote_error",
+      // Network error
+      "E_NETWORK_ERROR": "network_error",
+      // Receipt failed
+      "E_RECEIPT_FAILED": "receipt_failed",
+      // Receipt finish failed
+      "E_RECEIPT_FINISHED_FAILED": "receipt_finish_failed",
+      // Product already owned, it must be consumed before being bought again
+      "E_ALREADY_OWNED": "product_already_owned",
+      // Developer error, the product sku is probably invalid
+      "E_DEVELOPER_ERROR": "developer_error"
+    };
+    // Transform error
+    var error = this.error(err.message, errors[err.code] || "unknown");
+    // Reject buy request if active
+    if (this.buyRequest) {
+      var request = this.buyRequest;
+
+      this.buyRequest = null;
+      request.reject(error);
+    }
+  }
+
+  /*
    * Process a receipt
    * @param {Object} purchase Purchase
    */
@@ -438,6 +462,7 @@ class Iaphub {
     var newTransactions = [];
     var oldTransactions = [];
     var shouldFinishReceipt = false;
+    var error = null;
 
     // Process receipt with IAPHUB
     try {
@@ -450,47 +475,56 @@ class Iaphub {
         newTransactions = response.newTransactions;
         oldTransactions = response.oldTransactions;
         shouldFinishReceipt = true;
-        // Emit receipt success event
-        await this.emitReceiptSuccess(receipt);
       }
       // Otherwise emit receipt error event (A restore won't be needed, IAPHUB will retry processing the receipt)
       else if (response.status == "failed") {
         shouldFinishReceipt = true;
-        newTransactions = await this.emitReceiptError(
-          this.error("Receipt validation failed", "receipt_validation_error"),
-          receipt
-        );
-        // Finish the receipt if the function returns undefined or an array of transactions
-        if (newTransactions != false) {
-          shouldFinishReceipt = true;
-        }
-      }
-    } catch (err) {
-      // If any error, emit the receipt error and stop the processing, the receipt won't be finished (A restore will be needed)
-      newTransactions = await this.emitReceiptError(err, receipt);
-      // Finish the receipt if the function returns an array of transactions
-      if (Array.isArray(newTransactions)) {
-        shouldFinishReceipt = true;
+        error = this.error("Receipt validation on IAPHUB failed", "receipt_validation_failed");
       }
     }
-    // Emit purchase success event
-    if (Array.isArray(newTransactions) && newTransactions.length) {
-      newTransactions.reduce(async (promise, transaction) => {
-        await promise;
-        await this.emitPurchaseSuccess(transaction);
-      }, Promise.resolve());
+    // If it fails we won't finish the receipt
+    catch (err) {
+      error = this.error("Receipt request to IAPHUB failed", "receipt_request_failed");
     }
-    // Finish receipt (We finish the receipt even if the status is failed since IAPHUB will automatically retry the receipt)
+    // Finish receipt
     if (shouldFinishReceipt) {
       var productType = await this.detectProductType(
         receipt.sku,
         newTransactions,
         oldTransactions
       );
-
       await this.finishReceipt(purchase, productType);
     }
-
+    // Emit receipt processed event
+    try {
+      var newTransactionsOverride = await this.emitReceiptProcessed(error, receipt);
+      if (Array.isArray(newTransactionsOverride)) {
+        newTransactions = newTransactionsOverride;
+      }
+    } catch (err) {
+      error = err;
+    }
+    // Resolve buy request if active
+    if (this.buyRequest) {
+      var request = this.buyRequest;
+      // Delete saved request
+      this.buyRequest = null;
+      // Get transaction
+      var transaction = newTransactions.find((item) => item.sku == request.sku);
+      // Reject the request if there is no transaction
+      if (!transaction) {
+        this.error("Transaction not found", "transaction_not_found");
+      }
+      // If there was an error, reject the request
+      if (error) {
+        request.reject(error);
+      }
+      // Otherwise resolve with the transaction
+      else {
+        var product = this.user.productsForSale.find((product) => product.sku == transaction.sku);
+        request.resolve({...product, ...transaction});
+      }
+    }
     return newTransactions || [];
   }
 
@@ -618,51 +652,18 @@ class Iaphub {
   }
 
   /*
-   * Emit receipt success
+   * Emit receipt processed event
    */
-  async emitReceiptSuccess(...params) {
-    if (!this.onReceiptSuccess) return;
-    try {
-      await this.onReceiptSuccess(...params);
-    } catch (err) {
-      console.error(err);
-    }
-  }
+  async emitReceiptProcessed(...params) {
+    if (!this.onReceiptProcessed) return;
+    var transactions = null
 
-  /*
-   * Emit receipt error
-   */
-  async emitReceiptError(...params) {
-    if (!this.emitReceiptError) return;
     try {
-      await this.onReceiptError(...params);
+      transactions = await this.onReceiptProcessed(...params);
     } catch (err) {
       console.error(err);
     }
-  }
-
-  /*
-   * Emit purchase success
-   */
-  async emitPurchaseSuccess(...params) {
-    if (!this.onPurchaseSuccess) return;
-    try {
-      await this.onPurchaseSuccess(...params);
-    } catch (err) {
-      console.error(err);
-    }
-  }
-
-  /*
-   * Emit purchase error
-   */
-  async emitPurchaseError(...params) {
-    if (!this.onPurchaseError) return;
-    try {
-      await this.onPurchaseError(...params);
-    } catch (err) {
-      console.error(err);
-    }
+    return transactions;
   }
 
   /*
@@ -674,6 +675,7 @@ class Iaphub {
     err.code = code;
     return err;
   }
+
 }
 
 export default new Iaphub();
