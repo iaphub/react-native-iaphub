@@ -43,7 +43,7 @@ export default class IAPPage extends React.Component {
     }
   }
 
-	renderProduct = (product, onPress) => {
+  renderProduct = (product, onPress) => {
     var {skuProcessing} = iap;
 
     return (
@@ -89,7 +89,7 @@ export default class IAPPage extends React.Component {
             {groups[groupName].map((product) => this.renderProduct(product, () => iap.buy(product.sku)))}
           </View>
         ))}
-			</View>
+      </View>
     );
   }
 
@@ -101,26 +101,26 @@ export default class IAPPage extends React.Component {
       <View>
         <Text style={styles.title}>Active products</Text>
         {!activeProducts.length && this.renderEmpty("No active products (Subscriptions, non-consumables)")}
-				{activeProducts.map((product) => this.renderProduct(product))}
-			</View>
+        {activeProducts.map((product) => this.renderProduct(product))}
+      </View>
     );
   }
 
   renderRestore = () => {
     return (
-			<View>
-				<Text style={styles.title}>Restore</Text>
-				<Button title="Restore purchases" onPress={iap.restore}/>
-			</View>
+      <View>
+        <Text style={styles.title}>Restore</Text>
+        <Button title="Restore purchases" onPress={iap.restore}/>
+      </View>
     );
   }
 
   renderLogout = () => {
     return (
-			<View>
-				<Text style={styles.title}>Logout</Text>
-				<Button title="Logout" onPress={app.logout}/>
-			</View>
+      <View>
+        <Text style={styles.title}>Logout</Text>
+        <Button title="Logout" onPress={app.logout}/>
+      </View>
     );
   }
 
@@ -144,32 +144,32 @@ export default class IAPPage extends React.Component {
         </View>
       </ScrollView>
     );
-	}
+  }
 
-	render() {
-		return (
-			<Observer>
-				{this.renderContent}
-			</Observer>
-		)
-	}
+  render() {
+    return (
+      <Observer>
+        {this.renderContent}
+      </Observer>
+    )
+  }
 
 }
 
 const styles = StyleSheet.create({
-	root: {
-		flex: 1,
+  root: {
+    flex: 1,
     paddingTop: 40,
     paddingBottom: 40,
-		paddingLeft: 20,
-		paddingRight: 20
-	},
-	title: {
-		color: '#111566',
-		fontWeight: 'bold',
-		fontSize: 24,
-		marginTop: 20,
-		marginBottom: 20
+    paddingLeft: 20,
+    paddingRight: 20
+  },
+  title: {
+    color: '#111566',
+    fontWeight: 'bold',
+    fontSize: 24,
+    marginTop: 20,
+    marginBottom: 20
   },
   // Loader
   loader: {
@@ -185,13 +185,13 @@ const styles = StyleSheet.create({
   // Group
   groupTitle: {
     color: '#111566',
-		fontWeight: 'bold',
-		fontSize: 16,
-		marginTop: 20,
-		marginBottom: 10
+    fontWeight: 'bold',
+    fontSize: 16,
+    marginTop: 20,
+    marginBottom: 10
   },
-	// Product
-	product: {
+  // Product
+  product: {
     flexDirection: 'row',
     padding: 10,
     backgroundColor: 'white',

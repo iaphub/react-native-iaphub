@@ -4,35 +4,35 @@ import iap from './iap';
 
 class AppStore {
 
-	isLogged = false;
+  isLogged = false;
 
-	constructor() {
-		this.init()
-	}
+  constructor() {
+    this.init()
+  }
 
-	init = async () => {
-		iap.init();
-		this.isLogged = (await AsyncStorage.getItem('isLogged')) == "true" ? true : false;
-		if (this.isLogged) {
-			this.login();
-		}
-	}
+  init = async () => {
+    iap.init();
+    this.isLogged = (await AsyncStorage.getItem('isLogged')) == "true" ? true : false;
+    if (this.isLogged) {
+      this.login();
+    }
+  }
 
-	login = async () => {
-		this.isLogged = true;
-		await AsyncStorage.setItem('isLogged', "true");
-		iap.login("1");
-	}
-	
-	logout = async () => {
-		this.isLogged = false;
-		await AsyncStorage.setItem('isLogged', "false");
-		iap.logout();
-	}
+  login = async () => {
+    this.isLogged = true;
+    await AsyncStorage.setItem('isLogged', "true");
+    iap.login("1");
+  }
+  
+  logout = async () => {
+    this.isLogged = false;
+    await AsyncStorage.setItem('isLogged', "false");
+    iap.logout();
+  }
 
 }
 
 decorate(AppStore, {
-	isLogged: observable
+  isLogged: observable
 })
 export default new AppStore();

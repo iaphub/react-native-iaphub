@@ -18,18 +18,18 @@ export default class App extends React.Component {
     )
   }
 
-	render() {
-		return (
-			<Observer>
-				{this.renderContent}
-			</Observer>
-		)
-	}
+  render() {
+    return (
+      <Observer>
+        {this.renderContent}
+      </Observer>
+    )
+  }
 
 }
 
 const styles = StyleSheet.create({
-	root: {
-		flex: 1
-	}
+  root: {
+    flex: 1
+  }
 });
