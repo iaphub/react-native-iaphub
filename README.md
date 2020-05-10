@@ -33,7 +33,7 @@ npm install react-native-iaphub@latest --save
 
 ## Init
 Call the `init` method at the start of your app to initialize your configuration<br/><br/>
-*It should be called as soon as possible when starting your app.*
+ℹ️ It should be called as soon as possible when starting your app.
 
 ```js
   await Iaphub.init({
@@ -47,19 +47,20 @@ Call the `init` method at the start of your app to initialize your configuration
 ```
 
 ## Login
-Call the `login` method after an user log in<br/><br/>
-*You must provide an `user id` in order to identify the user.<br/>
-After the login, you'll be able to call methods such as `getUser` and `buy`.<br/>
-You can logout the user using the `logout` method.*
+Call the `login` method to authenticate an user.<br/>
 
+If you have an authentication system, provide the `user id` of the user right after the user log in.<br/>
+If you don't and want to handle IAP on the client side, you can provide the `device id` when the app start instead by using a module such as [react-native-device-info](https://github.com/react-native-community/react-native-device-info#getuniqueid) to get a device unique ID.<br/>
+
+⚠ You should provide an id that is non-guessable and isn't public. (Email not allowed)
 ```js
 await Iaphub.login("1e5494930c48ed07aa275fd2");
 ```
 
 ## Set user tags
 Call the `setUserTags` method to update the user tags<br/><br/>
-*Tags are a powerful tool that allows you to offer to your users different products depending on custom properties.<br/>
-⚠ This method will throw an error if the tag name hasn't been created on the IAPHUB dashboard*
+Tags are a powerful tool that allows you to offer to your users different products depending on custom properties.<br/>
+⚠ This method will throw an error if the tag name hasn't been created on the IAPHUB dashboard
 
 ```js
 await Iaphub.setUserTags({gender: 'male'});
@@ -67,7 +68,7 @@ await Iaphub.setUserTags({gender: 'male'});
 
 ## Get user
 Call the ``getUser`` method to fetch the user profile<br/><br/>
-*The user profile contains the active products (subscriptions not expired yet or non-consumables) and the products for sale of the user (the products the user is able to buy).*
+The user profile contains the active products (subscriptions not expired yet or non-consumables) and the products for sale of the user (the products the user is able to buy).
 
 ```js
 var user = await Iaphub.getUser();
@@ -155,8 +156,8 @@ console.log(user);
 
 ## Buy a product
 Call the ``buy`` method to buy a product<br/><br/>
-*This method only needs the product sku that you would get from one of the products of the user productsForSale array.<br/>
-⚠ Buying a product that isn't in the productsForSale array will throw an error.*
+ℹ️ The method needs the product sku that you would get from one of the products of the user productsForSale array.<br/>
+⚠ Buying a product that isn't in the productsForSale array will throw an error.
 
 ```js
 try {
@@ -245,8 +246,9 @@ try {
 
 ## Restore user purchases
 Call the ``restore`` method to restore the user purchases<br/><br/>
-*This method will only return the transactions that were not already on IAPHUB (pretty handy to know how many transactions have been restored).<br/>
-You should display a restore button somewhere in your app (usually on the settings page).*
+This method will return the transactions that were not already saved on IAPHUB.<br/>
+ℹ️ You should display a restore button somewhere in your app (usually on the settings page).<br/>
+ℹ️ If you logged in using the `device id`, an user using a new device will have to restore its purchases since the `device id` will be different.
 
 ```js
 var restoredPurchases = await Iaphub.restore();
@@ -264,8 +266,10 @@ console.log(restoredPurchases);
 ```
 
 ## Logout
-Call the `logout` method after an user log out<br/><br/>
-*Any purchase event will be saved in a queue until the user log in.*
+Call the `logout` method after an user log out<br/>
+
+ℹ️ After a logout any purchase event will be saved in a queue until the user log in.<br>
+ℹ️ Logout isn't required if you logged in with a `device id`.
 
 ```js
 await Iaphub.logout();
