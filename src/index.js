@@ -679,3 +679,48 @@ class Iaphub {
 }
 
 export default new Iaphub();
+
+export var EIapHubEnvironment;
+(function (EIapHubEnvironment) {
+    EIapHubEnvironment["PRODUCTION"] = "production";
+    EIapHubEnvironment["STAGING"] = "staging";
+    EIapHubEnvironment["DEVELOPMENT"] = "development";
+})(EIapHubEnvironment || (EIapHubEnvironment = {}));
+export var EIapHubProductTypes;
+(function (EIapHubProductTypes) {
+    EIapHubProductTypes["CONSUMABLE"] = "consumable";
+    EIapHubProductTypes["NON_CONSUMABLE"] = "non_consumable";
+    EIapHubProductTypes["SUBSCRIPTION"] = "subscription";
+    EIapHubProductTypes["RENEWABLE_SUBSCRIPTION"] = "renewable_subscription";
+})(EIapHubProductTypes || (EIapHubProductTypes = {}));
+export var EIapHubSubscriptionPeriod;
+(function (EIapHubSubscriptionPeriod) {
+    EIapHubSubscriptionPeriod["PER_1_WEEK"] = "P1W";
+    EIapHubSubscriptionPeriod["PER_1_MONTH"] = "P1M";
+    EIapHubSubscriptionPeriod["PER_3_MONTHS"] = "P3M";
+    EIapHubSubscriptionPeriod["PER_6_MONTHS"] = "P6M";
+    EIapHubSubscriptionPeriod["PER_1_YEAR"] = "P1Y";
+})(EIapHubSubscriptionPeriod || (EIapHubSubscriptionPeriod = {}));
+export var EIapHubSubscriptionPeriodType;
+(function (EIapHubSubscriptionPeriodType) {
+    EIapHubSubscriptionPeriodType["NORMAL"] = "normal";
+    EIapHubSubscriptionPeriodType["TRIAL"] = "trial";
+    EIapHubSubscriptionPeriodType["INTRO"] = "intro";
+})(EIapHubSubscriptionPeriodType || (EIapHubSubscriptionPeriodType = {}));
+export var EIapHubIntroductoryPaymentType;
+(function (EIapHubIntroductoryPaymentType) {
+    EIapHubIntroductoryPaymentType["AS_YOU_GO"] = "as_you_go";
+    EIapHubIntroductoryPaymentType["UPFRONT"] = "upfront";
+})(EIapHubIntroductoryPaymentType || (EIapHubIntroductoryPaymentType = {}));
+export var EIapHubWebhookStatus;
+(function (EIapHubWebhookStatus) {
+    EIapHubWebhookStatus["FAILED"] = "failed";
+    EIapHubWebhookStatus["SUCCESS"] = "success";
+})(EIapHubWebhookStatus || (EIapHubWebhookStatus = {}));
+export var EIapHubPurchaseErrorCodes;
+(function (EIapHubPurchaseErrorCodes) {
+    EIapHubPurchaseErrorCodes["USER_CANCELLED"] = "user_cancelled";
+    EIapHubPurchaseErrorCodes["PRODUCT_ALREADY_OWNED"] = "product_already_owned";
+    EIapHubPurchaseErrorCodes["RECEIPT_VALIDATION_FAILED"] = "receipt_validation_failed";
+    EIapHubPurchaseErrorCodes["RECEIPT_REQUEST_FAILED"] = "receipt_request_failed";
+})(EIapHubPurchaseErrorCodes || (EIapHubPurchaseErrorCodes = {}));
