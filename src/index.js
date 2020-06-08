@@ -466,10 +466,7 @@ class Iaphub {
 
     // Process receipt with IAPHUB
     try {
-      var response = await this.request("post", "/receipt", {
-        token: receipt.token,
-        sku: receipt.sku
-      });
+      var response = await this.request("post", "/receipt", receipt);
       // If the receipt validation is a success
       if (response.status == "success") {
         newTransactions = response.newTransactions;
