@@ -151,7 +151,7 @@ class Iaphub {
     // Request purchase
     try {
       if (product.type.indexOf("subscription") != -1) {
-        var activeSubscription = this.user.activeProducts.find((product) => product.type == 'renewable_subscription' && product.group == product.group);
+        var activeSubscription = this.user.activeProducts.find((item) => item.type == 'renewable_subscription' && item.group == product.group);
 
         // On android we need to provide the old sku if it is an upgrade/downgrade
         if (this.platform == 'android' && activeSubscription) {
