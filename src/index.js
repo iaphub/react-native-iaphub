@@ -127,8 +127,10 @@ class Iaphub {
   /*
    * Buy product
    * @param {String} sku Product sku
+   * @param {Object} opts Options
+	 * @param {Number} opts.androidProrationMode - Proration mode when upgrading/downgrading subscription (Android only)
    */
-  async buy(sku) {
+  async buy(sku, opts = {}) {
     // The user has to be logged in
     if (!this.isLogged) {
       throw this.error("Login required", "login_required");
@@ -149,7 +151,16 @@ class Iaphub {
     // Request purchase
     try {
       if (product.type.indexOf("subscription") != -1) {
-        await RNIap.requestSubscription(product.sku, false);
+        var activeSubscription = this.user.activeProducts.find((product) => product.type == 'renewable_subscription' && product.group == product.group);
+
+        // On android we need to provide the old sku if it is an upgrade/downgrade
+        if (this.platform == 'android' && activeSubscription) {
+          await RNIap.requestSubscription(product.sku, false, activeSubscription.sku, opts.androidProrationMode || 1);
+        }
+        // Otherwise request subscription normally
+        else {
+          await RNIap.requestSubscription(product.sku, false);
+        }
       } else {
         await RNIap.requestPurchase(product.sku, false);
       }
