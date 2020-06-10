@@ -590,6 +590,9 @@ class Iaphub {
       }
       // We have to consume 'consumable' and 'subscription' types (The subscription because it is a managed product on android that an user should be able to buy again in the future)
       var shouldBeConsumed = (["consumable", "subscription"].indexOf(productType) != -1) ? true : false;
+      // If the purchase has already been ackknowledged, no need to finish the transaction (otherwise react-native-iap will throw an error)
+      if (!shouldBeConsumed && purchase.isAcknowledgedAndroid) return;
+      // Finish transaction
       await RNIap.finishTransaction(purchase, shouldBeConsumed);
     }
     // Finish ios transaction
