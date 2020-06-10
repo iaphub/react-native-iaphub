@@ -157,6 +157,7 @@ console.log(user);
 ## Buy a product
 Call the ``buy`` method to buy a product<br/><br/>
 ℹ️ The method needs the product sku that you would get from one of the products of the user productsForSale array.<br/>
+ℹ️ The method will process a purchase as a subscription replace if you currently have an active subscription and you buy a subscription of the same group (product group created on IAPHUB).<br/>
 ⚠ Buying a product that isn't in the productsForSale array will throw an error.
 
 ```js
@@ -177,6 +178,10 @@ try {
     price: 14.99,
     currency: "USD"
   }
+
+  // To override the default proration mode on Android (https://developer.android.com/reference/com/android/billingclient/api/BillingFlowParams.ProrationMode):
+  //var transaction = await Iaphub.buy("subscription_1", {androidProrationMode: 2});
+
   /*
    * The purchase has been successful but we need to check that the webhook to our server was successful as well
    * If the webhook request failed, IAPHUB will send you an alert and retry again in 1 minute, 10 minutes, 1 hour and 24 hours.
