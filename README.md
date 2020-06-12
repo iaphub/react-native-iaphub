@@ -145,7 +145,7 @@ console.log(user);
 | subscriptionDuration | `string` | ⚠ Only available for a subscription<br> Duration of the subscription cycle specified in the ISO 8601 format (Possible values: 'P1W', 'P1M', 'P3M', 'P6M', 'P1Y') |
 | expirationDate | `string` | ⚠ Only available for an active subscription<br> Subscription expiration date |
 | isSubscriptionRenewable | `boolean` | ⚠ Only available for an active subscription<br> If the subscription can be renewed |
-| isSubscriptionRetryPeriod | `boolean` | ⚠ Only available for an active subscription<br> If the subscription is currently trying be renewed |
+| isSubscriptionRetryPeriod | `boolean` | ⚠ Only available for an active subscription<br> If the subscription is expired but still trying to be renewed, you should display a modal asking for the user to update its payment informations! |
 | subscriptionPeriodType | `string` | ⚠ Only available for a subscription<br>Subscription period type (Possible values: 'normal', 'trial', 'intro')<br>If the subscription is active it is the current period otherwise it is the period if the user purchase the subscription |
 | subscriptionIntroPrice | `string` | ⚠ Only available for a subscription with an introductory price<br>Localized introductory price (Ex: "$2.99") |
 | subscriptionIntroPriceAmount | `number` | ⚠ Only available for a subscription with an introductory price<br>Introductory price amount (Ex: 2.99) |
@@ -153,6 +153,12 @@ console.log(user);
 | subscriptionIntroDuration | `string` | ⚠ Only available for a subscription with an introductory price<br>Duration of an introductory cycle specified in the ISO 8601 format (Possible values: 'P1W', 'P1M', 'P3M', 'P6M', 'P1Y') |
 | subscriptionIntroCycles | `number` | ⚠ Only available for a subscription with an introductory price<br>Number of cycles in the introductory offer |
 | subscriptionTrialDuration | `string` | ⚠ Only available for a subscription with a trial<br>Duration of the trial specified in the ISO 8601 format |
+
+#### Check subscription status
+
+You should check if an active subscription is available using the `activeProducts` property of the user.<br/>
+If an active subscription is available you should also check there is no retry period using the `isSubscriptionRetryPeriod` property.<br/>
+If the subscription is in a retry period you should restrict the access to the features offered by your subscription and display a modal asking for the user to update its payment informations.
 
 ## Buy a product
 Call the ``buy`` method to buy a product<br/><br/>
