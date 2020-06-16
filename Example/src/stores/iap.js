@@ -113,8 +113,10 @@ class IAPStore {
 	// Call this method to restore the user purchases (you should have a button, it is usually displayed on the settings page)
 	async restore() {
 		var restoredPurchases = await Iaphub.restore();
-
+		// Show alert
 		Alert.alert("Restore", `${restoredPurchases.length} purchases restored`);
+		// Refresh the user
+		this.user = await Iaphub.getUser();
 	}
 
 }
