@@ -521,7 +521,7 @@ class Iaphub {
       var transaction = newTransactions.find((item) => item.sku == request.sku);
       // Reject the request if there is no transaction
       if (!transaction) {
-        this.error("Transaction not found", "transaction_not_found");
+        error = this.error("Transaction not found", "transaction_not_found");
       }
       // If there was an error, reject the request
       if (error) {
