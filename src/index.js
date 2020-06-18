@@ -517,8 +517,12 @@ class Iaphub {
       var request = this.buyRequest;
       // Delete saved request
       this.buyRequest = null;
-      // Get transaction
+      // Search transaction by sku
       var transaction = newTransactions.find((item) => item.sku == request.sku);
+      // If not found, look if it is a product change
+      if (!transaction) {
+        transaction = newTransactions.find((item) => item.subscriptionRenewalProductSku == request.sku);
+      }
       // Reject the request if there is no transaction
       if (!transaction) {
         error = this.error("Transaction not found", "transaction_not_found");
