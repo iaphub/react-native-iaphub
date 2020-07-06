@@ -1,5 +1,5 @@
-<a href="https://www.iaphub.com" title="IAPHUB link">
-  <img width=882px src="https://www.iaphub.com/github-rn-ad.png" alt="IAPHUB logo">
+<a href="https://www.iaphub.com" title="IAPHUB">
+  <img width=882px src="https://www.iaphub.com/github-rn-ad.png" alt="IAPHUB">
 </a>
 <br/>
 <br/>
@@ -13,11 +13,11 @@ You should spend this precious time building your app!
 |   | Features |
 | --- | --- |
 📜 | Receipt validation - Send the receipt, we'll take care of the rest.
-📨 | Webhooks - Receive webhooks to your server to be notified when you have a purchase, a new subscription, a cancelled subscription, a refund...    
-📊 | Analytics - Out of the box insights of on all your sales, subscriptions, customers and everything you need to improve your revenues!
+📨 | Webhooks - Receive webhooks directly to your server to be notified of any event such as a purchase or a subscription cancellation.    
+📊 | Realtime Analytics - Out of the box insights of on all your sales, subscriptions, customers and everything you need to improve your revenues.
 🧪 | A/B Testing - Test different pricings and get analytics of which one performs the best.
-🌎 | Product segmentation - Offer different product or pricings to your customers depending on defined criterias such as the country!
-👤 | Customer management - Access your customer sales, active subscriptions, analytics... in one click.
+🌎 | Product Segmentation - Offer different product or pricings to your customers depending on defined criterias such as the country.
+👤 | Customer Management - Access easily the details of a customer, everything you need to know such as the past transactions and the active subscriptions on one page.
 
 ## Getting started
 
@@ -81,6 +81,7 @@ console.log(user);
       id: "5e5198930c48ed07aa275fd9",
       type: "renewable_subscription",
       sku: "membership2_tier10",
+      group: "3e5198930c48ed07aa275fd8",
       groupName: "subscription_group_1",
       title: "Membership",
       description: "Become a member of the community",
@@ -111,6 +112,7 @@ console.log(user);
     expirationDate: "2021-03-11T00:42:28.000Z",
     isSubscriptionRenewable: true,
     isSubscriptionRetryPeriod: false,
+    group: "3e5198930c48ed07aa275fd8",
     groupName: "subscription_group_1",
     title: "Membership",
     description: "Become a member of the community",
@@ -139,13 +141,15 @@ console.log(user);
 | priceAmount | `number` | Price amount (Ex: 12.99) |
 | title | `string` | Product title (Ex: "Membership") |
 | description | `string` | Product description (Ex: "Join the community with a membership") |
+| group | `string` | ⚠ Only available if the product as a group<br>Group id (From IAPHUB) |
 | groupName | `string` | ⚠ Only available if the product as a group<br>Name of the product group created on IAPHUB (Ex: "premium") |
 | purchase | `string` | ⚠ Only available for an active product<br> Purchase id (From IAPHUB) |
 | purchaseDate | `string` | ⚠ Only available for an active product<br> Purchase date |
 | subscriptionDuration | `string` | ⚠ Only available for a subscription<br> Duration of the subscription cycle specified in the ISO 8601 format (Possible values: 'P1W', 'P1M', 'P3M', 'P6M', 'P1Y') |
 | expirationDate | `string` | ⚠ Only available for an active subscription<br> Subscription expiration date |
 | isSubscriptionRenewable | `boolean` | ⚠ Only available for an active subscription<br> If the subscription can be renewed |
-| isSubscriptionRetryPeriod | `boolean` | ⚠ Only available for an active subscription<br> If the subscription is expired but still trying to be renewed, you should display a modal asking for the user to update its payment informations! |
+| isSubscriptionRetryPeriod | `boolean` | ⚠ Only available for an active subscription<br> If the subscription is currently in a retry period |
+| isSubscriptionGracePeriod | `boolean` | ⚠ Only available for an active subscription<br> If the subscription is currently in a grace period |
 | subscriptionPeriodType | `string` | ⚠ Only available for a subscription<br>Subscription period type (Possible values: 'normal', 'trial', 'intro')<br>If the subscription is active it is the current period otherwise it is the period if the user purchase the subscription |
 | subscriptionIntroPrice | `string` | ⚠ Only available for a subscription with an introductory price<br>Localized introductory price (Ex: "$2.99") |
 | subscriptionIntroPriceAmount | `number` | ⚠ Only available for a subscription with an introductory price<br>Introductory price amount (Ex: 2.99) |
@@ -157,8 +161,11 @@ console.log(user);
 #### Check subscription status
 
 You should check if an active subscription is available using the `activeProducts` property of the user.<br/>
-If an active subscription is available you should also check there is no retry period using the `isSubscriptionRetryPeriod` property.<br/>
-If the subscription is in a retry period you should restrict the access to the features offered by your subscription and display a modal asking for the user to update its payment informations.
+If an active subscription is available you should also check if there is a retry period using the `isSubscriptionRetryPeriod` and `isSubscriptionGracePeriod` properties.<br/>
+- On a **retry period with a grace period** the user should still have access to the features offered by the subscription and you should display a message asking for the user to update its payment informations.
+- On a **retry period with no grace period** you should restrict the access to the features offered by your subscription and display a message asking for the user to update its payment informations.
+
+More informations on the [IAPHUB documentation](https://iaphub.com/docs/getting-started/manage-subscription-states#subscription-renewal-retry).
 
 ## Buy a product
 Call the ``buy`` method to buy a product<br/><br/>
@@ -177,6 +184,7 @@ try {
     purchase: "4e5198930c48ed07aa275fd2",
     purchaseDate: "2020-03-11T00:42:27.000Z",
     webhookStatus: "success",
+    group: "3e5198930c48ed07aa275fd8",
     groupName: "pack",
     title: "Pack 10",
     description: "Pack of 10 coins",
@@ -272,6 +280,7 @@ console.log(restoredPurchases);
   purchase: "ae5198930c48ed07aa275fdd",
   purchaseDate: "2020-01-11T00:42:27.000Z",
   webhookStatus: "success",
+  group: "3e5198930c48ed07aa275fd2",
   groupName: "pack"
 }]
 ```
@@ -293,7 +302,7 @@ You should check out the [Example app](https://github.com/iaphub/react-native-ia
 
 ## FAQ
 
-### I'm already validating receipts on my server, can I run receipt validation on both `MY SERVER` and `IAPHUB`?
+### I'm already validating receipts on my server, can I run receipt validation on both my server and IAPHUB?
 Yes! It can be pretty handy if you want to:
 - Slowly migrate over IAPHUB
 - Give IAPHUB a try without shutting down your current receipt validation system
