@@ -1,50 +1,30 @@
 declare module 'react-native-iaphub' {
-  export enum EIapHubEnvironment {
-    PRODUCTION = 'production',
-    STAGING = 'staging',
-    DEVELOPMENT = 'development',
-  }
+  export type IapHubEnvironment = 'production' | 'staging' | 'development';
 
-  export enum EIapHubProductTypes {
-    CONSUMABLE = 'consumable',
-    NON_CONSUMABLE = 'non_consumable',
-    SUBSCRIPTION = 'subscription',
-    RENEWABLE_SUBSCRIPTION = 'renewable_subscription'
-  }
+  export type IapHubProductTypes = 'consumable' | 'non_consumable' | 'subscription' | 'renewable_subscription';
 
-  export enum EIapHubSubscriptionPeriod {
-    PER_1_WEEK = 'P1W',
-    PER_1_MONTH = 'P1M',
-    PER_3_MONTHS = 'P3M',
-    PER_6_MONTHS = 'P6M',
-    PER_1_YEAR = 'P1Y'
-  }
+  /***
+   * PER_1_WEEK = 'P1W',
+   * PER_1_MONTH = 'P1M',
+   * PER_3_MONTHS = 'P3M',
+   * PER_6_MONTHS = 'P6M',
+   * PER_1_YEAR = 'P1Y'
+   **/
+  export type IapHubSubscriptionPeriod = 'P1W' | 'P1M' | 'P3M' | 'P6M' | 'P1Y';
 
-  export enum EIapHubSubscriptionPeriodType {
-    NORMAL = 'normal',
-    TRIAL = 'trial',
-    INTRO = 'intro'
-  }
+  export type IapHubSubscriptionPeriodType = 'normal' | 'trial' | 'intro';
 
-  export enum EIapHubIntroductoryPaymentType {
-    AS_YOU_GO ='as_you_go',
-    UPFRONT = 'upfront'
-  }
+  export type IapHubIntroductoryPaymentType = 'as_you_go' | 'upfront';
 
-  export enum EIapHubWebhookStatus {
-    FAILED = 'failed',
-    SUCCESS = 'success'
-  }
+  export type IapHubWebhookStatus = 'failed' | 'success';
 
-  export enum EIapHubPurchaseErrorCodes {
-    USER_CANCELLED = 'user_cancelled',
-    PRODUCT_ALREADY_OWNED = 'product_already_owned',
-    RECEIPT_VALIDATION_FAILED = 'receipt_validation_failed',
-    RECEIPT_REQUEST_FAILED = 'receipt_request_failed',
+  export type IapHubPurchaseErrorCodes =
+    'user_cancelled'
+    | 'product_already_owned'
+    | 'receipt_validation_failed'
+    | 'receipt_request_failed';
 
-  }
-
-  //#region Interfaces
+//#region Interfaces
   interface IapHubInitOptions {
     /**
      * The app id is available on the settings page of your app
@@ -59,7 +39,7 @@ declare module 'react-native-iaphub' {
     /**
      * App environment (production by default, other environments must be created on the IAPHUB dashboard)
      */
-    environment: EIapHubEnvironment;
+    environment: IapHubEnvironment;
 
     /**
      * Event triggered after IAPHUB processed a receipt
@@ -78,7 +58,7 @@ declare module 'react-native-iaphub' {
     /**
      * Product type
      */
-    type: EIapHubProductTypes;
+    type: IapHubProductTypes;
 
     /**
      * Product sku (Ex: "membership_tier1")
@@ -129,7 +109,7 @@ declare module 'react-native-iaphub' {
     /**
      * Duration of the subscription cycle specified in the ISO 8601 format (Possible values: 'P1W', 'P1M', 'P3M', 'P6M', 'P1Y') - ⚠ Only available for a subscription
      */
-    subscriptionDuration?: EIapHubSubscriptionPeriod;
+    subscriptionDuration?: IapHubSubscriptionPeriod;
 
     /**
      * Subscription expiration date - ⚠ Only available for an active subscription
@@ -149,7 +129,7 @@ declare module 'react-native-iaphub' {
     /**
      * If the subscription is active it is the current period otherwise it is the period if the user purchase the subscription - ⚠ Only available for a subscription
      */
-    subscriptionPeriodType?: EIapHubSubscriptionPeriodType;
+    subscriptionPeriodType?: IapHubSubscriptionPeriodType;
 
     /**
      * Localized introductory price (Ex: "$2.99") - ⚠ Only available for a subscription with an introductory price
@@ -165,12 +145,12 @@ declare module 'react-native-iaphub' {
     /**
      * Payment type of the introductory offer - ⚠ Only available for a subscription with an introductory price
      */
-    subscriptionIntroPayment?: EIapHubIntroductoryPaymentType;
+    subscriptionIntroPayment?: IapHubIntroductoryPaymentType;
 
     /**
      * Duration of an introductory cycle specified in the ISO 8601 format - ⚠ Only available for a subscription with an introductory price
      */
-    subscriptionIntroDuration?: EIapHubSubscriptionPeriod;
+    subscriptionIntroDuration?: IapHubSubscriptionPeriod;
 
     /**
      * Number of cycles in the introductory offer - ⚠ Only available for a subscription with an introductory price
@@ -189,7 +169,7 @@ declare module 'react-native-iaphub' {
      * If the webhook request failed, IAPHUB will send you an alert and retry again in 1 minute, 10 minutes, 1 hour and 24 hours.
      * You can retry the webhook directly from the dashboard as well
      */
-    webhookStatus: EIapHubWebhookStatus;
+    webhookStatus: IapHubWebhookStatus;
   }
 
   interface IapHubUserInformation {
@@ -208,7 +188,7 @@ declare module 'react-native-iaphub' {
     /**
      * Tags you want to assign to user.
      */
-    [TagKey:string]: any;
+    [TagKey: string]: any;
   }
 
   interface IapHubReceipt {
@@ -227,9 +207,10 @@ declare module 'react-native-iaphub' {
      */
     isRestore: string;
   }
-  //#endregion
 
-  //#region Methods
+//#endregion
+
+//#region Methods
   /**
    * Call the init method at the start of your app to initialize your configuration
    *
@@ -289,7 +270,8 @@ declare module 'react-native-iaphub' {
    * ℹ️ Logout isn't required if you logged in with a device id.
    */
   export function logout(): Promise<void>;
-  //#endregion
+
+//#endregion
 
   export type {
     IapHubInitOptions,
