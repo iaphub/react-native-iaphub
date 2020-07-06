@@ -22,7 +22,15 @@ declare module 'react-native-iaphub' {
     'user_cancelled'
     | 'product_already_owned'
     | 'receipt_validation_failed'
-    | 'receipt_request_failed';
+    | 'receipt_request_failed'
+    | 'billing_unavailable'
+    | 'item_unavailable'
+    | 'remote_error'
+    | 'network_error'
+    | 'receipt_failed'
+    | 'receipt_finish_failed'
+    | 'developer_error'
+    | 'unknown';
 
 //#region Interfaces
   interface IapHubInitOptions {
@@ -90,6 +98,10 @@ declare module 'react-native-iaphub' {
      */
     description: string;
 
+    /**
+     * Group id - ⚠ Only available if the product as a group
+     */
+    group?: string;
 
     /**
      * Name of the product group created on IAPHUB (Ex: "premium") - ⚠ Only available if the product as a group
@@ -122,9 +134,14 @@ declare module 'react-native-iaphub' {
     isSubscriptionRenewable?: boolean;
 
     /**
-     * If the subscription is currently trying be renewed - ⚠ Only available for an active subscription
+     * If the subscription is currently in a retry period - ⚠ Only available for an active subscription
      */
     isSubscriptionRetryPeriod?: boolean;
+
+     /**
+     * If the subscription is currently in a grace period - ⚠ Only available for an active subscription
+     */
+    isSubscriptionGracePeriod?: boolean;
 
     /**
      * If the subscription is active it is the current period otherwise it is the period if the user purchase the subscription - ⚠ Only available for a subscription
