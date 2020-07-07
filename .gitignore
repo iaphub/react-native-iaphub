@@ -4,3 +4,5 @@ npm-debug.log*
 node_modules
 *.todo
 *~
+.idea/
+dist/

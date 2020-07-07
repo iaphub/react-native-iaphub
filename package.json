@@ -1,9 +1,9 @@
 {
   "name": "react-native-iaphub",
-  "version": "3.0.7",
+  "version": "3.0.8",
   "description": "The easiest way to implement IAP (In-app purchase) in your React Native app",
-  "main": "src/index.js",
-  "license": "GNU GPL V3.0",
+  "main": "index.js",
+  "license": "GPL-3.0-only",
   "keywords": [
     "react-native",
     "in app purchase",
@@ -18,12 +18,25 @@
     "type": "git",
     "url": "https://github.com/iaphub/react-native-iaphub.git"
   },
+  "scripts": {
+    "build": "del-cli dist -f && tsc && copyfiles package.json README.md LICENSE dist"
+  },
   "peerDependencies": {
     "react": "*",
     "react-native": "*"
   },
-  "devDependencies": {},
+  "devDependencies": {
+    "@types/node": "^14.0.18",
+    "@types/react": "^16.9.41",
+    "@types/react-native": "^0.62.17",
+    "copyfiles": "^2.3.0",
+    "del-cli": "^3.0.1",
+    "typescript": "^3.9.6"
+  },
   "dependencies": {
-    "react-native-iap": "4.4.3"
+    "axios": "^0.19.2",
+    "iaphub_api": "^1.0.4",
+    "react-native-iap": "4.4.3",
+    "ts-error": "^1.0.6"
   }
 }
