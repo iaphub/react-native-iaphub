@@ -146,7 +146,7 @@ class Iaphub {
     }
     // Create promise than will be resolved (or rejected) after process of the receipt is complete
     var buyPromise = new Promise((resolve, reject) => {
-      this.buyRequest = {resolve, reject, sku};
+      this.buyRequest = {resolve, reject, sku, processing: false};
     });
     // Request purchase
     try {
@@ -475,6 +475,11 @@ class Iaphub {
     var shouldFinishReceipt = false;
     var error = null;
 
+    // Prevent concurrent processing of receipts on a buy request
+    if (this.buyRequest) {
+      if (this.buyRequest.processing) return;
+      this.buyRequest.processing = true;
+    }
     // Process receipt with IAPHUB
     try {
       var response = await this.request("post", "/receipt", receipt);
