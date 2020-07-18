@@ -146,7 +146,7 @@ class Iaphub {
     }
     // Create promise than will be resolved (or rejected) after process of the receipt is complete
     var buyPromise = new Promise((resolve, reject) => {
-      this.buyRequest = {resolve, reject, sku, processing: false};
+      this.buyRequest = {resolve, reject, sku, processing: false, opts: opts};
     });
     // Request purchase
     try {
@@ -456,7 +456,16 @@ class Iaphub {
       var request = this.buyRequest;
 
       this.buyRequest = null;
-      request.reject(error);
+      // Support android deferred subscription replace
+      // After an android deferred subscription replace the listenner is called with an empty list of purchases which is causing the error
+      if (this.platform == 'android' && request.opts && request.opts.androidProrationMode == 4 && err.message.indexOf('purchases are null') != -1) {
+        var product = this.user.productsForSale.find((product) => product.sku == request.sku);
+        request.resolve(product);
+      }
+      // Otherwise reject the request
+      else {
+        request.reject(error);
+      }
     }
   }
 
