@@ -501,12 +501,19 @@ class Iaphub {
     }
     // Finish receipt
     if (shouldFinishReceipt) {
-      var productType = await this.detectProductType(
-        receipt.sku,
-        newTransactions,
-        oldTransactions
-      );
-      await this.finishReceipt(purchase, productType);
+      try {
+        var productType = await this.detectProductType(
+          receipt.sku,
+          newTransactions,
+          oldTransactions
+        );
+        await this.finishReceipt(purchase, productType);
+      }
+      // Not critical if we can't finish the receipt properly here, receipt will stay in queue and be finished next time it's triggered
+      // The IAPHUB API is acknowledging android purchases as well (so the purchase won't be refunded after 3 days)
+      catch (err) {
+        console.error(err);
+      }
     }
     // Emit receipt processed event
     try {
