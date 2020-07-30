@@ -1,33 +1,48 @@
 import {decorate, observable} from 'mobx';
-import {AsyncStorage} from 'react-native';
+import {AsyncStorage, AppState} from 'react-native';
 import iap from './iap';
 
 class AppStore {
 
   isLogged = false;
+  appState = null;
 
   constructor() {
-    this.init()
+    this.start()
   }
 
-  init = async () => {
+  start = async () => {
     iap.init();
+    AppState.addEventListener("change", this.onAppStateChange);
     this.isLogged = (await AsyncStorage.getItem('isLogged')) == "true" ? true : false;
     if (this.isLogged) {
       this.login();
     }
   }
 
+  stop = () => {
+    AppState.removeEventListener("change", this.onAppStateChange);
+  }
+
+  onAppStateChange = (nextAppState) => {
+    if (this.appState && this.appState.match(/inactive|background/) && nextAppState === "active") {
+      iap.getActiveProducts();
+    }
+    this.appState = nextAppState;
+  }
+
   login = async () => {
-    this.isLogged = true;
+    iap.setUserId("1");
+    await iap.getProductsForSale();
+    await iap.getActiveProducts();
     await AsyncStorage.setItem('isLogged', "true");
-    iap.login("1");
+    this.isLogged = true;
   }
   
   logout = async () => {
-    this.isLogged = false;
     await AsyncStorage.setItem('isLogged', "false");
-    iap.logout();
+    iap.setUserId(null);
+    this.isLogged = false;
   }
 
 }

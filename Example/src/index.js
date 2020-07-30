@@ -7,6 +7,10 @@ import app from './stores/app';
 
 export default class App extends React.Component {
 
+  componentWillUnmount() {
+    app.stop();
+  }
+
   renderContent = () => {
     var {isLogged} = app;
 

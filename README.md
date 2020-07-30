@@ -46,88 +46,68 @@ Call the `init` method at the start of your app to initialize your configuration
   });
 ```
 
-## Login
-Call the `login` method to authenticate an user.<br/>
+## Set user id
+Call the `setUserId` method to authenticate an user.<br/>
 
 If you have an authentication system, provide the `user id` of the user right after the user log in.<br/>
 If you don't and want to handle IAP on the client side, you can provide the `device id` when the app start instead by using a module such as [react-native-device-info](https://github.com/react-native-community/react-native-device-info#getuniqueid) to get a device unique ID.<br/>
 
 ⚠ You should provide an id that is non-guessable and isn't public. (Email not allowed)
 ```js
-await Iaphub.login("1e5494930c48ed07aa275fd2");
+await Iaphub.setUserId("1e5494930c48ed07aa275fd2");
+```
+
+You should provide the `null` value when a user logout.
+```js
+await Iaphub.setUserId(null);
 ```
 
 ## Set user tags
-Call the `setUserTags` method to update the user tags<br/><br/>
+Call the `setUserTags` method to update the user tags.<br/>
 Tags are a powerful tool that allows you to offer to your users different products depending on custom properties.<br/>
+
 ⚠ This method will throw an error if the tag name hasn't been created on the IAPHUB dashboard
 
 ```js
 await Iaphub.setUserTags({gender: 'male'});
 ```
 
-## Get user
-Call the ``getUser`` method to fetch the user profile<br/><br/>
-The user profile contains the active products (subscriptions not expired yet or non-consumables) and the products for sale of the user (the products the user is able to buy).
+## Get products for sale
+Call the ``getProductsForSale`` method to get the products for sale.<br/>
+You should use this method when displaying the page with the list of your products for sale.
+
+⚠ If the request fails because of a network issue, the method returns the latest request in cache (if available, otherwise an error is thrown).
 
 ```js
-var user = await Iaphub.getUser();
+var products = await Iaphub.getProductsForSale();
 
-console.log(user);
-{
-  // The products the user is able to buy
-  productsForSale: [
-    {
-      id: "5e5198930c48ed07aa275fd9",
-      type: "renewable_subscription",
-      sku: "membership2_tier10",
-      group: "3e5198930c48ed07aa275fd8",
-      groupName: "subscription_group_1",
-      title: "Membership",
-      description: "Become a member of the community",
-      price: "$9.99",
-      priceAmount: 9.99,
-      priceCurrency: "USD",
-      subscriptionPeriodType: "normal",
-      subscriptionDuration: "P1M"
-    },
-    {
-      id: "5e5198930c48ed07aa275fd9",
-      type: "consumable",
-      sku: "pack10_tier15",
-      title: "Pack 10",
-      description: "Pack of 10 coins",
-      localizedPrice: "$14.99",
-      price: 14.99,
-      currency: "USD"
-    }
-  ],
-  // The products the user bought that are still active (subscriptions or non-consumables)
-  activeProducts: [{
+console.log(products);
+[
+  {
     id: "5e5198930c48ed07aa275fd9",
     type: "renewable_subscription",
-    sku: "membership1_tier5",
-    purchase: "5e5198930c48ed07aa275fe8",
-    purchaseDate: "2020-03-11T00:42:28.000Z",
-    expirationDate: "2021-03-11T00:42:28.000Z",
-    isSubscriptionRenewable: true,
-    isSubscriptionRetryPeriod: false,
+    sku: "membership2_tier10",
     group: "3e5198930c48ed07aa275fd8",
     groupName: "subscription_group_1",
     title: "Membership",
     description: "Become a member of the community",
-    price: "$4.99",
-    priceAmount: 4.99,
+    price: "$9.99",
+    priceAmount: 9.99,
     priceCurrency: "USD",
-    subscriptionDuration: "P1M",
-    subscriptionPeriodType: "intro",
-    subscriptionIntroPrice: "$1.99",
-    subscriptionIntroPriceAmount: 1.99,
-    subscriptionIntroPayment: "as_you_go",
-    subscriptionIntroDuration: "P1M",
-    subscriptionIntroCycles: 3
-  }]
-}
+    subscriptionPeriodType: "normal",
+    subscriptionDuration: "P1M"
+  },
+  {
+    id: "5e5198930c48ed07aa275fd9",
+    type: "consumable",
+    sku: "pack10_tier15",
+    title: "Pack 10",
+    description: "Pack of 10 coins",
+    localizedPrice: "$14.99",
+    price: 14.99,
+    currency: "USD"
+  }
+]
 ```
 
 #### Product properties
@@ -158,10 +138,75 @@ console.log(user);
 | subscriptionIntroCycles | `number` | ⚠ Only available for a subscription with an introductory price<br>Number of cycles in the introductory offer |
 | subscriptionTrialDuration | `string` | ⚠ Only available for a subscription with a trial<br>Duration of the trial specified in the ISO 8601 format |
 
+## Get active products
+If you're relying on IAPHUB on the client side (instead of using your server with webhooks) to detect if the user has active products (renewable subscriptions or non-consumables), you should use the `getActiveProducts` method when the app is brought to the foreground.<br/>
+
+⚠ If the request fails because of a network issue, the method returns the latest request in cache (if available, otherwise an error is thrown).
+
+```js
+class App extends Component {
+
+  state = {
+    appState: AppState.currentState
+  };
+
+  componentDidMount() {
+    AppState.addEventListener("change", this.handleAppStateChange);
+  }
+
+  componentWillUnmount() {
+    AppState.removeEventListener("change", this.handleAppStateChange);
+  }
+
+  handleAppStateChange = (nextAppState) => {
+    if (
+      this.state.appState.match(/inactive|background/) &&
+      nextAppState === "active"
+    ) {
+      var products = await Iaphub.getActiveProducts();
+      
+      console.log(products);
+      [{
+        id: "5e5198930c48ed07aa275fd9",
+        type: "renewable_subscription",
+        sku: "membership1_tier5",
+        purchase: "5e5198930c48ed07aa275fe8",
+        purchaseDate: "2020-03-11T00:42:28.000Z",
+        expirationDate: "2021-03-11T00:42:28.000Z",
+        isSubscriptionRenewable: true,
+        isSubscriptionRetryPeriod: false,
+        group: "3e5198930c48ed07aa275fd8",
+        groupName: "subscription_group_1",
+        title: "Membership",
+        description: "Become a member of the community",
+        price: "$4.99",
+        priceAmount: 4.99,
+        priceCurrency: "USD",
+        subscriptionDuration: "P1M",
+        subscriptionPeriodType: "intro",
+        subscriptionIntroPrice: "$1.99",
+        subscriptionIntroPriceAmount: 1.99,
+        subscriptionIntroPayment: "as_you_go",
+        subscriptionIntroDuration: "P1M",
+        subscriptionIntroCycles: 3
+      }]
+    }
+    this.setState({ appState: nextAppState });
+  };
+
+  render() {
+    return (
+      <View>
+        <Text>My app</Text>
+      </View>
+    );
+  }
+}
+```
+
 #### Check subscription status
 
-You should check if an active subscription is available using the `activeProducts` property of the user.<br/>
-If an active subscription is available you should also check if there is a retry period using the `isSubscriptionRetryPeriod` and `isSubscriptionGracePeriod` properties.<br/>
+When retrieving a subscription from the active products, you should also check if it is in a retry period using the `isSubscriptionRetryPeriod` and `isSubscriptionGracePeriod` properties.<br/>
 - On a **retry period with a grace period** the user should still have access to the features offered by the subscription and you should display a message asking for the user to update its payment informations.
 - On a **retry period with no grace period** you should restrict the access to the features offered by your subscription and display a message asking for the user to update its payment informations.
 
@@ -169,9 +214,8 @@ More informations on the [IAPHUB documentation](https://iaphub.com/docs/getting-
 
 ## Buy a product
 Call the ``buy`` method to buy a product<br/><br/>
-ℹ️ The method needs the product sku that you would get from one of the products of the user productsForSale array.<br/>
+ℹ️ The method needs the product sku that you would get from one of the products of `getProductsForSale()`.<br/>
 ℹ️ The method will process a purchase as a subscription replace if you currently have an active subscription and you buy a subscription of the same group (product group created on IAPHUB).<br/>
-⚠ Buying a product that isn't in the productsForSale array will throw an error.
 
 ```js
 try {
@@ -265,34 +309,11 @@ try {
 
 ## Restore user purchases
 Call the ``restore`` method to restore the user purchases<br/><br/>
-This method will return the transactions that were not already saved on IAPHUB.<br/>
 ℹ️ You should display a restore button somewhere in your app (usually on the settings page).<br/>
 ℹ️ If you logged in using the `device id`, an user using a new device will have to restore its purchases since the `device id` will be different.
 
 ```js
-var restoredPurchases = await Iaphub.restore();
-
-console.log(restoredPurchases);
-[{
-  id: "2e5198930c48ed07aa275fd1",
-  type: "consumable",
-  sku: "pack20_tier20",
-  purchase: "ae5198930c48ed07aa275fdd",
-  purchaseDate: "2020-01-11T00:42:27.000Z",
-  webhookStatus: "success",
-  group: "3e5198930c48ed07aa275fd2",
-  groupName: "pack"
-}]
-```
-
-## Logout
-Call the `logout` method after an user log out<br/>
-
-ℹ️ After a logout any purchase event will be saved in a queue until the user log in.<br>
-ℹ️ Logout isn't required if you logged in with a `device id`.
-
-```js
-await Iaphub.logout();
+await Iaphub.restore();
 ```
 
 ## Full example

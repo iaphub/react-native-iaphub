@@ -68,21 +68,28 @@ export default class IAPPage extends React.Component {
   }
 
   renderProductsForSale = () => {
-    var {user} = iap;
+    var {productsForSale} = iap;
     var groups = {};
 
-    user.productsForSale.forEach((product) => {
-      var groupName = product.groupName || "default";
+    if (productsForSale) {
+      productsForSale.forEach((product) => {
+        var groupName = product.groupName || "default";
 
-      if (!groups[groupName]) {
-        groups[groupName] = [];
-      }
-      groups[groupName].push(product);
-    });
+        if (!groups[groupName]) {
+          groups[groupName] = [];
+        }
+        groups[groupName].push(product);
+      });
+    }
     return (
       <View>
         <Text style={styles.title}>Products for sale</Text>
-        {!user.productsForSale.length && this.renderEmpty("No products for sale")}
+        {!productsForSale &&
+          <View style={styles.loader}>
+            <ActivityIndicator size="small"/>
+          </View>
+        }
+        {productsForSale && !productsForSale.length && this.renderEmpty("No products for sale")}
         {Object.keys(groups).map((groupName) => (
           <View key={groupName}>
             <Text style={styles.groupTitle}>{groupName}</Text>
@@ -94,14 +101,18 @@ export default class IAPPage extends React.Component {
   }
 
   renderActiveProducts = () => {
-    var {user} = iap;
-    var activeProducts = user.activeProducts || [];
+    var {activeProducts} = iap;
 
     return (
       <View>
         <Text style={styles.title}>Active products</Text>
-        {!activeProducts.length && this.renderEmpty("No active products (Subscriptions, non-consumables)")}
-        {activeProducts.map((product) => this.renderProduct(product))}
+        {!activeProducts &&
+          <View style={styles.loader}>
+            <ActivityIndicator size="small"/>
+          </View>
+        }
+        {activeProducts && !activeProducts.length && this.renderEmpty("No active products (Subscriptions, non-consumables)")}
+        {activeProducts && activeProducts.map((product) => this.renderProduct(product, () => iap.buy(product.sku)))}
       </View>
     );
   }
@@ -125,9 +136,9 @@ export default class IAPPage extends React.Component {
   }
 
   renderContent = () => {
-    var {isInitialized, isProcessing, user} = iap;
+    var {isInitialized, isProcessing} = iap;
 
-    if (!isInitialized || !user || isProcessing) {
+    if (!isInitialized || isProcessing) {
       return (
         <View style={styles.loader}>
           <ActivityIndicator size="large"/>

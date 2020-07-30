@@ -6,7 +6,8 @@ class IAPStore {
 
 	isInitialized = false;
 	skuProcessing = null;
-	user = null;
+	productsForSale = null;
+	activeProducts = null;
 
 	// Init IAPHUB
 	async init() {
@@ -32,17 +33,19 @@ class IAPStore {
 		}
 	}
 
-	// Login user
-	async login(userId) {
-		// Login with user id
-		Iaphub.login(userId);
-		// Get the user
-		this.user = await Iaphub.getUser();
+	// Set user id
+	async setUserId(userId) {
+		Iaphub.setUserId(userId);
 	}
 
-	// Logout user
-	logout() {
-		Iaphub.logout();
+	// Get products for sale
+	async getProductsForSale() {
+		this.productsForSale = await Iaphub.getProductsForSale();
+	}
+
+	// Get active products
+	async getActiveProducts() {
+		this.activeProducts = await Iaphub.getActiveProducts();
 	}
 
 	// Call this method when an user click on one of your products
@@ -67,7 +70,8 @@ class IAPStore {
 			}
 			// Refresh the user to update the products for sale
 			try {
-				this.user = await Iaphub.getUser();
+				await this.getProductsForSale();
+				await this.getActiveProducts();
 			} catch (err) {
 				console.error(err);
 			}
@@ -112,11 +116,10 @@ class IAPStore {
 
 	// Call this method to restore the user purchases (you should have a button, it is usually displayed on the settings page)
 	async restore() {
-		var restoredPurchases = await Iaphub.restore();
-		// Show alert
-		Alert.alert("Restore", `${restoredPurchases.length} purchases restored`);
-		// Refresh the user
-		this.user = await Iaphub.getUser();
+		await Iaphub.restore();
+		await Iaphub.getProductsForSale();
+		await Iaphub.getActiveProducts();
+		Alert.alert("Restore", "Purchases restored");
 	}
 
 }
@@ -124,7 +127,7 @@ class IAPStore {
 decorate(IAPStore, {
 	isInitialized: observable,
 	skuProcessing: observable,
-	products: observable,
-	user: observable
+	productsForSale: observable,
+	activeProducts: observable
 })
 export default new IAPStore();

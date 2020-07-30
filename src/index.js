@@ -8,12 +8,14 @@ class Iaphub {
     this.apiUrl = "https://api.iaphub.com/v1";
     this.platform = Platform.OS;
     this.products = [];
+    this.productsPricing = null;
     this.appId = null;
     this.apiKey = null;
     this.userId = null;
     this.user = null;
+    this.userFetchDate = null;
+    this.receiptPostDate = null;
     this.isInitialized = false;
-    this.isLogged = false;
     this.canMakePayments = true;
     this.onReceiptProcessed = null;
     this.buyRequest = null;
@@ -63,44 +65,44 @@ class Iaphub {
       }
     }
     // Init listeners
-    RNIap.purchaseUpdatedListener(async (purchase) => {
-      // If the user isn't logged we save the event in a queue (that will be executed when the user login)
-      if (!this.isLogged) {
-        this.purchaseUpdatedEvents.push(purchase);
-      }
-      // Otherwise we process the receipt
-      else {
-        await this.processReceipt(purchase);
-      }
-    });
-    RNIap.purchaseErrorListener((err) => {
-      // If the user isn't logged we save the event in a queue (that will be executed when the user login)
-      if (!this.isLogged) {
-        this.purchaseErrorEvents.push(err);
-      }
-      // Otherwise process the error
-      else {
-        this.processError(err);
-      }
-    });
+    if (!this.purchaseUpdatedListener) {
+      this.purchaseUpdatedListener = RNIap.purchaseUpdatedListener(async (purchase) => {
+        // If the user isn't logged we save the event in a queue (that will be executed when the user login)
+        if (!this.userId) {
+          this.purchaseUpdatedEvents.push(purchase);
+        }
+        // Otherwise we process the receipt
+        else {
+          await this.processReceipt(purchase);
+        }
+      });
+    }
+    if (!this.purchaseErrorListener) {
+      this.purchaseErrorListener = RNIap.purchaseErrorListener((err) => {
+        // If the user isn't logged we save the event in a queue (that will be executed when the user login)
+        if (!this.userId) {
+          this.purchaseErrorEvents.push(err);
+        }
+        // Otherwise process the error
+        else {
+          this.processError(err);
+        }
+      });
+    }
   }
 
   /*
-   * Login user
+   * Set user id (or device id)
    * @param {String} userId User id
    */
-  async login(userId) {
-    if (!userId) {
-      throw this.error("Missing userId", "user_id_empty");
-    }
-    if (typeof userId != "string") {
-      throw this.error("Invalid userId, it must be a string", "user_id_invalid");
-    }
+  async setUserId(userId) {
     if (!this.isInitialized) {
       throw this.error("IAPHUB hasn't been initialized", "init_missing");
     }
     this.userId = userId;
-    this.isLogged = true;
+    this.user = null;
+    this.userFetchDate = null;
+    if (!this.userId) return;
     // Execute purchase updated events received prior to initialize
     await this.purchaseUpdatedEvents.reduce(async (promise, purchase) => {
       await promise;
@@ -116,27 +118,22 @@ class Iaphub {
   }
 
   /*
-   * Logout user
-   */
-  async logout() {
-    this.user = null;
-    this.userId = null;
-    this.isLogged = false;
-  }
-
-  /*
    * Buy product
    * @param {String} sku Product sku
    * @param {Object} opts Options
 	 * @param {Number} opts.androidProrationMode - Proration mode when upgrading/downgrading subscription (Android only)
    */
   async buy(sku, opts = {}) {
-    // The user has to be logged in
-    if (!this.isLogged) {
-      throw this.error("Login required", "login_required");
+    // The user id has to be set
+    if (!this.userId) {
+      throw this.error("User id required", "user_id_required");
     }
     // Get product of the sku
     var product = this.user.productsForSale.find((product) => product.sku == sku);
+    // If the product isn't found look in active products
+    if (!product) {
+      product = this.user.activeProducts.find((product) => product.sku == sku);
+    }
     // Prevent buying a product that isn't in the products for sale list
     if (!product) {
       throw this.error(
@@ -174,11 +171,80 @@ class Iaphub {
   }
 
   /*
+   * Get active products
+   */
+  async getActiveProducts(opts = {}) {
+    var userFetched = false;
+
+    // Fetch the user if necessary
+    try {
+      if (
+          // User fetch forced 
+          opts.force ||
+          // User not fetched yet
+          !this.user ||
+          // User not fetched for 24 hours
+          (new Date(this.userFetchDate.getTime() + 1000 * 60 * 60 * 24) < new Date()) ||
+          // Receit post date more recent than the user fetch date
+          (this.receiptPostDate && (this.receiptPostDate > this.userFetchDate))
+        ) {
+          userFetched = true;
+          await this.getUser();
+        }
+    }
+    // If the user fetch fails (network offline?), throw an error only if the user has never been fetched
+    catch (err) {
+      if (!this.user) {
+        throw err;
+      }
+    }
+    // Remove expired subsriptions from active products
+    var activeProducts = this.user.activeProducts.filter((item) => {
+      return !item.expirationDate || item.isSubscriptionRetryPeriod || (new Date(item.expirationDate) > new Date());
+    });
+    // Refresh the user if that's not already the case
+    if (!userFetched) {
+      // If we have expired subscriptions
+      if (activeProducts.length != this.user.activeProducts.length) {
+        return this.getActiveProducts({force: true});
+      }
+      // If we have an active subscription that hasn't been refreshed in the last minute
+      var subscription = activeProducts.find((item) => item.type == 'renewable_subscription');
+      if (subscription && new Date(this.userFetchDate.getTime() + 1000 * 60) < new Date()) {
+        return this.getActiveProducts({force: true});
+      }
+    }
+
+    return activeProducts;
+  }
+
+  /*
+   * Get products for sale
+   */
+  async getProductsForSale() {
+    // Fetch the user if it hasn't been fetched in the last minute
+    try {
+      if (!this.userFetchDate || new Date(this.userFetchDate.getTime() + 1000 * 60) < new Date()) {
+        await this.getUser();
+      }
+    }
+    // If the user fetch fails (network offline?), throw an error only if the user has never been fetched
+    catch (err) {
+      if (!this.user) {
+        throw err;
+      }
+    }
+
+    return this.user.productsForSale;
+  }
+
+  /*
    * Get user
    */
   async getUser(params = {}) {
-    if (!this.isLogged) {
-      throw this.error("Login required", "login_required");
+    // The user id has to be set
+    if (!this.userId) {
+      throw this.error("User id required", "user_id_required");
     }
     var data = await this.request("get", "", params);
 
@@ -328,6 +394,7 @@ class Iaphub {
       productsForSale: data.productsForSale.map(formatProduct).filter(product => product),
       activeProducts: data.activeProducts.map(formatProduct).filter(product => product)
     };
+    this.userFetchDate = new Date();
 
     try {
       await this.setPricing(
@@ -343,8 +410,9 @@ class Iaphub {
    * Set user tags
    */
   async setUserTags(tags) {
-    if (!this.isLogged) {
-      throw this.error("Login required", "login_required");
+    // The user id has to be set
+    if (!this.userId) {
+      throw this.error("User id required", "user_id_required");
     }
     try {
       await this.request("post", "", {tags: tags});
@@ -360,12 +428,12 @@ class Iaphub {
    * Restore purchases
    */
   async restore() {
-    if (!this.isLogged) {
-      throw this.error("Login required", "login_required");
+    // The user id has to be set
+    if (!this.userId) {
+      throw this.error("User id required", "user_id_required");
     }
     try {
       var availablePurchases = await RNIap.getAvailablePurchases();
-      var restoredPurchases = [];
       var purchases = [];
 
       // Filter duplicate receipts
@@ -378,11 +446,8 @@ class Iaphub {
       // Process receipts
       await purchases.reduce(async (promise, purchase) => {
         await promise;
-        var newTransactions = await this.processReceipt(purchase, true);
-        restoredPurchases.push(...newTransactions);
+        await this.processReceipt(purchase, true);
       }, Promise.resolve());
-
-      return restoredPurchases;
     } catch (err) {
       throw this.error(
         `Restore failed (Err: ${err.message})`,
@@ -406,7 +471,7 @@ class Iaphub {
    * @param {Array} products Array of products
    */
   async setPricing(products) {
-    products = products.map((product) => {
+    var productsPricing = products.map((product) => {
       var item = {
         id: product.id,
         price: product.priceAmount,
@@ -418,8 +483,25 @@ class Iaphub {
       }
       return item;
     });
-
-    await this.request("post", "/pricing", {products: products});
+    // Compare with the last pricing
+    if (this.productsPricing) {
+      var sameProducts = productsPricing.filter((productPricing) => {
+        return this.productsPricing.find((item) => {
+          return (item.id == productPricing.id) &&
+                 (item.price == productPricing.price) &&
+                 (item.currency == productPricing.currency) &&
+                 (item.introPrice == productPricing.introPrice);
+        });
+      });
+      // No need to send a request if the pricing is the same
+      if (sameProducts.length == productsPricing.length) {
+        return;
+      }
+    }
+    // Send request
+    await this.request("post", "/pricing", {products: productsPricing});
+    // Update productsPricing property
+    this.productsPricing = productsPricing;
   }
 
   /*
@@ -492,6 +574,7 @@ class Iaphub {
     // Process receipt with IAPHUB
     try {
       var response = await this.request("post", "/receipt", receipt);
+      this.receiptPostDate = new Date();
       // If the receipt validation is a success
       if (response.status == "success") {
         newTransactions = response.newTransactions;
