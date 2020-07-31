@@ -73,7 +73,7 @@ await Iaphub.setUserTags({gender: 'male'});
 ```
 
 ## Get products for sale
-Call the ``getProductsForSale`` method to get the products for sale.<br/>
+Call the ``getProductsForSale`` method to get the user's products for sale<br/>
 You should use this method when displaying the page with the list of your products for sale.
 
 ⚠ If the request fails because of a network issue, the method returns the latest request in cache (if available, otherwise an error is thrown).
