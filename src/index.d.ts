@@ -189,18 +189,6 @@ declare module 'react-native-iaphub' {
     webhookStatus: IapHubWebhookStatus;
   }
 
-  interface IapHubUserInformation {
-    /**
-     * The products the user is able to buy
-     */
-    productsForSale: IapHubProductInformation[];
-
-    /**
-     * The products the user bought that are still active (subscriptions or non-consumables)
-     */
-    activeProducts: IapHubProductInformation[];
-  }
-
   interface IapHubUserTags {
     /**
      * Tags you want to assign to user.
@@ -237,22 +225,30 @@ declare module 'react-native-iaphub' {
   export function init(Options: IapHubInitOptions): Promise<void>;
 
   /***
-   * Call the login method to authenticate an user.
+   * Call the `setUserId` method to authenticate an user.
    *
-   * If you have an authentication system, provide the user id of the user right after the user log in.
-   * If you don't and want to handle IAP on the client side, you can provide the device id when the app start instead by using a module such as react-native-device-info to get a device unique ID.
+   * If you have an authentication system, provide the `user id` of the user right after the user log in.
+   * If you don't and want to handle IAP on the client side, you can provide the `device id` when the app start instead by using a module such as [react-native-device-info](https://github.com/react-native-community/react-native-device-info#getuniqueid) to get a device unique ID.
    *
    * ⚠ You should provide an id that is non-guessable and isn't public. (Email not allowed)
    * @param UniqueUserId Non-guessable unique identifier of user.
    */
-  export function login(UniqueUserId: string): Promise<void>;
+  export function setUserId(UniqueUserId: string): Promise<void>;
 
   /***
-   * Call the getUser method to fetch the user profile
+   * Call the ``getProductsForSale`` method to get the products for sale.
    *
-   * The user profile contains the active products (subscriptions not expired yet or non-consumables) and the products for sale of the user (the products the user is able to buy).
+   * You should use this method when displaying the page with the list of your products for sale.
+   * ⚠ If the request fails because of a network issue, the method returns the latest request in cache (if available, otherwise an error is thrown).
    */
-  export function getUser(): Promise<IapHubUserInformation>;
+  export function getProductsForSale(): Promise<IapHubProductInformation[]>;
+
+  /***
+   * If you're relying on IAPHUB on the client side (instead of using your server with webhooks) to detect if the user has active products (renewable subscriptions or non-consumables), you should use the `getActiveProducts` method when the app is brought to the foreground.
+   *
+   * ⚠ If the request fails because of a network issue, the method returns the latest request in cache (if available, otherwise an error is thrown).
+   */
+  export function getActiveProducts(): Promise<IapHubProductInformation[]>;
 
   /***
    * Call the setUserTags method to update the user tags
@@ -280,19 +276,10 @@ declare module 'react-native-iaphub' {
    */
   export function restore(): Promise<IapHubProductInformation[]>;
 
-  /***
-   * Call the logout method after an user log out
-   *
-   * ℹ️ After a logout any purchase event will be saved in a queue until the user log in.
-   * ℹ️ Logout isn't required if you logged in with a device id.
-   */
-  export function logout(): Promise<void>;
-
 //#endregion
 
   export type {
     IapHubInitOptions,
-    IapHubUserInformation,
     IapHubUserTags,
     IapHubProductInformation,
     IapHubProductInformationWithWebhook,
