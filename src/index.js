@@ -173,9 +173,43 @@ class Iaphub {
   /*
    * Get active products
    */
-  async getActiveProducts(opts = {}) {
+  async getActiveProducts() {
     var userFetched = false;
 
+    // Refresh user
+    userFetched = await this.refreshUser();
+    // Refresh the user if that's not already the case
+    if (!userFetched) {
+      var subscriptions = this.user.activeProducts.filter((item) => item.type == 'renewable_subscription');
+      // If we have active renewable subscriptions, refresh every minute
+      if (subscriptions.length) {
+        await this.refreshUser({interval: 1000 * 60});
+      }
+    }
+
+    return this.user.activeProducts;
+  }
+
+  /*
+   * Get products for sale
+   */
+  async getProductsForSale() {
+    // Refresh user every minute
+    await this.refreshUser({interval: 1000 * 60});
+    // Return products for sale
+    return this.user.productsForSale;
+  }
+
+  /*
+   * Refresh user (only when needed)
+   */
+  async refreshUser(opts = {}) {
+    var fetched = false;
+
+    // Refresh user every 24 hours by default
+    if (!opts.interval) {
+      opts.interval = 1000 * 60 * 60 * 24;
+    }
     // Fetch the user if necessary
     try {
       if (
@@ -183,13 +217,13 @@ class Iaphub {
           opts.force ||
           // User not fetched yet
           !this.user ||
-          // User not fetched for 24 hours
-          (new Date(this.userFetchDate.getTime() + 1000 * 60 * 60 * 24) < new Date()) ||
+          // User not fetched for X hours
+          (new Date(this.userFetchDate.getTime() + opts.interval) < new Date()) ||
           // Receit post date more recent than the user fetch date
           (this.receiptPostDate && (this.receiptPostDate > this.userFetchDate))
         ) {
-          userFetched = true;
-          await this.getUser();
+          fetched = true;
+          await this.fetchUser();
         }
     }
     // If the user fetch fails (network offline?), throw an error only if the user has never been fetched
@@ -198,55 +232,19 @@ class Iaphub {
         throw err;
       }
     }
-    // Remove expired subsriptions from active products
-    var activeProducts = this.user.activeProducts.filter((item) => {
-      return !item.expirationDate || item.isSubscriptionRetryPeriod || (new Date(item.expirationDate) > new Date());
-    });
-    // Refresh the user if that's not already the case
-    if (!userFetched) {
-      // If we have expired subscriptions
-      if (activeProducts.length != this.user.activeProducts.length) {
-        return this.getActiveProducts({force: true});
-      }
-      // If we have an active subscription that hasn't been refreshed in the last minute
-      var subscription = activeProducts.find((item) => item.type == 'renewable_subscription');
-      if (subscription && new Date(this.userFetchDate.getTime() + 1000 * 60) < new Date()) {
-        return this.getActiveProducts({force: true});
-      }
-    }
 
-    return activeProducts;
+    return fetched;
   }
 
   /*
-   * Get products for sale
+   * Fetch user
    */
-  async getProductsForSale() {
-    // Fetch the user if it hasn't been fetched in the last minute
-    try {
-      if (!this.userFetchDate || new Date(this.userFetchDate.getTime() + 1000 * 60) < new Date()) {
-        await this.getUser();
-      }
-    }
-    // If the user fetch fails (network offline?), throw an error only if the user has never been fetched
-    catch (err) {
-      if (!this.user) {
-        throw err;
-      }
-    }
-
-    return this.user.productsForSale;
-  }
-
-  /*
-   * Get user
-   */
-  async getUser(params = {}) {
+  async fetchUser() {
     // The user id has to be set
     if (!this.userId) {
       throw this.error("User id required", "user_id_required");
     }
-    var data = await this.request("get", "", params);
+    var data = await this.request("get", "");
 
     if (!data || !data.productsForSale) {
       throw this.error(
@@ -656,7 +654,7 @@ class Iaphub {
     // Try to get the product type from the user productsForSale
     if (!this.user) {
       try {
-        await this.getUser();
+        await this.fetchUser();
       } catch (err) {}
     }
     if (this.user && this.user.productsForSale) {

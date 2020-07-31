@@ -33,8 +33,8 @@ class AppStore {
 
   login = async () => {
     iap.setUserId("1");
-    await iap.getProductsForSale();
     await iap.getActiveProducts();
+    await iap.getProductsForSale();
     await AsyncStorage.setItem('isLogged', "true");
     this.isLogged = true;
   }

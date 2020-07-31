@@ -70,8 +70,8 @@ class IAPStore {
 			}
 			// Refresh the user to update the products for sale
 			try {
-				await this.getProductsForSale();
 				await this.getActiveProducts();
+				await this.getProductsForSale();
 			} catch (err) {
 				console.error(err);
 			}
@@ -117,8 +117,8 @@ class IAPStore {
 	// Call this method to restore the user purchases (you should have a button, it is usually displayed on the settings page)
 	async restore() {
 		await Iaphub.restore();
-		await Iaphub.getProductsForSale();
 		await Iaphub.getActiveProducts();
+		await Iaphub.getProductsForSale();
 		Alert.alert("Restore", "Purchases restored");
 	}
 
