@@ -151,15 +151,17 @@ class Iaphub {
         var activeSubscription = this.user.activeProducts.find((item) => item.type == 'renewable_subscription' && item.group == product.group);
 
         // On android we need to provide the old sku if it is an upgrade/downgrade
+        // Cannot await on RNIap.request because of this issue in iOS 14
+        // https://github.com/dooboolab/react-native-iap/issues/1058
         if (this.platform == 'android' && activeSubscription) {
-          await RNIap.requestSubscription(product.sku, false, activeSubscription.sku, opts.androidProrationMode || 1);
+          RNIap.requestSubscription(product.sku, false, activeSubscription.sku, opts.androidProrationMode || 1);
         }
         // Otherwise request subscription normally
         else {
-          await RNIap.requestSubscription(product.sku, false);
+          RNIap.requestSubscription(product.sku, false);
         }
       } else {
-        await RNIap.requestPurchase(product.sku, false);
+        RNIap.requestPurchase(product.sku, false);
       }
     }
     // Transform request purchase/subscription errors
