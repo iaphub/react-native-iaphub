@@ -93,7 +93,7 @@ class Iaphub {
 
   /*
    * Set user id (or device id)
-   * @param {String} userId User id
+   * @param {String|null} userId User id
    */
   async setUserId(userId) {
     if (!this.isInitialized) {
