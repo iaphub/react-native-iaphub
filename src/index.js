@@ -568,6 +568,10 @@ class Iaphub {
     if (this.buyRequest) {
       if (this.buyRequest.processing) return;
       this.buyRequest.processing = true;
+      // Call onReceiptProcess option if defined
+      if (this.buyRequest.opts.onReceiptProcess) {
+        this.buyRequest.opts.onReceiptProcess(receipt);
+      }
     }
     // Process receipt with IAPHUB
     try {

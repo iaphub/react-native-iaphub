@@ -52,7 +52,7 @@ class IAPStore {
 	async buy(productSku) {
 		try {
 			this.skuProcessing = productSku;
-			var transaction = await Iaphub.buy(productSku);
+			var transaction = await Iaphub.buy(productSku, {onReceiptProcess: () => console.log('-> Processing receipt')});
 			this.skuProcessing = null;
 			// The webhook could not been sent to my server
 			if (transaction.webhookStatus == "failed") {

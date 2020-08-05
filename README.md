@@ -219,7 +219,14 @@ Call the ``buy`` method to buy a product<br/><br/>
 
 ```js
 try {
-  var transaction = await Iaphub.buy("pack10_tier15");
+  var transaction = await Iaphub.buy("pack10_tier15", {
+    // Optional property to override the default proration mode on Android (https://developer.android.com/reference/com/android/billingclient/api/BillingFlowParams.ProrationMode)
+    androidProrationMode: 1,
+    // Optional callback triggered before the receipt is processed
+    onReceiptProcess: (receipt) => {
+      console.log('Purchase success, processing receipt...');
+    }
+  });
   console.log(transaction);
   {
     id: "2e5198930c48ed07aa275fd3",
@@ -236,9 +243,6 @@ try {
     price: 14.99,
     currency: "USD"
   }
-
-  // To override the default proration mode on Android (https://developer.android.com/reference/com/android/billingclient/api/BillingFlowParams.ProrationMode):
-  //var transaction = await Iaphub.buy("subscription_1", {androidProrationMode: 2});
 
   /*
    * The purchase has been successful but we need to check that the webhook to our server was successful as well
