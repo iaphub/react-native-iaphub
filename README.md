@@ -290,6 +290,16 @@ try {
     );
   }
   /*
+   * The receipt has been processed on IAPHUB but is invalid
+   * It could be a fraud attempt, using apps such as Freedom or Lucky Patcher on an Android rooted device
+   */
+  else if (err.code == "receipt_invalid") {
+    Alert.alert(
+      "Purchase error",
+      "We were not able to process your purchase, if you've been charged please contact the support (support@myapp.com)"
+    );
+  }
+  /*
    * The receipt hasn't been validated on IAPHUB (Could be an issue like a network error...)
    * The user will have to restore its purchases in order to validate the transaction
    * An automatic restore should be triggered on every relaunch of your app since the transaction hasn't been 'finished'

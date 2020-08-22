@@ -577,16 +577,19 @@ class Iaphub {
     try {
       var response = await this.request("post", "/receipt", receipt);
       this.receiptPostDate = new Date();
+      shouldFinishReceipt = true;
       // If the receipt validation is a success
       if (response.status == "success") {
         newTransactions = response.newTransactions;
         oldTransactions = response.oldTransactions;
-        shouldFinishReceipt = true;
       }
-      // Otherwise emit receipt error event (A restore won't be needed, IAPHUB will retry processing the receipt)
-      else if (response.status == "failed") {
-        shouldFinishReceipt = true;
-        error = this.error("Receipt validation on IAPHUB failed", "receipt_validation_failed");
+      // If the receipt is invalid
+      else if (response.status == "invalid") {
+        error = this.error("Receipt validation on IAPHUB failed, receipt invalid", "receipt_invalid");
+      }
+      // Otherwise the receipt validation failed (IAPHUB will automatically retry to process the receipt)
+      else {
+        error = this.error("Receipt validation on IAPHUB failed, receipt processing will be retried", "receipt_validation_failed");
       }
     }
     // If it fails we won't finish the receipt
