@@ -24,6 +24,6 @@
   },
   "devDependencies": {},
   "dependencies": {
-    "react-native-iap": "4.5.2"
+    "react-native-iap": "4.5.3"
   }
 }
