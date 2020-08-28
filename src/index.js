@@ -30,7 +30,7 @@ class Iaphub {
    * @param {Object} opts Options
    * @param {String} opts.appId - The app id is available on the settings page of your app
    * @param {String} opts.apiKey - The (client) api key is available on the settings page of your app
-   * @param {String} opts.environment - Environment used to determine the webhook configuration
+   * @param {String} opts.environment - App environment
    * @param {Function} opts.onReceiptProcessed - Event triggered after IAPHUB processed a receipt
    */
   async init(opts = {}) {
@@ -527,7 +527,9 @@ class Iaphub {
       // Product already owned, it must be consumed before being bought again
       "E_ALREADY_OWNED": "product_already_owned",
       // Developer error, the product sku is probably invalid
-      "E_DEVELOPER_ERROR": "developer_error"
+      "E_DEVELOPER_ERROR": "developer_error",
+      // Deferred payment
+      "E_DEFERRED_PAYMENT": "deferred_payment"
     };
     // Transform error
     var error = this.error(err.message, errors[err.code] || "unknown");

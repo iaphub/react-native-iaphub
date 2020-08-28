@@ -90,6 +90,13 @@ class IAPStore {
 					]
 				);
 			}
+			// The payment has been deferred (awaiting approval from parental control)
+			else if (err.code == "deferred_payment") {
+				Alert.alert(
+					"Purchase awaiting approval",
+					"Your purchase is awaiting approval from the parental control"
+				);
+			}
 			// The receipt has been processed on IAPHUB but something went wrong
 			else if (err.code == "receipt_validation_failed") {
 				Alert.alert(

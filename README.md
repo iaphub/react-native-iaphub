@@ -276,6 +276,13 @@ try {
       ]
     );
   }
+  // The payment has been deferred (awaiting approval from parental control)
+  else if (err.code == "deferred_payment") {
+    Alert.alert(
+      "Purchase awaiting approval",
+      "Your purchase is awaiting approval from the parental control"
+    );
+  }
   /*
    * The receipt has been processed on IAPHUB but something went wrong
    * It is probably because of an issue with the configuration of your app or a call to the Itunes/GooglePlay API that failed
