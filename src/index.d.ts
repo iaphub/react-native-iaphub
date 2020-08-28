@@ -30,6 +30,7 @@ declare module 'react-native-iaphub' {
     | 'receipt_failed'
     | 'receipt_finish_failed'
     | 'developer_error'
+    | 'deferred_payment'
     | 'unknown';
 
 //#region Interfaces
