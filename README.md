@@ -103,9 +103,9 @@ console.log(products);
     sku: "pack10_tier15",
     title: "Pack 10",
     description: "Pack of 10 coins",
-    localizedPrice: "$14.99",
-    price: 14.99,
-    currency: "USD"
+    price: "$14.99",
+    priceAmount: 14.99,
+    priceCurrency: "USD"
   }
 ]
 ```
@@ -239,9 +239,9 @@ try {
     groupName: "pack",
     title: "Pack 10",
     description: "Pack of 10 coins",
-    localizedPrice: "$14.99",
-    price: 14.99,
-    currency: "USD"
+    price: "$14.99",
+    priceAmount: 14.99,
+    priceCurrency: "USD"
   }
 
   /*
