@@ -619,24 +619,30 @@ class Iaphub {
       var newTransactionsOverride = await this.emitReceiptProcessed(error, receipt);
       if (Array.isArray(newTransactionsOverride)) {
         newTransactions = newTransactionsOverride;
+        // If we had an error previously, ignore it
+        error = null;
       }
     } catch (err) {
       error = err;
     }
     // Resolve buy request if active
     if (this.buyRequest) {
+      var transaction = null;
       var request = this.buyRequest;
       // Delete saved request
       this.buyRequest = null;
-      // Search transaction by sku
-      var transaction = newTransactions.find((item) => item.sku == request.sku);
-      // If not found, look if it is a product change
-      if (!transaction) {
-        transaction = newTransactions.find((item) => item.subscriptionRenewalProductSku == request.sku);
-      }
-      // Reject the request if there is no transaction
-      if (!transaction) {
-        error = this.error("Transaction not found", "transaction_not_found");
+      // Check the transactions if there is no error
+      if (!error) {
+        // Search transaction by sku
+        transaction = newTransactions.find((item) => item.sku == request.sku);
+        // If not found, look if it is a product change
+        if (!transaction) {
+          transaction = newTransactions.find((item) => item.subscriptionRenewalProductSku == request.sku);
+        }
+        // Reject the request if there is no transaction
+        if (!transaction) {
+          error = this.error("Transaction not found", "transaction_not_found");
+        }
       }
       // If there was an error, reject the request
       if (error) {
@@ -648,6 +654,7 @@ class Iaphub {
         request.resolve({...product, ...transaction});
       }
     }
+
     return newTransactions || [];
   }
 
