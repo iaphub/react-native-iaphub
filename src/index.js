@@ -151,8 +151,8 @@ class Iaphub {
         var activeSubscription = this.user.activeProducts.find((item) => item.type == 'renewable_subscription' && item.group == product.group);
 
         // On android we need to provide the old sku if it is an upgrade/downgrade
-        if (this.platform == 'android' && activeSubscription) {
-          await RNIap.requestSubscription(product.sku, false, activeSubscription.sku, opts.androidProrationMode || 1);
+        if (this.platform == 'android' && activeSubscription && activeSubscription.sku != product.sku) {
+          await RNIap.requestSubscription(product.sku, false, activeSubscription.sku, activeSubscription.androidToken, opts.androidProrationMode || 1);
         }
         // Otherwise request subscription normally
         else {
