@@ -8,6 +8,7 @@ class IAPStore {
 	skuProcessing = null;
 	productsForSale = null;
 	activeProducts = null;
+	platform = 'unknown';
 
 	// Init IAPHUB
 	async init() {
@@ -23,6 +24,7 @@ class IAPStore {
 			});
 			// Iaphub is now initialized and ready to use
 			this.isInitialized = true;
+			this.platform = Iaphub.platform;
 		} catch (err) {
 			console.error(err);
 			// The init has failed (the error code is available in the 'err.code' property)
@@ -31,6 +33,12 @@ class IAPStore {
 			// Or the billing system is unavailable, it may be a problem with the device or Itunes/Play Store is down (Error code: 'billing_unavailable')
 			// Or it is an unknown error, probably the native library of react-native-iap that is not installed properly (Error code: 'billing_error')
 		}
+	}
+
+	// Set platform
+	setPlatform(platform) {
+		Iaphub.setPlatform(platform);
+		this.platform = Iaphub.platform;
 	}
 
 	// Set user id
@@ -113,6 +121,10 @@ class IAPStore {
 			}
 			// Couldn't buy product for many other reasons (the user shouldn't be charged)
 			else {
+				// Do not show unknown errors alert on AMAZON, there is no way to detect if this is due to the user just cancelling the popup
+				// Also the  Amazon UI guidelines disallow showing error alerts
+				if (err.code == 'unknown' && this.platform == 'amazon') return;
+
 				Alert.alert(
 					"Purchase error",
 					"We were not able to process your purchase, please try again later or contact the support (support@myapp.com)"
@@ -135,6 +147,7 @@ decorate(IAPStore, {
 	isInitialized: observable,
 	skuProcessing: observable,
 	productsForSale: observable,
-	activeProducts: observable
+	activeProducts: observable,
+	platform: observable
 })
 export default new IAPStore();

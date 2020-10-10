@@ -26,6 +26,24 @@ class Iaphub {
   /**************************************************** PUBLIC ********************************************************/
 
   /*
+   * Force platform
+   */
+  setPlatform(platform) {
+    if (platform == 'amazon') {
+      RNIap.setInstallSourceAndroid(RNIap.InstallSourceAndroid.AMAZON);
+      this.platform = 'amazon';
+    }
+    else if (platform == 'android') {
+      RNIap.setInstallSourceAndroid(RNIap.InstallSourceAndroid.GOOGLE_PLAY);
+      this.platform = 'android';
+    }
+    else {
+      RNIap.setInstallSourceAndroid(RNIap.InstallSourceAndroid.NOT_SET);
+      this.platform = Platform.OS;
+    }
+  }
+
+  /*
    * Init service
    * @param {Object} opts Options
    * @param {String} opts.appId - The app id is available on the settings page of your app
@@ -52,6 +70,10 @@ class Iaphub {
       // On ios initConnection will return the result of canMakePayments
       if (this.platform == "ios" && status == "false") {
         this.canMakePayments = false;
+      }
+      // Update the platform for amazon
+      if (RNIap.getInstallSourceAndroid() == RNIap.InstallSourceAndroid.AMAZON) {
+        this.platform = 'amazon';
       }
     } catch (err) {
       // Check init connection errors
@@ -461,7 +483,16 @@ class Iaphub {
    * @param {Object} purchase Purchase
    */
   getReceiptToken(purchase) {
-    return this.platform == "android" ? purchase.purchaseToken : purchase.transactionReceipt;
+    // Android
+    if (this.platform == 'android') {
+      return purchase.purchaseToken;
+    }
+    // Amazon
+    else if (this.platform == 'amazon') {
+      return `${purchase.userIdAmazon} ${purchase.purchaseToken}`;
+    }
+    // IOS
+    return purchase.transactionReceipt;
   }
 
   /*
@@ -469,7 +500,11 @@ class Iaphub {
    * @param {Array} products Array of products
    */
   async setPricing(products) {
-    var productsPricing = products.map((product) => {
+    var productsPricing = products
+    // Filter free product (Amazon for instance returns a price of 0 during a free trial)
+    .filter((product) => !!product.priceAmount)
+    // Transform
+    .map((product) => {
       var item = {
         id: product.id,
         price: product.priceAmount,

@@ -28,8 +28,8 @@ This module implements the IAPHUB API on top of the [react-native-iap](https://g
 
 2. Install the package
 ```js
-// Install react-native-iap which is a required peer dependency (Be sure you install version 4.6.3)
-npm install react-native-iap@4.6.3 --save-exact
+// Install react-native-iap which is a required peer dependency (Be sure you install version 5.0.1)
+npm install react-native-iap@5.0.1 --save-exact
 // Install react-native-iaphub
 npm install react-native-iaphub@5.1.0 --save-exact
 ```
@@ -323,6 +323,10 @@ try {
   }
   // Couldn't buy product for many other reasons (the user shouldn't be charged)
   else {
+    // Do not show unknown errors alert on AMAZON, there is no way to detect if this is due to the user just cancelling the popup
+    // Also the  Amazon UI guidelines disallow showing error alerts
+		if (err.code == 'unknown' && this.platform == 'amazon') return;
+
     Alert.alert(
       "Purchase error",
       "We were not able to process your purchase, please try again later or contact the support (support@myapp.com)"

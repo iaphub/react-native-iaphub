@@ -21,6 +21,14 @@
         </intent-filter>
       </activity>
       <activity android:name="com.facebook.react.devsupport.DevSettingsActivity" />
+
+      <receiver android:name = "com.amazon.device.iap.ResponseReceiver"
+      android:permission = "com.amazon.inapp.purchasing.Permission.NOTIFY" >
+        <intent-filter>
+          <action android:name = "com.amazon.inapp.purchasing.NOTIFY" />
+        </intent-filter>
+      </receiver>
+
     </application>
 
 </manifest>
