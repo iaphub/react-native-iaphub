@@ -27,9 +27,12 @@ This module implements the IAPHUB API on top of the [react-native-iap](https://g
 1. Create an account on [IAPHUB](https://www.iaphub.com)
 
 2. Install the package
-``
-npm install react-native-iaphub@latest --save
-``
+```js
+// Install react-native-iap which is a required peer dependency (Be sure you install version 4.6.3)
+npm install react-native-iap@4.6.3 --save-exact
+// Install react-native-iaphub
+npm install react-native-iaphub@5.0.0 --save-exact
+```
 
 ## Init
 Call the `init` method at the start of your app to initialize your configuration<br/><br/>

@@ -20,10 +20,9 @@
   },
   "peerDependencies": {
     "react": "*",
-    "react-native": "*"
+    "react-native": "*",
+    "react-native-iap": "4.6.3"
   },
   "devDependencies": {},
-  "dependencies": {
-    "react-native-iap": "4.6.3"
-  }
+  "dependencies": {}
 }

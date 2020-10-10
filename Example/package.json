@@ -13,7 +13,8 @@
     "mobx": "^5.15.4",
     "mobx-react": "^5.4.4",
     "react": "16.9.0",
-    "react-native": "0.61.5"
+    "react-native": "0.61.5",
+    "react-native-iap": "4.6.3"
   },
   "devDependencies": {
     "@babel/core": "^7.7.4",
@@ -23,7 +24,6 @@
     "eslint": "^6.7.1",
     "jest": "^24.9.0",
     "metro-react-native-babel-preset": "^0.57.0",
-    "react-native-iap": "4.6.3",
     "react-test-renderer": "16.9.0"
   },
   "jest": {
