@@ -132,9 +132,11 @@ console.log(products);
 | purchaseDate | `string` | ⚠ Only available for an active product<br> Purchase date |
 | subscriptionDuration | `string` | ⚠ Only available for a subscription<br> Duration of the subscription cycle specified in the ISO 8601 format (Possible values: 'P1W', 'P1M', 'P3M', 'P6M', 'P1Y') |
 | expirationDate | `string` | ⚠ Only available for an active subscription<br> Subscription expiration date |
+| autoResumeDate | `string` | ⚠ Only available for an android active subscription currently paused<br> Subscription resume date |
 | isSubscriptionRenewable | `boolean` | ⚠ Only available for an active subscription<br> If the subscription can be renewed |
 | isSubscriptionRetryPeriod | `boolean` | ⚠ Only available for an active subscription<br> If the subscription is currently in a retry period |
 | isSubscriptionGracePeriod | `boolean` | ⚠ Only available for an active subscription<br> If the subscription is currently in a grace period |
+| isSubscriptionPaused | `boolean` | ⚠ Only available for an android active subscription<br> If the subscription is currently paused |
 | subscriptionPeriodType | `string` | ⚠ Only available for a subscription<br>Subscription period type (Possible values: 'normal', 'trial', 'intro')<br>If the subscription is active it is the current period otherwise it is the period if the user purchase the subscription |
 | subscriptionIntroPrice | `string` | ⚠ Only available for a subscription with an introductory price<br>Localized introductory price (Ex: "$2.99") |
 | subscriptionIntroPriceAmount | `number` | ⚠ Only available for a subscription with an introductory price<br>Introductory price amount (Ex: 2.99) |
@@ -211,9 +213,12 @@ class App extends Component {
 
 #### Check subscription status
 
-When retrieving a subscription from the active products, you should also check if it is in a retry period using the `isSubscriptionRetryPeriod` and `isSubscriptionGracePeriod` properties.<br/>
+⚠ Retrieving a subscription from the active products doesn't mean the user has access to the features offered by the subscription.<br/>
+You must check if the subscription is on a retry period (`isSubscriptionRetryPeriod`), grace period (`isSubscriptionGracePeriod`) or is paused (`isSubscriptionPaused`).
+
 - On a **retry period with a grace period** the user should still have access to the features offered by the subscription and you should display a message asking for the user to update its payment informations.
-- On a **retry period with no grace period** you should restrict the access to the features offered by your subscription and display a message asking for the user to update its payment informations.
+- On a **retry period with no grace period** you have to restrict the access to the features offered by your subscription and display a message asking for the user to update its payment informations.
+- On a **paused subscription** (Android only) you have to restrict the access to the features offered by your subscription.
 
 More informations on the [IAPHUB documentation](https://iaphub.com/docs/getting-started/manage-subscription-states#subscription-renewal-retry).
 
