@@ -128,6 +128,8 @@ class Iaphub {
     if (!this.userId) {
       throw this.error("User id required", "user_id_required");
     }
+    // Refresh user
+    await this.refreshUser();
     // Get product of the sku
     var product = this.user.productsForSale.find((product) => product.sku == sku);
     // If the product isn't found look in active products
