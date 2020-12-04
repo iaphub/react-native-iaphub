@@ -219,6 +219,8 @@ class Iaphub {
           opts.force ||
           // User not fetched yet
           !this.user ||
+          // User fetch date reset
+          !this.userFetchDate ||
           // User not fetched for X hours
           (new Date(this.userFetchDate.getTime() + opts.interval) < new Date()) ||
           // Receit post date more recent than the user fetch date
@@ -414,6 +416,7 @@ class Iaphub {
     if (!this.userId) {
       throw this.error("User id required", "user_id_required");
     }
+    // Post tags
     try {
       await this.request("post", "", {tags: tags});
     } catch (err) {
@@ -422,6 +425,8 @@ class Iaphub {
         err.code || "unknown"
       );
     }
+    // Reset user cache
+    this.userFetchDate = null;
   }
 
   /*
