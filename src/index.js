@@ -149,7 +149,8 @@ class Iaphub {
     });
     // Request purchase
     try {
-      if (product.type.indexOf("subscription") != -1) {
+      // Request renewable subscription
+      if (product.type.indexOf("renewable_subscription") != -1) {
         var activeSubscription = this.user.activeProducts.find((item) => item.type == 'renewable_subscription' && item.group == product.group);
 
         // On android we need to provide the old sku if it is an upgrade/downgrade
@@ -160,7 +161,9 @@ class Iaphub {
         else {
           await RNIap.requestSubscription(product.sku, false);
         }
-      } else {
+      }
+      // Request other types
+      else {
         await RNIap.requestPurchase(product.sku, false);
       }
     }
