@@ -177,9 +177,12 @@ class Iaphub {
 
   /*
    * Get active products
+   * @param {Object} opts Options
+	 * @param {Array} opts.includeSubscriptionStates - Include subscription states (only 'active' and 'grace_period' states are returned by default)
    */
-  async getActiveProducts() {
+  async getActiveProducts(opts = {}) {
     var userFetched = false;
+    var subscriptionStates = ['active', 'grace_period'].concat(opts.includeSubscriptionStates || []);
 
     // Refresh user
     userFetched = await this.refreshUser();
@@ -191,8 +194,13 @@ class Iaphub {
         await this.refreshUser({interval: 1000 * 60});
       }
     }
-
-    return this.user.activeProducts;
+    // Filter subscriptions states, return only 'active' and 'grace_period' states by default which are the states when the subscription is truly active
+    return this.user.activeProducts.filter((product) => {
+      // Return product if it has no state
+      if (!product.subscriptionState) return true;
+      // Otherwise check the state
+      return subscriptionStates.indexOf(product.subscriptionState) != -1;
+    });
   }
 
   /*
