@@ -14,7 +14,7 @@
     "mobx-react": "^5.4.4",
     "react": "16.9.0",
     "react-native": "0.61.5",
-    "react-native-iap": "5.2.0"
+    "react-native-iap": "5.1.3"
   },
   "devDependencies": {
     "@babel/core": "^7.7.4",
