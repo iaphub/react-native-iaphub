@@ -241,9 +241,14 @@ class Iaphub {
           await this.fetchUser();
         }
     }
-    // If the user fetch fails (network offline?), throw an error only if the user has never been fetched
+    // If the user fetch fails (network offline?)
     catch (err) {
+      // Throw an error if the user hasn't been fetched yet
       if (!this.user) {
+        throw err;
+      }
+      // Throw an error if the user has an active subscription currently expired
+      if (this.user.activeProducts.find((product) => product.expirationDate && (new Date(product.expirationDate) < new Date()))) {
         throw err;
       }
     }
