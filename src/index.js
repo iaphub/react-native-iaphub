@@ -303,7 +303,15 @@ class Iaphub {
       var infos = productsInfos.find(info => info.productId == product.sku);
 
       if (!infos) {
-        console.error(`Product sku '${product.sku} not found'`);
+        if (this.platform == 'ios') {
+          console.error(`Itunes did not return the product '${product.sku}', the product has been filtered, if the sku is valid your Itunes account or sandbox environment is probably not configured properly (https://iaphub.com/docs/set-up-ios/configure-sandbox-testing)`);
+        }
+        else if (this.platform == 'android') {
+          console.error(`GooglePlay did not return the product '${product.sku}', the product has been filtered, if the sku is valid your GooglePlay account or sandbox environment is probably not configured properly (https://iaphub.com/docs/set-up-android/configure-sandbox-testing)`);
+        }
+        else {
+          console.error(`Product sku '${product.sku}' not found`);
+        }
         return null;
       }
       return {
