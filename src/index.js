@@ -667,7 +667,14 @@ class Iaphub {
         }
         // Reject the request if there is no transaction
         if (!transaction) {
-          error = this.error("Transaction not found", "transaction_not_found");
+          // Check if it is because the product is already purchased
+          if (oldTransactions.find((item) => item.sku == request.sku)) {
+            error = this.error("Product already purchased, if not returned in the active products it may be owned by a different user (restore needed)", "product_already_purchased");
+          }
+          // Otherwise it means the product sku wasn't in the receipt
+          else {
+            error = this.error("Transaction not found, the product sku wasn't in the receipt, the purchase failed", "transaction_not_found");
+          }
         }
       }
       // If there was an error, reject the request
