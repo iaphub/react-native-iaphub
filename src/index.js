@@ -590,17 +590,21 @@ class Iaphub {
     var receipt = {
       token: this.getReceiptToken(purchase),
       sku: purchase.productId,
-      isRestore: isRestore
+      context: 'refresh'
     };
     var newTransactions = [];
     var oldTransactions = [];
     var shouldFinishReceipt = false;
     var error = null;
 
+    // Update context on a restore
+    if (isRestore) receipt.context = 'restore';
     // Prevent concurrent processing of receipts on a buy request
     if (this.buyRequest) {
       if (this.buyRequest.processing) return;
       this.buyRequest.processing = true;
+      // Update context
+      receipt.context = 'purchase';
       // Call onReceiptProcess option if defined
       if (this.buyRequest.opts.onReceiptProcess) {
         this.buyRequest.opts.onReceiptProcess(receipt);
