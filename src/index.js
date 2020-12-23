@@ -1,4 +1,4 @@
-import { Platform } from "react-native";
+import { Platform, AppState } from "react-native";
 import * as RNIap from "react-native-iap";
 import pkg from '../package.json';
 
@@ -64,30 +64,32 @@ class Iaphub {
         );
       }
     }
-    // Init listeners
-    if (!this.purchaseUpdatedListener) {
-      this.purchaseUpdatedListener = RNIap.purchaseUpdatedListener(async (purchase) => {
-        // If the user isn't logged we save the event in a queue (that will be executed when the user login)
-        if (!this.userId) {
-          this.purchaseUpdatedEvents.push(purchase);
+    // Init AppState listener
+    if (!this.appState) {
+      this.appState = AppState.currentState;
+      AppState.addEventListener("change", (nextAppState) => {
+        // Wait 2 seconds before switching back the state to 'active' and process the queued events
+        // It is necessary to do it like that because an interrupted purchase on iOS will trigger first an error and then a purchase when the action is completed
+        if (this.appState != "active" && nextAppState == 'active') {
+          clearTimeout(this.appStateTimeout);
+          this.appStateTimeout = setTimeout(() => {
+            this.appState = nextAppState;
+            this.processQueuedEvents();
+          }, 2000);
         }
-        // Otherwise we process the receipt
         else {
-          await this.processReceipt(purchase);
+          clearTimeout(this.appStateTimeout);
+          this.appState = nextAppState;
         }
       });
     }
+    // Init purchase updated listener
+    if (!this.purchaseUpdatedListener) {
+      this.purchaseUpdatedListener = RNIap.purchaseUpdatedListener((purchase) => this.addPurchaseUpdatedEvent(purchase));
+    }
+    // Init purchase error listener
     if (!this.purchaseErrorListener) {
-      this.purchaseErrorListener = RNIap.purchaseErrorListener((err) => {
-        // If the user isn't logged we save the event in a queue (that will be executed when the user login)
-        if (!this.userId) {
-          this.purchaseErrorEvents.push(err);
-        }
-        // Otherwise process the error
-        else {
-          this.processError(err);
-        }
-      });
+      this.purchaseErrorListener = RNIap.purchaseErrorListener((err) => this.addPurchaseErrorEvent(err));
     }
   }
 
@@ -95,26 +97,14 @@ class Iaphub {
    * Set user id (or device id)
    * @param {String|null} userId User id
    */
-  async setUserId(userId) {
+  setUserId(userId) {
     if (!this.isInitialized) {
       throw this.error("IAPHUB hasn't been initialized", "init_missing");
     }
     this.userId = userId;
     this.user = null;
     this.userFetchDate = null;
-    if (!this.userId) return;
-    // Execute purchase updated events received prior to initialize
-    await this.purchaseUpdatedEvents.reduce(async (promise, purchase) => {
-      await promise;
-      await this.processReceipt(purchase);
-    }, Promise.resolve());
-    this.purchaseUpdatedEvents = [];
-    // Execute purchase error events received prior to initialize
-    await this.purchaseErrorEvents.reduce(async (promise, err) => {
-      await promise;
-      this.processError(err);
-    }, Promise.resolve());
-    this.purchaseErrorEvents = [];
+    this.processQueuedEvents();
   }
 
   /*
@@ -169,7 +159,7 @@ class Iaphub {
     }
     // Transform request purchase/subscription errors
     catch (err) {
-      this.processError(err);
+      this.addPurchaseErrorEvent(err);
     }
     // Return promise
     return buyPromise;
@@ -486,6 +476,61 @@ class Iaphub {
   }
 
   /**************************************************** PRIVATE ********************************************************/
+
+  /*
+   * Add purchase updated event
+   */
+  addPurchaseUpdatedEvent(purchase) {
+    var shouldBeQueued = !this.userId || (this.platform == "ios" &&  this.appState != 'active');
+
+    // Add to the queue if necessary
+    if (shouldBeQueued) {
+      this.purchaseUpdatedEvents.push(purchase);
+    }
+    // Otherwise we process the receipt
+    else {
+      this.processReceipt(purchase);
+    }
+  }
+
+  /*
+   * Add purchase error event
+   */
+  addPurchaseErrorEvent(err) {
+    var shouldBeQueued = !this.userId || (this.platform == "ios" && this.appState != "active");
+
+    // Add to the queue if necessary
+    if (shouldBeQueued) {
+      this.purchaseErrorEvents.push(err);
+    }
+    // Otherwise process the error
+    else {
+      this.processError(err);
+    }
+  }
+
+  /*
+   * Process queued events
+   */
+  async processQueuedEvents() {
+    if (!this.userId) return;
+
+    var purchaseUpdatedEvents = this.purchaseUpdatedEvents;
+    var purchaseErrorEvents = this.purchaseErrorEvents;
+
+    this.purchaseUpdatedEvents = [];
+    this.purchaseErrorEvents = [];
+    // Execute purchase updated events
+    await purchaseUpdatedEvents.reduce(async (promise, purchase) => {
+      await promise;
+      await this.processReceipt(purchase);
+    }, Promise.resolve());
+    // Execute purchase error events
+    await purchaseErrorEvents.reduce(async (promise, err) => {
+      await promise;
+      this.processError(err);
+    }, Promise.resolve());
+  }
 
   /*
    * Get receipt token of purchase
