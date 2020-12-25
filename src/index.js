@@ -667,7 +667,17 @@ class Iaphub {
       }
       // If the receipt is invalid
       else if (response.status == "invalid") {
-        error = this.error("Receipt validation on IAPHUB failed, receipt invalid", "receipt_invalid");
+        error = this.error("Receipt is invalid", "receipt_invalid");
+      }
+      // The receipt is stale (no purchases still valid were found)
+      else if (response.status == "stale") {
+        error = this.error("Receipt is stale, no purchases still valid were found", "receipt_stale");
+      }
+      // The receipt is deferred (its final status is pending external action)
+      else if (response.status == "deferred") {
+        error = this.error("Receipt is deferred, pending purchase detected, its final status is pending external action", "deferred_payment");
+        // The receipt shouldn't be finished when deferred
+        shouldFinishReceipt = false;
       }
       // Otherwise the receipt validation failed (IAPHUB will automatically retry to process the receipt)
       else {
