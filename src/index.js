@@ -669,24 +669,28 @@ class Iaphub {
       else if (response.status == "invalid") {
         error = this.error("Receipt is invalid", "receipt_invalid");
       }
-      // The receipt is stale (no purchases still valid were found)
+      // If the receipt validation failed
+      else if (response.status == "failed") {
+        error = this.error("Receipt validation failed, receipt processing will be automatically retried if possible", "receipt_validation_failed");
+      }
+      // If the receipt is stale (no purchases still valid were found)
       else if (response.status == "stale") {
         error = this.error("Receipt is stale, no purchases still valid were found", "receipt_stale");
       }
-      // The receipt is deferred (its final status is pending external action)
+      // If the receipt is deferred (its final status is pending external action)
       else if (response.status == "deferred") {
         error = this.error("Receipt is deferred, pending purchase detected, its final status is pending external action", "deferred_payment");
-        // The receipt shouldn't be finished when deferred
         shouldFinishReceipt = false;
       }
-      // Otherwise the receipt validation failed (IAPHUB will automatically retry to process the receipt)
+      // Otherwise it is another error
       else {
-        error = this.error("Receipt validation on IAPHUB failed, receipt processing will be retried", "receipt_validation_failed");
+        error = this.error("Receipt validation failed because of an unexpected error", "unknown", {response: response});
+        shouldFinishReceipt = false;
       }
     }
     // If it fails we won't finish the receipt
     catch (err) {
-      error = this.error("Receipt request to IAPHUB failed", "receipt_request_failed");
+      error = this.error("Receipt request to IAPHUB failed", "receipt_request_failed", {err: err});
     }
     // Finish receipt
     if (shouldFinishReceipt) {
@@ -858,9 +862,10 @@ class Iaphub {
     });
 
     var json = {};
+    var response = null;
 
     try {
-      var response = await fetch(
+      response = await fetch(
         `${this.apiUrl}/app/${this.appId}/user/${this.userId}${url}`,
         opts
       );
@@ -868,7 +873,8 @@ class Iaphub {
     } catch (err) {
       throw this.error(
         `Network error, request to the Iaphub API failed (${err.message})`,
-        "network_error"
+        "network_error",
+        {response: response}
       );
     }
 
@@ -899,10 +905,11 @@ class Iaphub {
   /*
    * Create error
    */
-  error(message, code) {
+  error(message, code, params) {
     var err = new Error(message);
 
     err.code = code;
+    err.params = params;
     return err;
   }
 
