@@ -14,6 +14,7 @@ class Iaphub {
     this.userId = null;
     this.user = null;
     this.userFetchDate = null;
+    this.userFetchPromises = [];
     this.receiptPostDate = null;
     this.isInitialized = false;
     this.canMakePayments = true;
@@ -250,176 +251,189 @@ class Iaphub {
    * Fetch user
    */
   async fetchUser() {
-    // The user id has to be set
-    if (!this.userId) {
-      throw this.error("User id required", "user_id_required");
-    }
-    var data = await this.request("get", "");
-
-    if (!data || !data.productsForSale) {
-      throw this.error(
-        "The Iaphub API returned an unexpected response",
-        "unexpected_response"
-      );
-    }
-    var products = [].concat(data.productsForSale).concat(data.activeProducts);
-    var productIds = products
-      .filter(item => item.type.indexOf("renewable_subscription") == -1)
-      .map(item => item.sku);
-    var subscriptionIds = products
-      .filter(item => item.type.indexOf("renewable_subscription") != -1)
-      .map(item => item.sku);
-    var productsInfos = [];
-
-    if (productIds.length) {
-      productsInfos = await RNIap.getProducts(productIds);
-    }
-    if (subscriptionIds.length) {
-      productsInfos = productsInfos.concat(
-        await RNIap.getSubscriptions(subscriptionIds)
-      );
-    }
-
-    var convertToISO8601 = (numberOfPeriods, periodType) => {
-      if (!numberOfPeriods || !periodType) {
-        return undefined;
-      }
-      var periodTypes = {
-        "DAY": `P${numberOfPeriods}D`,
-        "WEEK": `P${numberOfPeriods}W`,
-        "MONTH": `P${numberOfPeriods}M`,
-        "YEAR": `P${numberOfPeriods}Y`
-      };
-
-      return periodTypes[periodType];
-    }
-
-    var formatProduct = (product) => {
-      var infos = productsInfos.find(info => info.productId == product.sku);
-
-      if (!infos) {
-        if (this.platform == 'ios') {
-          console.error(`Itunes did not return the product '${product.sku}', the product has been filtered, if the sku is valid your Itunes account or sandbox environment is probably not configured properly (https://iaphub.com/docs/set-up-ios/configure-sandbox-testing)`);
-        }
-        else if (this.platform == 'android') {
-          console.error(`GooglePlay did not return the product '${product.sku}', the product has been filtered, if the sku is valid your GooglePlay account or sandbox environment is probably not configured properly (https://iaphub.com/docs/set-up-android/configure-sandbox-testing)`);
-        }
-        else {
-          console.error(`Product sku '${product.sku}' not found`);
-        }
-        return null;
-      }
-      return {
-        ...product,
-        // Product title
-        title: infos.title,
-        // Product description
-        description: infos.description,
-        // Localized price
-        price: infos.localizedPrice,
-        // Price currency
-        priceCurrency: infos.currency,
-        // Price amount
-        priceAmount: parseFloat(infos.price),
-        // Only for a renewable subscription
-        ...(product.type == "renewable_subscription" ? {
-          // Duration of the subscription cycle specified in the ISO 8601 format
-          subscriptionDuration: (() => {
-            // Ios
-            if (this.platform == "ios") {
-              return convertToISO8601(infos.subscriptionPeriodNumberIOS, infos.subscriptionPeriodUnitIOS);
-            }
-            // Android
-            else if (this.platform == "android") {
-              return infos.subscriptionPeriodAndroid;
-            }
-          })()
-        } : {}),
-        // Only for a renewable subscription with an intro mode
-        ...((product.type == "renewable_subscription" && product.subscriptionPeriodType == 'intro') ? {
-          // Localized introductory price
-          subscriptionIntroPrice: infos.introductoryPrice,
-          // Introductory price amount
-          subscriptionIntroPriceAmount: infos.introductoryPrice ? parseFloat(infos.introductoryPrice.match(/\b\d+(?:.\d+)?/)[0]) : undefined,
-          // Payment type of the introductory offer
-          subscriptionIntroPayment: (() => {
-            // Ios
-            if (this.platform == "ios") {
-              return {
-                "PAYASYOUGO": "as_you_go",
-                "PAYUPFRONT": "upfront"
-              }[infos.introductoryPricePaymentModeIOS];
-            }
-            // Android
-            else if (this.platform == "android") {
-              return "as_you_go";
-            }
-          })(),
-          // Duration of an introductory cycle specified in the ISO 8601 format
-          subscriptionIntroDuration: (() => {
-            // Ios
-            if (this.platform == "ios") {
-              // The user pays directly a price for a number of weeks, months...
-              if (infos.introductoryPricePaymentModeIOS == "PAYUPFRONT") {
-                return convertToISO8601(infos.introductoryPriceNumberOfPeriodsIOS, infos.introductoryPriceSubscriptionPeriodIOS);
-              }
-              // The introductory subscription duration is the same as a regular subscription (Only the number of cycles can change)
-              else if (infos.introductoryPricePaymentModeIOS == "PAYASYOUGO") {
-                return convertToISO8601(infos.subscriptionPeriodNumberIOS, infos.subscriptionPeriodUnitIOS);
-              }
-            }
-            // Android
-            else if (this.platform == "android") {
-              return infos.introductoryPricePeriodAndroid;
-            }
-          })(),
-          // Number of cycles in the introductory offer
-          subscriptionIntroCycles: (() => {
-            // Ios
-            if (this.platform == "ios") {
-              if (infos.introductoryPricePaymentModeIOS == "PAYUPFRONT") {
-                return 1;
-              }
-              else if (infos.introductoryPricePaymentModeIOS == "PAYASYOUGO") {
-                return parseInt(infos.introductoryPriceNumberOfPeriodsIOS, 10);
-              }
-            }
-            // Android
-            else if (this.platform == "android") {
-              return parseInt(infos.introductoryPriceCyclesAndroid, 10);
-            }
-          })(),
-        } : {}),
-        // Only for a renewable subscription with a trial mode
-        ...((product.type == "renewable_subscription" && product.subscriptionPeriodType == 'trial') ? {
-          subscriptionTrialDuration: (() => {
-            // Ios
-            if (this.platform == "ios") {
-              return convertToISO8601(infos.introductoryPriceNumberOfPeriodsIOS, infos.introductoryPriceSubscriptionPeriodIOS);
-            }
-            // Android
-            else if (this.platform == "android") {
-              return infos.freeTrialPeriodAndroid;
-            }
-          })()
-        } : {})
-      };
-    };
-
-    this.user = {
-      productsForSale: data.productsForSale.map(formatProduct).filter(product => product),
-      activeProducts: data.activeProducts.map(formatProduct).filter(product => product)
-    };
-    this.userFetchDate = new Date();
+    // Keep a list of promises in order to handle concurrent requests
+    var promise = new Promise((resolve, reject) => this.userFetchPromises.push({resolve, reject}));
+    if (this.userFetchPromises.length > 1) return promise;
 
     try {
-      await this.setPricing(
-        [].concat(this.user.productsForSale).concat(this.user.activeProducts)
-      );
-    } catch (err) {
-      console.error(err);
+      // The user id has to be set
+      if (!this.userId) {
+        throw this.error("User id required", "user_id_required");
+      }
+      var data = await this.request("get", "");
+
+      if (!data || !data.productsForSale) {
+        throw this.error(
+          "The Iaphub API returned an unexpected response",
+          "unexpected_response"
+        );
+      }
+      var products = [].concat(data.productsForSale).concat(data.activeProducts);
+      var productIds = products
+        .filter(item => item.type.indexOf("renewable_subscription") == -1)
+        .map(item => item.sku);
+      var subscriptionIds = products
+        .filter(item => item.type.indexOf("renewable_subscription") != -1)
+        .map(item => item.sku);
+      var productsInfos = [];
+
+      if (productIds.length) {
+        productsInfos = await RNIap.getProducts(productIds);
+      }
+      if (subscriptionIds.length) {
+        productsInfos = productsInfos.concat(
+          await RNIap.getSubscriptions(subscriptionIds)
+        );
+      }
+
+      var convertToISO8601 = (numberOfPeriods, periodType) => {
+        if (!numberOfPeriods || !periodType) {
+          return undefined;
+        }
+        var periodTypes = {
+          "DAY": `P${numberOfPeriods}D`,
+          "WEEK": `P${numberOfPeriods}W`,
+          "MONTH": `P${numberOfPeriods}M`,
+          "YEAR": `P${numberOfPeriods}Y`
+        };
+
+        return periodTypes[periodType];
+      }
+
+      var formatProduct = (product) => {
+        var infos = productsInfos.find(info => info.productId == product.sku);
+
+        if (!infos) {
+          if (this.platform == 'ios') {
+            console.error(`Itunes did not return the product '${product.sku}', the product has been filtered, if the sku is valid your Itunes account or sandbox environment is probably not configured properly (https://iaphub.com/docs/set-up-ios/configure-sandbox-testing)`);
+          }
+          else if (this.platform == 'android') {
+            console.error(`GooglePlay did not return the product '${product.sku}', the product has been filtered, if the sku is valid your GooglePlay account or sandbox environment is probably not configured properly (https://iaphub.com/docs/set-up-android/configure-sandbox-testing)`);
+          }
+          else {
+            console.error(`Product sku '${product.sku}' not found`);
+          }
+          return null;
+        }
+        return {
+          ...product,
+          // Product title
+          title: infos.title,
+          // Product description
+          description: infos.description,
+          // Localized price
+          price: infos.localizedPrice,
+          // Price currency
+          priceCurrency: infos.currency,
+          // Price amount
+          priceAmount: parseFloat(infos.price),
+          // Only for a renewable subscription
+          ...(product.type == "renewable_subscription" ? {
+            // Duration of the subscription cycle specified in the ISO 8601 format
+            subscriptionDuration: (() => {
+              // Ios
+              if (this.platform == "ios") {
+                return convertToISO8601(infos.subscriptionPeriodNumberIOS, infos.subscriptionPeriodUnitIOS);
+              }
+              // Android
+              else if (this.platform == "android") {
+                return infos.subscriptionPeriodAndroid;
+              }
+            })()
+          } : {}),
+          // Only for a renewable subscription with an intro mode
+          ...((product.type == "renewable_subscription" && product.subscriptionPeriodType == 'intro') ? {
+            // Localized introductory price
+            subscriptionIntroPrice: infos.introductoryPrice,
+            // Introductory price amount
+            subscriptionIntroPriceAmount: infos.introductoryPrice ? parseFloat(infos.introductoryPrice.match(/\b\d+(?:.\d+)?/)[0]) : undefined,
+            // Payment type of the introductory offer
+            subscriptionIntroPayment: (() => {
+              // Ios
+              if (this.platform == "ios") {
+                return {
+                  "PAYASYOUGO": "as_you_go",
+                  "PAYUPFRONT": "upfront"
+                }[infos.introductoryPricePaymentModeIOS];
+              }
+              // Android
+              else if (this.platform == "android") {
+                return "as_you_go";
+              }
+            })(),
+            // Duration of an introductory cycle specified in the ISO 8601 format
+            subscriptionIntroDuration: (() => {
+              // Ios
+              if (this.platform == "ios") {
+                // The user pays directly a price for a number of weeks, months...
+                if (infos.introductoryPricePaymentModeIOS == "PAYUPFRONT") {
+                  return convertToISO8601(infos.introductoryPriceNumberOfPeriodsIOS, infos.introductoryPriceSubscriptionPeriodIOS);
+                }
+                // The introductory subscription duration is the same as a regular subscription (Only the number of cycles can change)
+                else if (infos.introductoryPricePaymentModeIOS == "PAYASYOUGO") {
+                  return convertToISO8601(infos.subscriptionPeriodNumberIOS, infos.subscriptionPeriodUnitIOS);
+                }
+              }
+              // Android
+              else if (this.platform == "android") {
+                return infos.introductoryPricePeriodAndroid;
+              }
+            })(),
+            // Number of cycles in the introductory offer
+            subscriptionIntroCycles: (() => {
+              // Ios
+              if (this.platform == "ios") {
+                if (infos.introductoryPricePaymentModeIOS == "PAYUPFRONT") {
+                  return 1;
+                }
+                else if (infos.introductoryPricePaymentModeIOS == "PAYASYOUGO") {
+                  return parseInt(infos.introductoryPriceNumberOfPeriodsIOS, 10);
+                }
+              }
+              // Android
+              else if (this.platform == "android") {
+                return parseInt(infos.introductoryPriceCyclesAndroid, 10);
+              }
+            })(),
+          } : {}),
+          // Only for a renewable subscription with a trial mode
+          ...((product.type == "renewable_subscription" && product.subscriptionPeriodType == 'trial') ? {
+            subscriptionTrialDuration: (() => {
+              // Ios
+              if (this.platform == "ios") {
+                return convertToISO8601(infos.introductoryPriceNumberOfPeriodsIOS, infos.introductoryPriceSubscriptionPeriodIOS);
+              }
+              // Android
+              else if (this.platform == "android") {
+                return infos.freeTrialPeriodAndroid;
+              }
+            })()
+          } : {})
+        };
+      };
+
+      this.user = {
+        productsForSale: data.productsForSale.map(formatProduct).filter(product => product),
+        activeProducts: data.activeProducts.map(formatProduct).filter(product => product)
+      };
+      this.userFetchDate = new Date();
+
+      try {
+        await this.setPricing(
+          [].concat(this.user.productsForSale).concat(this.user.activeProducts)
+        );
+      } catch (err) {
+        console.error(err);
+      }
+
+      this.userFetchPromises.forEach((promise) => promise.resolve(this.user));
     }
-    return this.user;
+    catch (err) {
+      this.userFetchPromises.forEach((promise) => promise.reject(err));
+    }
+
+    this.userFetchPromises = [];
+    return promise;
   }
 
   /*
