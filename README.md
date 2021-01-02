@@ -31,7 +31,7 @@ This module implements the IAPHUB API on top of the [react-native-iap](https://g
 // Install react-native-iap which is a required peer dependency (Be sure you install version 5.1.3)
 npm install react-native-iap@5.1.3 --save-exact
 // Install react-native-iaphub
-npm install react-native-iaphub@6.0.4 --save-exact
+npm install react-native-iaphub --save
 // Update dependency on xcode (in the ios folder)
 pod install
 ```
