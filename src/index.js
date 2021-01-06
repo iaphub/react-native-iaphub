@@ -1,4 +1,4 @@
-import { Platform, AppState } from "react-native";
+import { Platform, AppState, NativeModules, NativeEventEmitter } from "react-native";
 import * as RNIap from "react-native-iap";
 import pkg from '../package.json';
 
@@ -91,6 +91,23 @@ class Iaphub {
     // Init purchase error listener
     if (!this.purchaseErrorListener) {
       this.purchaseErrorListener = RNIap.purchaseErrorListener((err) => this.addPurchaseErrorEvent(err));
+    }
+    // Init iOS promoted products listener
+    if (!this.promotedProductListener && this.platform == 'ios') {
+      var IAPEmitter = new NativeEventEmitter(NativeModules.RNIapIos);
+
+      this.promotedProductListener = IAPEmitter.addListener('iap-promoted-product', async () => {
+        var productId = await RNIap.getPromotedProductIOS();
+
+        if (productId !== null) {
+          try {
+            await RNIap.buyPromotedProductIOS();
+          }
+          catch(err) {
+            console.error(err);
+          }
+        }
+      });
     }
   }
 
