@@ -3,7 +3,7 @@
 </a>
 <br/>
 <br/>
-Implementing and developping all the tools to manage your In-App purchases properly can be very complex and time consuming.
+Implementing and developing all the tools to manage your In-App purchases properly can be very complex and time consuming.
 You should spend this precious time building your app!
 <br/>
 <br/>
