@@ -3,7 +3,11 @@
 </a>
 <br/>
 <br/>
-Implementing and developing all the tools to manage your In-App purchases properly can be very complex and time consuming.
+
+![npm](https://img.shields.io/npm/dt/react-native-iaphub)
+![npm](https://img.shields.io/npm/dm/react-native-iaphub)
+
+Implementing and developping all the tools to manage your In-App purchases properly can be very complex and time consuming.
 You should spend this precious time building your app!
 <br/>
 <br/>
