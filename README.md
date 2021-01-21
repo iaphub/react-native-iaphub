@@ -66,20 +66,42 @@ If you don't and want to handle IAP on the client side, you can provide the `dev
 await Iaphub.setUserId("1e5494930c48ed07aa275fd2");
 ```
 
-You should provide the `null` value when a user logout.
-```js
-await Iaphub.setUserId(null);
-```
-
 ## Set user tags
 Call the `setUserTags` method to update the user tags.<br/>
-Tags are a powerful tool that allows you to offer to your users different products depending on custom properties.<br/>
-
-⚠ This method will throw an error if the tag name hasn't been created on the IAPHUB dashboard
+User tags will appear on the user page of the IAPHUB dashboard.<br/>
+When using IAPHUB's smart listings, you'll be able to return different products depending on the user tags.
 
 ```js
-await Iaphub.setUserTags({gender: 'male'});
+// To set a tag
+await Iaphub.setUserTags({status: 'vip'});
+// To clear the user tags
+await Iaphub.setUserTags({status: null});
 ```
+
+A few details:
+  - A tag must be created on the IAPHUB dashboard (otherwise the method will throw an error)
+  - When creating a tag on the IAPHUB dashboard you must check the option to allow editing the tag from the client (otherwise you'll only be able to edit the tag using the [IAPHUB API](https://www.iaphub.com/docs/api/post-user) from your server)
+  - A tag key is limited to 32 characters
+  - A tag value is limited to 64 characters
+
+## Set device params
+Call the `setDeviceParams` method to set parameters for the device<br/>
+When using IAPHUB's smart listings, you'll be able to return different products depending on the device params.
+
+```js
+// For instance you can provide the app version on app launch
+// Useful to return a product only supported in a new version
+Iaphub.setDeviceParams({appVersion: '1.2.0'});
+// To clear the device params
+Iaphub.setDeviceParams({});
+```
+
+A few details:
+  - The params are not saved on the device, they won't persist if the app is restarted
+  - The params are not saved on IAPHUB, they are just provided to the API when fetching the products for sale
+  - A param key limited to 32 characters and must be a valid key (``^[a-zA-Z_]*$``)
+  - A param value limited to 32 characters
+  - You can provide up to 5 params
 
 ## Get products for sale
 Call the ``getProductsForSale`` method to get the user's products for sale<br/>
