@@ -1,6 +1,7 @@
 import {decorate, observable} from 'mobx';
 import {Alert} from 'react-native';
 import Iaphub from 'react-native-iaphub';
+import pkg from '../../package.json';
 
 class IAPStore {
 
@@ -21,6 +22,8 @@ class IAPStore {
 				// The environment is used to determine the webhooks configuration ('production', 'staging', 'development')
 				environment: "production"
 			});
+			// Add device params
+			Iaphub.setDeviceParams({appVersion: pkg.version});
 			// Iaphub is now initialized and ready to use
 			this.isInitialized = true;
 		} catch (err) {

@@ -15,6 +15,7 @@ class Iaphub {
     this.user = null;
     this.userFetchDate = null;
     this.userFetchPromises = [];
+    this.deviceParams = {};
     this.receiptPostDate = null;
     this.isInitialized = false;
     this.canMakePayments = true;
@@ -277,7 +278,7 @@ class Iaphub {
       if (!this.userId) {
         throw this.error("User id required", "user_id_required");
       }
-      var data = await this.request("get", "");
+      var data = await this.request("get", "", this.deviceParams);
 
       if (!data || !data.productsForSale) {
         throw this.error(
@@ -472,6 +473,18 @@ class Iaphub {
     }
     // Reset user cache
     this.userFetchDate = null;
+  }
+
+  /*
+   * Set device params
+   */
+  setDeviceParams(params) {
+    var deviceParams = {};
+
+    Object.keys(params).forEach((paramKey) => {
+      deviceParams[`params.${paramKey}`] = params[paramKey];
+    });
+    this.deviceParams = deviceParams;
   }
 
   /*
@@ -866,10 +879,13 @@ class Iaphub {
     if (!this.apiKey) throw "api_key_empty";
     if (!this.userId) throw "user_id_empty";
     // Default params
-    params.platform = this.platform;
-    params.environment = this.environment;
-    params.libraryName = 'react_native';
-    params.libraryVersion = pkg.version;
+    params = {
+      ...params,
+      platform: this.platform,
+      environment: this.environment,
+      libraryName: 'react_native',
+      libraryVersion: pkg.version
+    };
     // Handle get request
     if (type == "get") {
       var query = "";
@@ -877,7 +893,7 @@ class Iaphub {
       for (var param in params) {
         var value = params[param];
         query += !query.length ? "?" : "&";
-        query += `${param}=${value}`;
+        query += `${encodeURIComponent(param)}=${encodeURIComponent(value)}`;
       }
       url += query;
     }

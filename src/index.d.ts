@@ -197,6 +197,13 @@ declare module 'react-native-iaphub' {
     [TagKey: string]: any;
   }
 
+  interface IapHubDeviceParams {
+    /**
+     * Params you want to assign to the device
+     */
+    [TagKey: string]: any;
+  }
+
   interface IapHubReceipt {
     /**
      * Product sku
@@ -259,6 +266,13 @@ declare module 'react-native-iaphub' {
    * @param Tags Tags you want to assign to the user.
    */
   export function setUserTags(Tags: IapHubUserTags): Promise<void>;
+
+  /***
+   * Call the setDeviceParams method to assign parameters to the device
+   *
+   * @param Params Params you want to assign to the device.
+   */
+  export function setDeviceParams(Params: IapHubDeviceParams): void;
 
   /***
    * Call the buy method to buy a product
