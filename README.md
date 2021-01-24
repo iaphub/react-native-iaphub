@@ -6,6 +6,9 @@
 
 ![npm](https://img.shields.io/npm/dt/react-native-iaphub)
 ![npm](https://img.shields.io/npm/dm/react-native-iaphub)
+<a href="https://shoutem.com">
+  <img height="48px" src="https://iaphub.com/img/github/github-shoutem.png?v=4" alt="Shoutem">
+</a>
 
 Implementing and developping all the tools to manage your In-App purchases properly can be very complex and time consuming.
 You should spend this precious time building your app!
