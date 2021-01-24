@@ -6,7 +6,7 @@
 
 ![npm](https://img.shields.io/npm/dt/react-native-iaphub)
 ![npm](https://img.shields.io/npm/dm/react-native-iaphub)
-<a href="https://shoutem.com">
+<a href="https://shoutem.com" target="_blank">
   <img height="48px" src="https://iaphub.com/img/github/github-shoutem.png?v=4" alt="Shoutem">
 </a>
 
