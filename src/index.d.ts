@@ -3,6 +3,8 @@ declare module 'react-native-iaphub' {
 
   export type IapHubProductTypes = 'consumable' | 'non_consumable' | 'subscription' | 'renewable_subscription';
 
+  export type IapHubSubscriptionState = 'active' | 'grace_period' | 'retry_period' | 'paused';
+
   /***
    * PER_1_WEEK = 'P1W',
    * PER_1_MONTH = 'P1M',
@@ -56,6 +58,13 @@ declare module 'react-native-iaphub' {
      * @param receipt Receipt returning from purchase process
      */
     onReceiptProcessed?: (err: Error, receipt: IapHubReceipt) => Promise<void>;
+  }
+
+  interface IapHubActiveProductsOptions {
+    /**
+     * To include extra states such as the 'retry_period' and 'paused' states
+     */
+    includeSubscriptionStates: [IapHubSubscriptionState]
   }
 
   interface IapHubProductInformation {
@@ -143,6 +152,11 @@ declare module 'react-native-iaphub' {
      * If the subscription is currently in a grace period - ⚠ Only available for an active subscription
      */
     isSubscriptionGracePeriod?: boolean;
+
+    /**
+     * State of the subscription - ⚠ Only available for an active subscription
+     */
+    subscriptionState?: IapHubSubscriptionState;
 
     /**
      * If the subscription is active it is the current period otherwise it is the period if the user purchase the subscription - ⚠ Only available for a subscription
@@ -256,7 +270,7 @@ declare module 'react-native-iaphub' {
    *
    * ⚠ If the request fails because of a network issue, the method returns the latest request in cache (if available, otherwise an error is thrown).
    */
-  export function getActiveProducts(): Promise<IapHubProductInformation[]>;
+  export function getActiveProducts(Options?: IapHubActiveProductsOptions): Promise<IapHubProductInformation[]>;
 
   /***
    * Call the setUserTags method to update the user tags
