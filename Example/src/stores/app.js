@@ -41,7 +41,6 @@ class AppStore {
   
   logout = async () => {
     await AsyncStorage.setItem('isLogged', "false");
-    iap.setUserId(null);
     this.isLogged = false;
   }
 

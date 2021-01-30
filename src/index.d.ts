@@ -255,7 +255,7 @@ declare module 'react-native-iaphub' {
    * ⚠ You should provide an id that is non-guessable and isn't public. (Email not allowed)
    * @param UniqueUserId Non-guessable unique identifier of user.
    */
-  export function setUserId(UniqueUserId: string | null): Promise<void>;
+  export function setUserId(UniqueUserId: string): Promise<void>;
 
   /***
    * Call the ``getProductsForSale`` method to get the products for sale.

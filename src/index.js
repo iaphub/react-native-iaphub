@@ -119,11 +119,14 @@ class Iaphub {
 
   /*
    * Set user id (or device id)
-   * @param {String|null} userId User id
+   * @param {String} userId User id
    */
   setUserId(userId) {
     if (!this.isInitialized) {
       throw this.error("IAPHUB hasn't been initialized", "init_missing");
+    }
+    if (!userId) {
+      throw this.error("User id required", "user_id_required");
     }
     this.userId = userId;
     this.user = null;
