@@ -1,5 +1,6 @@
 import { Platform, AppState, NativeModules, NativeEventEmitter } from "react-native";
 import * as RNIap from "react-native-iap";
+import Queue from './queue';
 import pkg from '../package.json';
 
 class Iaphub {
@@ -21,8 +22,11 @@ class Iaphub {
     this.canMakePayments = true;
     this.onReceiptProcessed = null;
     this.buyRequest = null;
-    this.purchaseUpdatedEvents = [];
-    this.purchaseErrorEvents = [];
+    this.lastReceiptInfos = null;
+    this.receiptQueue = new Queue(this.processReceipt.bind(this));
+    this.errorQueue = new Queue(this.processError.bind(this));
+    // Pause queues until the user is authenticated
+    this.pauseQueues();
   }
 
   /**************************************************** PUBLIC ********************************************************/
@@ -66,32 +70,33 @@ class Iaphub {
         );
       }
     }
-    // Init AppState listener
-    if (!this.appState) {
+    // On iOS pause/remove the queues depending on the app state
+    // It is necessary to do it like that because an interrupted purchase on iOS will trigger first an error and then a purchase when the action is completed
+    if (!this.appState && this.platform == 'ios') {
       this.appState = AppState.currentState;
       AppState.addEventListener("change", (nextAppState) => {
-        // Wait 2 seconds before switching back the state to 'active' and process the queued events
-        // It is necessary to do it like that because an interrupted purchase on iOS will trigger first an error and then a purchase when the action is completed
+        // Wait 2 seconds before switching back the state to 'active' and resume the queues
         if (this.appState != "active" && nextAppState == 'active') {
           clearTimeout(this.appStateTimeout);
           this.appStateTimeout = setTimeout(() => {
             this.appState = nextAppState;
-            this.processQueuedEvents();
+            this.resumeQueues();
           }, 2000);
         }
         else {
           clearTimeout(this.appStateTimeout);
           this.appState = nextAppState;
+          this.pauseQueues();
         }
       });
     }
     // Init purchase updated listener
     if (!this.purchaseUpdatedListener) {
-      this.purchaseUpdatedListener = RNIap.purchaseUpdatedListener((purchase) => this.addPurchaseUpdatedEvent(purchase));
+      this.purchaseUpdatedListener = RNIap.purchaseUpdatedListener((purchase) => this.receiptQueue.add({date: new Date(), purchase: purchase}));
     }
     // Init purchase error listener
     if (!this.purchaseErrorListener) {
-      this.purchaseErrorListener = RNIap.purchaseErrorListener((err) => this.addPurchaseErrorEvent(err));
+      this.purchaseErrorListener = RNIap.purchaseErrorListener((err) => this.errorQueue.add(err));
     }
     // Init iOS promoted products listener
     if (!this.promotedProductListener && this.platform == 'ios') {
@@ -123,7 +128,7 @@ class Iaphub {
     this.userId = userId;
     this.user = null;
     this.userFetchDate = null;
-    this.processQueuedEvents();
+    this.resumeQueues();
   }
 
   /*
@@ -154,7 +159,7 @@ class Iaphub {
     }
     // Create promise than will be resolved (or rejected) after process of the receipt is complete
     var buyPromise = new Promise((resolve, reject) => {
-      this.buyRequest = {resolve, reject, sku, processing: false, opts: opts};
+      this.buyRequest = {resolve, reject, sku, opts: opts};
     });
     // Request purchase
     try {
@@ -176,9 +181,9 @@ class Iaphub {
         await RNIap.requestPurchase(product.sku, false);
       }
     }
-    // Transform request purchase/subscription errors
+    // Add error to queue
     catch (err) {
-      this.addPurchaseErrorEvent(err);
+      this.errorQueue.add(err);
     }
     // Return promise
     return buyPromise;
@@ -509,7 +514,7 @@ class Iaphub {
       // Process receipts
       await purchases.reduce(async (promise, purchase) => {
         await promise;
-        await this.processReceipt(purchase, true);
+        await this.processReceipt({date: new Date(), purchase: purchase, context: 'restore'});
       }, Promise.resolve());
     } catch (err) {
       throw this.error(
@@ -522,58 +527,19 @@ class Iaphub {
   /**************************************************** PRIVATE ********************************************************/
 
   /*
-   * Add purchase updated event
+   * Pause receipt and error queues
    */
-  addPurchaseUpdatedEvent(purchase) {
-    var shouldBeQueued = !this.userId || (this.platform == "ios" &&  this.appState != 'active');
-
-    // Add to the queue if necessary
-    if (shouldBeQueued) {
-      this.purchaseUpdatedEvents.push(purchase);
-    }
-    // Otherwise we process the receipt
-    else {
-      this.processReceipt(purchase);
-    }
+  pauseQueues() {
+    this.receiptQueue.pause();
+    this.errorQueue.pause();
   }
 
   /*
-   * Add purchase error event
+   * Resume receipt and error queues
    */
-  addPurchaseErrorEvent(err) {
-    var shouldBeQueued = !this.userId || (this.platform == "ios" && this.appState != "active");
-
-    // Add to the queue if necessary
-    if (shouldBeQueued) {
-      this.purchaseErrorEvents.push(err);
-    }
-    // Otherwise process the error
-    else {
-      this.processError(err);
-    }
-  }
-
-  /*
-   * Process queued events
-   */
-  async processQueuedEvents() {
-    if (!this.userId) return;
-
-    var purchaseUpdatedEvents = this.purchaseUpdatedEvents;
-    var purchaseErrorEvents = this.purchaseErrorEvents;
-
-    this.purchaseUpdatedEvents = [];
-    this.purchaseErrorEvents = [];
-    // Execute purchase updated events
-    await purchaseUpdatedEvents.reduce(async (promise, purchase) => {
-      await promise;
-      await this.processReceipt(purchase);
-    }, Promise.resolve());
-    // Execute purchase error events
-    await purchaseErrorEvents.reduce(async (promise, err) => {
-      await promise;
-      this.processError(err);
-    }, Promise.resolve());
+  async resumeQueues() {
+    await this.receiptQueue.resume();
+    await this.errorQueue.resume();
   }
 
   /*
@@ -675,29 +641,36 @@ class Iaphub {
    * Process a receipt
    * @param {Object} purchase Purchase
    */
-  async processReceipt(purchase, isRestore = false) {
+  async processReceipt(opts = {}) {
     var receipt = {
-      token: this.getReceiptToken(purchase),
-      sku: purchase.productId,
-      context: 'refresh'
+      token: this.getReceiptToken(opts.purchase),
+      sku: opts.purchase.productId,
+      context: opts.context || 'refresh'
     };
     var newTransactions = [];
     var oldTransactions = [];
     var shouldFinishReceipt = false;
+    var productType = null;
     var error = null;
 
-    // Update context on a restore
-    if (isRestore) receipt.context = 'restore';
-    // Prevent concurrent processing of receipts on a buy request
+    // Process buy request
     if (this.buyRequest) {
-      if (this.buyRequest.processing) return;
-      this.buyRequest.processing = true;
       // Update context
       receipt.context = 'purchase';
       // Call onReceiptProcess option if defined
       if (this.buyRequest.opts.onReceiptProcess) {
         this.buyRequest.opts.onReceiptProcess(receipt);
       }
+    }
+    // Filter receipts that do not need to the validated with the server
+    if (this.lastReceiptInfos &&
+        this.lastReceiptInfos.token == receipt.token &&
+        this.lastReceiptInfos.date > new Date(opts.date - 500) &&
+        receipt.context == 'refresh') {
+          if (this.lastReceiptInfos.shouldFinishReceipt) {
+            await this.finishReceipt(opts.purchase, this.lastReceiptInfos.productType);
+          }
+          return;
     }
     // Process receipt with IAPHUB
     try {
@@ -738,19 +711,12 @@ class Iaphub {
     }
     // Finish receipt
     if (shouldFinishReceipt) {
-      try {
-        var productType = await this.detectProductType(
-          receipt.sku,
-          newTransactions,
-          oldTransactions
-        );
-        await this.finishReceipt(purchase, productType);
-      }
-      // Not critical if we can't finish the receipt properly here, receipt will stay in queue and be finished next time it's triggered
-      // The IAPHUB API is acknowledging android purchases as well (so the purchase won't be refunded after 3 days)
-      catch (err) {
-        console.error(err);
-      }
+      productType = await this.detectProductType(
+        receipt.sku,
+        newTransactions,
+        oldTransactions
+      );
+      await this.finishReceipt(opts.purchase, productType);
     }
     // Emit receipt processed event
     try {
@@ -799,6 +765,8 @@ class Iaphub {
         request.resolve({...product, ...transaction});
       }
     }
+    // Save receipt infos
+    this.lastReceiptInfos = {date: opts.date, token: receipt.token, shouldFinishReceipt: shouldFinishReceipt, productType: productType};
 
     return newTransactions || [];
   }
@@ -846,7 +814,8 @@ class Iaphub {
    * @param {String} productType Product type
    */
   async finishReceipt(purchase, productType) {
-    // Finish android transaction
+    var shouldBeConsumed = undefined;
+
     if (this.platform == "android") {
       // If we didn't find the product type we cannot finish the transaction properly
       if (!productType) {
@@ -859,12 +828,15 @@ class Iaphub {
       var shouldBeConsumed = (["consumable", "subscription"].indexOf(productType) != -1) ? true : false;
       // If the purchase has already been ackknowledged, no need to finish the transaction (otherwise react-native-iap will throw an error)
       if (!shouldBeConsumed && purchase.isAcknowledgedAndroid) return;
-      // Finish transaction
+    }
+    // Finish transaction
+    try {
       await RNIap.finishTransaction(purchase, shouldBeConsumed);
     }
-    // Finish ios transaction
-    else {
-      await RNIap.finishTransaction(purchase);
+    // Not critical if we can't finish the receipt properly here, receipt will stay in queue and be finished next time it's triggered
+    // The IAPHUB API is acknowledging android purchases as well (so the purchase won't be refunded after 3 days)
+    catch (err) {
+      console.error(err);
     }
   }
 
