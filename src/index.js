@@ -19,6 +19,7 @@ class Iaphub {
     this.deviceParams = {};
     this.receiptPostDate = null;
     this.isInitialized = false;
+    this.isRestoring = false;
     this.canMakePayments = true;
     this.onReceiptProcessed = null;
     this.buyRequest = null;
@@ -503,6 +504,10 @@ class Iaphub {
     if (!this.userId) {
       throw this.error("User id required", "user_id_required");
     }
+    if (this.isRestoring) {
+      throw this.error("Restore currently processing", "restore_processing");
+    }
+    this.isRestoring = true;
     try {
       var availablePurchases = await RNIap.getAvailablePurchases();
       var purchases = [];
@@ -520,11 +525,13 @@ class Iaphub {
         await this.processReceipt({date: new Date(), purchase: purchase, context: 'restore'});
       }, Promise.resolve());
     } catch (err) {
+      this.isRestoring = false;
       throw this.error(
         `Restore failed (Err: ${err.message})`,
         err.code || "unknown"
       );
     }
+    this.isRestoring = false;
   }
 
   /**************************************************** PRIVATE ********************************************************/
