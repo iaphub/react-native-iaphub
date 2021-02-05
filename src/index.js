@@ -329,10 +329,15 @@ class Iaphub {
         return periodTypes[periodType];
       }
 
-      var formatProduct = (product) => {
+      var formatProduct = (product, filterProductNotFound) => {
         var infos = productsInfos.find(info => info.productId == product.sku);
 
         if (!infos) {
+          // If the product wasn't found but the filter isn't enabled return the few infos we have about the product coming from the API
+          if (!filterProductNotFound) {
+            return product;
+          }
+          // Otherwise inform the developer the product has been filtered
           if (this.platform == 'ios') {
             console.error(`Itunes did not return the product '${product.sku}', the product has been filtered, if the sku is valid your Itunes account or sandbox environment is probably not configured properly (https://iaphub.com/docs/set-up-ios/configure-sandbox-testing)`);
           }
@@ -442,8 +447,8 @@ class Iaphub {
       };
 
       this.user = {
-        productsForSale: data.productsForSale.map(formatProduct).filter(product => product),
-        activeProducts: data.activeProducts.map(formatProduct).filter(product => product)
+        productsForSale: data.productsForSale.map((product) => formatProduct(product, true)).filter((product) => product),
+        activeProducts: data.activeProducts.map((product) => formatProduct(product, false))
       };
       this.userFetchDate = new Date();
 
