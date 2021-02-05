@@ -169,8 +169,10 @@ class Iaphub {
     try {
       // Request renewable subscription
       if (product.type.indexOf("renewable_subscription") != -1) {
-        var activeSubscription = this.user.activeProducts.find((item) => item.type == 'renewable_subscription' && item.group == product.group);
-
+        // Look if there is an active android subscription of the same group
+        var activeSubscription = this.user.activeProducts.find((item) => {
+          return item.type == 'renewable_subscription' && item.group == product.group && item.androidToken;
+        });
         // On android we need to provide the old sku if it is an upgrade/downgrade
         if (this.platform == 'android' && activeSubscription && activeSubscription.sku != product.sku) {
           await RNIap.requestSubscription(product.sku, false, activeSubscription.sku, activeSubscription.androidToken, opts.androidProrationMode || 1);
