@@ -60,6 +60,17 @@ declare module 'react-native-iaphub' {
     onReceiptProcessed?: (err: Error, receipt: IapHubReceipt) => Promise<void>;
   }
 
+  interface IapHubBuyOptions {
+    /**
+     * Override the default proration mode on Android
+     */
+    androidProrationMode?: string;
+    /**
+     * Enable/disable the security throwing an error if an active subscription on a different platform is detected
+     */
+    crossPlatformConflict?: boolean;
+  }
+
   interface IapHubActiveProductsOptions {
     /**
      * To include extra states such as the 'retry_period' and 'paused' states
@@ -294,7 +305,7 @@ declare module 'react-native-iaphub' {
    * ℹ️ The method needs the product sku that you would get from one of the products of the user productsForSale array.
    * @param ProductSKU SKU of product. - ⚠ Buying a product that isn't in the productsForSale array will throw an error.
    */
-  export function buy(ProductSKU: string): Promise<IapHubProductInformationWithWebhook>;
+  export function buy(ProductSKU: string, Options?: IapHubBuyOptions): Promise<IapHubProductInformationWithWebhook>;
 
   /***
    * Call the restore method to restore the user purchases

@@ -114,6 +114,13 @@ class IAPStore {
 					"Please try to restore your purchases later (Button in the settings) or contact the support (support@myapp.com)"
 				);
 			}
+			// The user has already an active subscription on a different platform (android or ios)
+			else if (err.code == "cross_platform_conflict") {
+				Alert.alert(
+					`Seems like you already have a subscription on ${err.params.platform}`,
+					`Please use the same platform to change your subscription or wait for your current subscription to expire`
+				);
+			}
 			// Couldn't buy product for many other reasons (the user shouldn't be charged)
 			else {
 				Alert.alert(

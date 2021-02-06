@@ -140,6 +140,7 @@ class Iaphub {
    * @param {String} sku Product sku
    * @param {Object} opts Options
 	 * @param {Number} opts.androidProrationMode - Proration mode when upgrading/downgrading subscription (Android only)
+   * @param {Boolean} opts.crossPlatformConflict - Enable/disable the security throwing an error if an active product on a different platform is detected
    */
   async buy(sku, opts = {}) {
     // The user id has to be set
@@ -159,6 +160,15 @@ class Iaphub {
       throw this.error(
         `Buy failed, product sku not in the products for sale`,
         "sku_not_for_sale"
+      );
+    }
+    // Prevent buying a product when we detect another platform has an active product in order to avoid conflicts (Multiple subscriptions...)
+    var crossPlatformConflict = this.user.activeProducts.find((item) => item.type.indexOf('subscription') != -1 &&(item.platform != this.platform));
+    if (crossPlatformConflict && opts.crossPlatformConflict != false) {
+      throw this.error(
+        `Buy failed, cross platform conflict, an active product from another platform has been detected`,
+        "cross_platform_conflict",
+        {platform: crossPlatformConflict.platform}
       );
     }
     // Create promise than will be resolved (or rejected) after process of the receipt is complete

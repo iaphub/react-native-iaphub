@@ -159,6 +159,7 @@ console.log(products);
 | description | `string` | Product description (Ex: "Join the community with a membership") |
 | group | `string` | ⚠ Only available if the product as a group<br>Group id (From IAPHUB) |
 | groupName | `string` | ⚠ Only available if the product as a group<br>Name of the product group created on IAPHUB (Ex: "premium") |
+| platform | `string` | ⚠ Only available for an active product<br> Platform of the purchase (Possible values: 'ios', 'android') |
 | purchase | `string` | ⚠ Only available for an active product<br> Purchase id (From IAPHUB) |
 | purchaseDate | `string` | ⚠ Only available for an active product<br> Purchase date |
 | subscriptionDuration | `string` | ⚠ Only available for a subscription<br> Duration of the subscription cycle specified in the ISO 8601 format (Possible values: 'P1W', 'P1M', 'P3M', 'P6M', 'P1Y') |
@@ -364,6 +365,17 @@ try {
     Alert.alert(
       "We're having trouble validating your transaction",
       "Please try to restore your purchases later (Button in the settings) or contact the support (support@myapp.com)"
+    );
+  }
+  /*
+   * The user has already an active subscription on a different platform (android or ios)
+   * This security has been implemented to prevent a user from ending up with two subscriptions of different platforms
+   * You can disable the security by providing the 'crossPlatformConflict' parameter to the buy method (Iaphub.buy(sku, {crossPlatformConflict: false}))
+   */
+  else if (err.code == "cross_platform_conflict") {
+    Alert.alert(
+      `Seems like you already have a subscription on ${err.params.platform}`,
+      `You have to use the same platform to change your subscription or wait for your current subscription to expire`
     );
   }
   // Couldn't buy product for many other reasons (the user shouldn't be charged)
