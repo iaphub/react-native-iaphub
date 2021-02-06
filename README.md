@@ -112,6 +112,8 @@ You should use this method when displaying the page with the list of your produc
 
 ⚠ If the request fails because of a network issue, the method returns the latest request in cache (if available, otherwise an error is thrown).
 
+⚠ If a product is returned by the [API](https://www.iaphub.com/docs/api/get-user/) but the sku cannot be loaded, it'll be filtered from the list and an error message will be displayed in the console
+
 ```js
 var products = await Iaphub.getProductsForSale();
 
@@ -175,7 +177,9 @@ console.log(products);
 ## Get active products
 If you're relying on IAPHUB on the client side (instead of using your server with webhooks) to detect if the user has active products (renewable subscriptions or non-consumables), you should use the `getActiveProducts` method when the app is brought to the foreground.<br/>
 
-⚠ If the request fails because of a network issue, the method returns the latest request in cache (if available, otherwise an error is thrown).
+⚠ If the request fails because of a network issue, the method returns the latest request in cache (if available with no expired subscription, otherwise an error is thrown).
+
+⚠ If an active product is returned by the API but the sku cannot be loaded, the product will be returned but only with the properties coming from the [API](https://www.iaphub.com/docs/api/get-user/) (The price, title, description.... properties won't be returned).
 
 ```js
 class App extends Component {

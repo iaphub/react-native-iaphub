@@ -299,20 +299,24 @@ class Iaphub {
       }
       var products = [].concat(data.productsForSale).concat(data.activeProducts);
       var productIds = products
-        .filter(item => item.type.indexOf("renewable_subscription") == -1)
+        .filter(item => item.sku && item.type.indexOf("renewable_subscription") == -1)
         .map(item => item.sku);
       var subscriptionIds = products
-        .filter(item => item.type.indexOf("renewable_subscription") != -1)
+        .filter(item => item.sku && item.type.indexOf("renewable_subscription") != -1)
         .map(item => item.sku);
       var productsInfos = [];
 
-      if (productIds.length) {
-        productsInfos = await RNIap.getProducts(productIds);
-      }
-      if (subscriptionIds.length) {
-        productsInfos = productsInfos.concat(
-          await RNIap.getSubscriptions(subscriptionIds)
-        );
+      try {
+        if (productIds.length) {
+          productsInfos = await RNIap.getProducts(productIds);
+        }
+        if (subscriptionIds.length) {
+          productsInfos = productsInfos.concat(
+            await RNIap.getSubscriptions(subscriptionIds)
+          );
+        }
+      } catch (err) {
+        console.error(err);
       }
 
       var convertToISO8601 = (numberOfPeriods, periodType) => {
@@ -572,7 +576,9 @@ class Iaphub {
    * @param {Array} products Array of products
    */
   async setPricing(products) {
-    var productsPricing = products.map((product) => {
+    var productsPricing = products
+    .filter((product) => product.priceAmount && product.priceCurrency)
+    .map((product) => {
       var item = {
         id: product.id,
         price: product.priceAmount,
@@ -600,7 +606,9 @@ class Iaphub {
       }
     }
     // Send request
-    await this.request("post", "/pricing", {products: productsPricing});
+    if (productsPricing.length) {
+      await this.request("post", "/pricing", {products: productsPricing});
+    }
     // Update productsPricing property
     this.productsPricing = productsPricing;
   }

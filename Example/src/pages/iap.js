@@ -39,7 +39,7 @@ export default class IAPPage extends React.Component {
     }
     // Everything else
     else {
-      return product.price;
+      return product.price || 'Price not available';
     }
   }
 
@@ -50,10 +50,10 @@ export default class IAPPage extends React.Component {
       <TouchableOpacity key={product.id} onPress={onPress}>
         <View style={styles.product}>
           <View style={styles.productDetails}>
-            <Text style={styles.productTitle}>{product.title}</Text>
+            <Text style={styles.productTitle}>{product.title || 'Title not available'}</Text>
             <Text style={styles.productPrice}>{this.renderPrice(product)}</Text>
           </View>
-          {skuProcessing == product.sku && <ActivityIndicator/>}
+          {(product.sku && skuProcessing == product.sku) && <ActivityIndicator/>}
         </View>
       </TouchableOpacity>
     );
