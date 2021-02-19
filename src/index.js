@@ -76,13 +76,13 @@ class Iaphub {
     if (!this.appState && this.platform == 'ios') {
       this.appState = AppState.currentState;
       AppState.addEventListener("change", (nextAppState) => {
-        // Wait 2 seconds before switching back the state to 'active' and resume the queues
+        // Force resuming the queues after the app is active for 10sec
         if (this.appState != "active" && nextAppState == 'active') {
           clearTimeout(this.appStateTimeout);
           this.appStateTimeout = setTimeout(() => {
             this.appState = nextAppState;
             this.resumeQueues();
-          }, 2000);
+          }, 10000);
         }
         else {
           clearTimeout(this.appStateTimeout);
@@ -93,7 +93,12 @@ class Iaphub {
     }
     // Init purchase updated listener
     if (!this.purchaseUpdatedListener) {
-      this.purchaseUpdatedListener = RNIap.purchaseUpdatedListener((purchase) => this.receiptQueue.add({date: new Date(), purchase: purchase}));
+      this.purchaseUpdatedListener = RNIap.purchaseUpdatedListener((purchase) => {
+        // Add receipt to the queue
+        this.receiptQueue.add({date: new Date(), purchase: purchase})
+        // Resume queues in case it was paused
+        this.resumeQueues();
+      });
     }
     // Init purchase error listener
     if (!this.purchaseErrorListener) {
