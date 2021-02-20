@@ -1,7 +1,13 @@
 import { Platform, AppState, NativeModules, NativeEventEmitter } from "react-native";
 import * as RNIap from "react-native-iap";
+import fetch from 'react-native-fetch-polyfill';
 import Queue from './queue';
 import pkg from '../package.json';
+
+// Prevent "Require cycle" warning triggered by react-native-fetch-polyfill
+const RequestObject = Request;
+// Add retry functionality to the fetch API
+const fetchWithRetry = require('fetch-retry')(fetch);
 
 class Iaphub {
 
@@ -714,7 +720,7 @@ class Iaphub {
     }
     // Process receipt with IAPHUB
     try {
-      var response = await this.request("post", "/receipt", receipt);
+      var response = await this.request("post", "/receipt", receipt, {timeout: 45000});
       this.receiptPostDate = new Date();
       shouldFinishReceipt = true;
       // If the receipt validation is a success
@@ -883,8 +889,19 @@ class Iaphub {
   /*
    * Api request to IAPHUB
    */
-  async request(type, url = "", params = {}) {
-    var opts = {method: type, headers: {}};
+  async request(type, url = "", params = {}, options = {}) {
+    var opts = {
+      method: type,
+      headers: {},
+      timeout: options.timeout || 6000,
+      retryDelay: 1000,
+      retryOn: (attempt, error, response) => {
+        if (attempt < 3 && (error != null || response.status >= 500)) {
+          return true;
+        }
+        return false;
+      }
+    };
 
     // Check appId and userId
     if (!this.appId) throw "app_id_empty";
@@ -924,7 +941,7 @@ class Iaphub {
     var response = null;
 
     try {
-      response = await fetch(
+      response = await fetchWithRetry(
         `${this.apiUrl}/app/${this.appId}/user/${this.userId}${url}`,
         opts
       );
