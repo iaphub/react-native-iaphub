@@ -530,11 +530,21 @@ class Iaphub {
    */
   setDeviceParams(params) {
     var deviceParams = {};
+    var hasChange = false;
 
     Object.keys(params).forEach((paramKey) => {
-      deviceParams[`params.${paramKey}`] = params[paramKey];
+      var paramValue = params[paramKey];
+
+      if (paramValue !== this.deviceParams[`params.${paramKey}`]) {
+        hasChange = true;
+      }
+      deviceParams[`params.${paramKey}`] = paramValue;
     });
     this.deviceParams = deviceParams;
+    // Reset user cache if there is any change
+    if (hasChange) {
+      this.userFetchDate = null;
+    }
   }
 
   /*
