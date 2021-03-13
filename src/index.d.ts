@@ -69,6 +69,10 @@ declare module 'react-native-iaphub' {
      * Enable/disable the security throwing an error if an active subscription on a different platform is detected
      */
     crossPlatformConflict?: boolean;
+    /**
+     * Event triggered before IAPHUB process the receipt of the buy request
+     */
+    onReceiptProcess?: (receipt: IapHubReceipt) => void;
   }
 
   interface IapHubActiveProductsOptions {
