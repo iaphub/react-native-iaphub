@@ -269,8 +269,6 @@ Call the ``buy`` method to buy a product<br/><br/>
 ```js
 try {
   var transaction = await Iaphub.buy("pack10_tier15", {
-    // Optional property to override the default proration mode on Android (https://developer.android.com/reference/com/android/billingclient/api/BillingFlowParams.ProrationMode)
-    androidProrationMode: 1,
     // Optional callback triggered before the receipt is processed
     onReceiptProcess: (receipt) => {
       console.log('Purchase success, processing receipt...');
@@ -387,6 +385,23 @@ try {
   }
 }
 ```
+
+#### Proration mode (Android only)
+
+You can specify the proration mode when replacing a subscription.
+
+```js
+var transaction = await Iaphub.buy("membership_tier1", {
+  prorationMode: 'immediate_and_charge_prorated_price'
+});
+```
+
+Value | Description |
+| :------------ |:---------------
+| immediate_with_time_proration | The replacement takes effect immediately, the remaining time will be prorated for the new subscription. **(default)**
+| immediate_and_charge_prorated_price | The replacement takes effect immediately, the price of the previous subscription will be prorated (partial refund).
+| immediate_without_proration | The replacement takes effect immediately with no extra charge, the new price will be charged on next recurrence time.
+| deferred | The replacement takes effect when the current subscription expires
 
 ## Restore user purchases
 Call the ``restore`` method to restore the user purchases<br/><br/>

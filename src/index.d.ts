@@ -62,9 +62,9 @@ declare module 'react-native-iaphub' {
 
   interface IapHubBuyOptions {
     /**
-     * Override the default proration mode on Android
+     * Override the default proration mode (Android only)
      */
-    androidProrationMode?: string;
+    prorationMode?: string;
     /**
      * Enable/disable the security throwing an error if an active subscription on a different platform is detected
      */

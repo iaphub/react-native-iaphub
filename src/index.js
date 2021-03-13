@@ -150,7 +150,7 @@ class Iaphub {
    * Buy product
    * @param {String} sku Product sku
    * @param {Object} opts Options
-	 * @param {Number} opts.androidProrationMode - Proration mode when upgrading/downgrading subscription (Android only)
+	 * @param {Number} opts.prorationMode - Proration mode when upgrading/downgrading subscription (Android only)
    * @param {Boolean} opts.crossPlatformConflict - Enable/disable the security throwing an error if an active product on a different platform is detected
    */
   async buy(sku, opts = {}) {
@@ -181,6 +181,15 @@ class Iaphub {
         "cross_platform_conflict",
         {platform: crossPlatformConflict.platform}
       );
+    }
+    // Support proration mode
+    if (typeof opts.androidProrationMode != 'undefined') {
+      var prorationModes = {1: 'immediate_with_time_proration', 2: 'immediate_and_charge_prorated_price', 3: 'immediate_without_proration', 4: 'deferred'};
+      opts.prorationMode = prorationModes[opts.androidProrationMode];
+    }
+    else if (typeof opts.prorationMode != 'undefined') {
+      var prorationModes = {'immediate_with_time_proration': 1, 'immediate_and_charge_prorated_price': 2, 'immediate_without_proration': 3, 'deferred': 4};
+      opts.androidProrationMode = prorationModes[opts.prorationMode];
     }
     // Create promise than will be resolved (or rejected) after process of the receipt is complete
     var buyPromise = new Promise((resolve, reject) => {
@@ -672,7 +681,7 @@ class Iaphub {
       this.buyRequest = null;
       // Support android deferred subscription replace
       // After an android deferred subscription replace the listenner is called with an empty list of purchases which is causing the error
-      if (this.platform == 'android' && request.opts && request.opts.androidProrationMode == 4 && err.message.indexOf('purchases are null') != -1) {
+      if (this.platform == 'android' && request.opts && request.opts.prorationMode == 'deferred' && err.message.indexOf('purchases are null') != -1) {
         var product = this.user.productsForSale.find((product) => product.sku == request.sku);
         request.resolve(product);
       }
@@ -703,6 +712,10 @@ class Iaphub {
     if (this.buyRequest) {
       // Update context
       receipt.context = 'purchase';
+      // Update proration mode if defined
+      if (this.buyRequest.opts.prorationMode) {
+        receipt.prorationMode = this.buyRequest.opts.prorationMode;
+      }
       // Call onReceiptProcess option if defined
       if (this.buyRequest.opts.onReceiptProcess) {
         this.buyRequest.opts.onReceiptProcess(receipt);
