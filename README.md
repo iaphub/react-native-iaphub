@@ -176,7 +176,7 @@ console.log(products);
 | subscriptionTrialDuration | `string` | ⚠ Only available for a subscription with a trial<br>Duration of the trial specified in the ISO 8601 format |
 
 ## Get active products
-If you're relying on IAPHUB on the client side (instead of using your server with webhooks) to detect if the user has active products (renewable subscriptions or non-consumables), you should use the `getActiveProducts` method when the app is brought to the foreground.<br/>
+If you're relying on IAPHUB on the client side (instead of using your server with webhooks) to detect if the user has active products (auto-renewable subscriptions, non-renewing subscriptions or non-consumables), you should use the `getActiveProducts` method when the app is brought to the foreground.<br/>
 
 ⚠ If the request fails because of a network issue, the method returns the latest request in cache (if available with no expired subscription, otherwise an error is thrown).
 
