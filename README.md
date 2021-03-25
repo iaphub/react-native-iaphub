@@ -166,6 +166,7 @@ console.log(products);
 | expirationDate | `string` | ⚠ Only available for an active subscription<br> Subscription expiration date |
 | autoResumeDate | `string` | ⚠ Only available for an android active subscription currently paused<br> Subscription resume date |
 | isSubscriptionRenewable | `boolean` | ⚠ Only available for an active subscription<br> If the subscription can be renewed |
+| isFamilyShare | `boolean` | ⚠ Only available for an active product<br> True if it is shared by a family member (iOS only) |
 | subscriptionState | `string` | ⚠ Only available for an active subscription<br> State of the subscription<br>(Possible values: 'active', 'grace_period', 'retry_period', 'paused') |
 | subscriptionPeriodType | `string` | ⚠ Only available for a subscription<br>Subscription period type (Possible values: 'normal', 'trial', 'intro')<br>If the subscription is active it is the current period otherwise it is the period if the user purchase the subscription |
 | subscriptionIntroPrice | `string` | ⚠ Only available for a subscription with an introductory price<br>Localized introductory price (Ex: "$2.99") |
