@@ -37,12 +37,12 @@ export default class Queue {
         console.error(err);
       }
     }, Promise.resolve());
+    // Mark the queue as not running
+    this.isRunning = false;
     // Run again if there's more items in the waiting list
     if (this.waiting.length) {
       await this.run();
     }
-    // Mark the queue as not running
-    this.isRunning = false;
   }
 
 }
