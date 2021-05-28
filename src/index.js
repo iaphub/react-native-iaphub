@@ -190,6 +190,12 @@ class Iaphub {
     else if (typeof opts.prorationMode != 'undefined') {
       var prorationModes = {'immediate_with_time_proration': 1, 'immediate_and_charge_prorated_price': 2, 'immediate_without_proration': 3, 'deferred': 4};
       opts.androidProrationMode = prorationModes[opts.prorationMode];
+      if (!opts.androidProrationMode) {
+        throw this.error(
+          `Buy failed, the proration mode is invalid`,
+          "proration_mode_invalid"
+        );
+      }
     }
     // Create promise than will be resolved (or rejected) after process of the receipt is complete
     var buyPromise = new Promise((resolve, reject) => {
@@ -205,6 +211,7 @@ class Iaphub {
         });
         // On android we need to provide the old sku if it is an upgrade/downgrade
         if (this.platform == 'android' && activeSubscription && activeSubscription.sku != product.sku) {
+          this.buyRequest.prorationMode = opts.prorationMode;
           await RNIap.requestSubscription(product.sku, false, activeSubscription.sku, activeSubscription.androidToken, opts.androidProrationMode || 1);
         }
         // Otherwise request subscription normally
@@ -691,7 +698,7 @@ class Iaphub {
       this.buyRequest = null;
       // Support android deferred subscription replace
       // After an android deferred subscription replace the listenner is called with an empty list of purchases which is causing the error
-      if (this.platform == 'android' && request.opts && request.opts.prorationMode == 'deferred' && err.message.indexOf('purchases are null') != -1) {
+      if (this.platform == 'android' && request.prorationMode == 'deferred' && err.message.indexOf('purchases are null') != -1) {
         var product = this.user.productsForSale.find((product) => product.sku == request.sku);
         request.resolve(product);
       }
@@ -723,8 +730,8 @@ class Iaphub {
       // Update context
       receipt.context = 'purchase';
       // Update proration mode if defined
-      if (this.buyRequest.opts.prorationMode) {
-        receipt.prorationMode = this.buyRequest.opts.prorationMode;
+      if (this.buyRequest.prorationMode) {
+        receipt.prorationMode = this.buyRequest.prorationMode;
       }
       // Call onReceiptProcess option if defined
       if (this.buyRequest.opts.onReceiptProcess) {
