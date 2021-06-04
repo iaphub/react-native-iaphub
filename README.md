@@ -59,7 +59,7 @@ Call the `init` method at the start of your app to initialize your configuration
 ```
 
 ## Set user id
-Call the `setUserId` method to authenticate an user.<br/>
+Call the `setUserId` method to authenticate a user.<br/>
 
 If you have an authentication system, provide the `user id` of the user right after the user log in.<br/>
 If you don't and want to handle IAP on the client side, you can provide the `device id` when the app start instead by using a module such as [react-native-device-info](https://github.com/react-native-community/react-native-device-info#getuniqueid) to get a device unique ID.<br/>
@@ -407,7 +407,7 @@ Value | Description |
 ## Restore user purchases
 Call the ``restore`` method to restore the user purchases<br/><br/>
 ℹ️ You should display a restore button somewhere in your app (usually on the settings page).<br/>
-ℹ️ If you logged in using the `device id`, an user using a new device will have to restore its purchases since the `device id` will be different.
+ℹ️ If you logged in using the `device id`, a user using a new device will have to restore its purchases since the `device id` will be different.
 
 ```js
 await Iaphub.restore();
