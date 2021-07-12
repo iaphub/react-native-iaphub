@@ -22,6 +22,7 @@ class Iaphub {
     this.user = null;
     this.userFetchDate = null;
     this.userFetchPromises = [];
+    this.userTagsProcessing = false;
     this.deviceParams = {};
     this.receiptPostDate = null;
     this.isInitialized = false;
@@ -519,15 +520,22 @@ class Iaphub {
     if (!this.userId) {
       throw this.error("User id required", "user_id_required");
     }
+    // Check if tags already processing
+    if (this.userTagsProcessing) {
+      throw this.error("User tags currently processing", "user_tags_processing");
+    }
+    this.userTagsProcessing = true;
     // Post tags
     try {
       await this.request("post", "", {tags: tags});
     } catch (err) {
+      this.userTagsProcessing = false;
       throw this.error(
         `Set user tags failed (Err: ${err.message})`,
         err.code || "unknown"
       );
     }
+    this.userTagsProcessing = false;
     // Reset user cache
     this.userFetchDate = null;
   }
