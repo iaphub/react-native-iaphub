@@ -829,8 +829,10 @@ class Iaphub {
         }
         // Reject the request if there is no transaction
         if (!transaction) {
+          var oldTransaction = oldTransactions.find((item) => item.sku == request.sku);
+
           // Check if it is because the product is already purchased
-          if (oldTransactions.find((item) => item.sku == request.sku)) {
+          if (oldTransaction && ((oldTransaction.type == 'non_consumable') || (oldTransaction.subscriptionState && oldTransaction.subscriptionState != 'expired'))) {
             error = this.error("Product already purchased, if not returned in the active products it may be owned by a different user (restore needed)", "product_already_purchased");
           }
           // Otherwise it means the product sku wasn't in the receipt
