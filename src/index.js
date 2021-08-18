@@ -977,6 +977,7 @@ class Iaphub {
       Authorization: `ApiKey ${this.apiKey}`
     });
 
+    var text = null;
     var json = {};
     var response = null;
 
@@ -985,12 +986,13 @@ class Iaphub {
         `${this.apiUrl}/app/${this.appId}/user/${this.userId}${url}`,
         opts
       );
-      json = await response.json();
+      text = await response.text();
+      json = JSON.parse(text);
     } catch (err) {
       throw this.error(
         `Network error, request to the Iaphub API failed (${err.message})`,
         "network_error",
-        {response: response}
+        {response: text, status: response.status}
       );
     }
 
