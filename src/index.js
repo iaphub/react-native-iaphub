@@ -598,6 +598,8 @@ class Iaphub {
       );
     }
     this.isRestoring = false;
+    // Reset user cache
+    this.userFetchDate = null;
   }
 
   /**************************************************** PRIVATE ********************************************************/
