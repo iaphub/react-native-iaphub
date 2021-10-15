@@ -35,8 +35,8 @@ This module implements the IAPHUB API on top of the [react-native-iap](https://g
 
 2. Install the package
 ```js
-// Install react-native-iap which is a required peer dependency (Be sure you install version 5.1.1)
-npm install react-native-iap@5.1.1 --save-exact
+// Install react-native-iap which is a required peer dependency (Be sure you install version 5.2.6)
+npm install react-native-iap@5.2.6 --save-exact
 // Install react-native-iaphub
 npm install react-native-iaphub --save
 // Update dependency on xcode (in the ios folder)
@@ -56,6 +56,19 @@ Call the `init` method at the start of your app to initialize your configuration
     // App environment (production by default, other environments must be created on the IAPHUB dashboard)
     environment: "production"
   });
+```
+
+## Events
+Call the `addEventListener` method to listen to an event and 'removeEventListener' to stop listening to an event.<br/><br/>
+
+- onUserUpdate: event triggered when the user products have been updated
+```js
+  // Listen to the user update event in order to know when the activeProducts/productsForSale are updated
+  var listener = Iaphub.addEventListener('onUserUpdate', async () => {
+	  await this.refreshProducts();
+	});
+  // You can also unlisten the event
+  Iaphub.removeEventListener(listener);
 ```
 
 ## Set user id
@@ -182,67 +195,6 @@ If you're relying on IAPHUB on the client side (instead of using your server wit
 ⚠ If the request fails because of a network issue, the method returns the latest request in cache (if available with no expired subscription, otherwise an error is thrown).
 
 ⚠ If an active product is returned by the API but the sku cannot be loaded, the product will be returned but only with the properties coming from the [API](https://www.iaphub.com/docs/api/get-user/) (The price, title, description.... properties won't be returned).
-
-```js
-class App extends Component {
-
-  state = {
-    appState: AppState.currentState
-  };
-
-  componentDidMount() {
-    AppState.addEventListener("change", this.handleAppStateChange);
-  }
-
-  componentWillUnmount() {
-    AppState.removeEventListener("change", this.handleAppStateChange);
-  }
-
-  handleAppStateChange = (nextAppState) => {
-    if (
-      this.state.appState.match(/inactive|background/) &&
-      nextAppState === "active"
-    ) {
-      var products = await Iaphub.getActiveProducts();
-      
-      console.log(products);
-      [{
-        id: "5e5198930c48ed07aa275fd9",
-        type: "renewable_subscription",
-        sku: "membership1_tier5",
-        purchase: "5e5198930c48ed07aa275fe8",
-        purchaseDate: "2020-03-11T00:42:28.000Z",
-        expirationDate: "2021-03-11T00:42:28.000Z",
-        isSubscriptionRenewable: true,
-        group: "3e5198930c48ed07aa275fd8",
-        groupName: "subscription_group_1",
-        title: "Membership",
-        description: "Become a member of the community",
-        price: "$4.99",
-        priceAmount: 4.99,
-        priceCurrency: "USD",
-        subscriptionState: 'active',
-        subscriptionDuration: "P1M",
-        subscriptionPeriodType: "intro",
-        subscriptionIntroPrice: "$1.99",
-        subscriptionIntroPriceAmount: 1.99,
-        subscriptionIntroPayment: "as_you_go",
-        subscriptionIntroDuration: "P1M",
-        subscriptionIntroCycles: 3
-      }]
-    }
-    this.setState({ appState: nextAppState });
-  };
-
-  render() {
-    return (
-      <View>
-        <Text>My app</Text>
-      </View>
-    );
-  }
-}
-```
 
 #### Subscription state
 

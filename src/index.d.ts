@@ -35,6 +35,8 @@ declare module 'react-native-iaphub' {
     | 'deferred_payment'
     | 'unknown';
 
+  export type EventListener = () => void;
+
 //#region Interfaces
   interface IapHubInitOptions {
     /**
@@ -319,6 +321,21 @@ declare module 'react-native-iaphub' {
    * ℹ️ If you logged in using the device id, an user using a new device will have to restore its purchases since the device id will be different.
    */
   export function restore(): Promise<IapHubProductInformation[]>;
+
+  /***
+   * Add event listener
+   */
+  export function addEventListener(Name: string, Listener: EventListener): Promise<EventListener>;
+
+  /***
+   * Remove event listener
+   */
+  export function removeEventListener(Listener: EventListener): Promise<boolean>;
+
+  /***
+   * Remove all event listeners
+   */
+  export function removeAllListeners(): Promise<boolean>;
 
 //#endregion
 

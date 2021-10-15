@@ -21,11 +21,12 @@
   "peerDependencies": {
     "react": "*",
     "react-native": "*",
-    "react-native-iap": "5.1.1"
+    "react-native-iap": "5.2.6"
   },
   "devDependencies": {},
   "dependencies": {
     "fetch-retry": "4.1.0",
+    "react-native-event-listeners": "1.0.7",
     "react-native-fetch-polyfill": "1.1.3"
   }
 }

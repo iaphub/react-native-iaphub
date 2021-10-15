@@ -1,5 +1,6 @@
 import { Platform, AppState, NativeModules, NativeEventEmitter } from "react-native";
 import * as RNIap from "react-native-iap";
+import { EventRegister } from 'react-native-event-listeners';
 import fetch from 'react-native-fetch-polyfill';
 import Queue from './queue';
 import pkg from '../package.json';
@@ -78,24 +79,17 @@ class Iaphub {
         );
       }
     }
-    // On iOS pause/remove the queues depending on the app state
-    // It is necessary to do it like that because an interrupted purchase on iOS will trigger first an error and then a purchase when the action is completed
-    if (!this.appState && this.platform == 'ios') {
+    // Watch for the app state
+    if (!this.appState) {
       this.appState = AppState.currentState;
       AppState.addEventListener("change", (nextAppState) => {
-        // Force resuming the queues after the app is active for 10sec
         if (this.appState != "active" && nextAppState == 'active') {
-          clearTimeout(this.appStateTimeout);
-          this.appStateTimeout = setTimeout(() => {
-            this.appState = nextAppState;
-            this.resumeQueues();
-          }, 10000);
+          this.onForeground();
         }
-        else {
-          clearTimeout(this.appStateTimeout);
-          this.appState = nextAppState;
-          this.pauseQueues();
+        else if (this.appState == "active" && nextAppState != 'active') {
+          this.onBackground();
         }
+        this.appState = nextAppState;
       });
     }
     // Init purchase updated listener
@@ -128,6 +122,31 @@ class Iaphub {
         }
       });
     }
+  }
+
+  /*
+   * Add event listener
+   * @param {String} name Event name
+   * @param {Function} listener Event callback
+   */
+  addEventListener(name, listener) {
+    return EventRegister.addEventListener(name, listener);
+  }
+
+  /*
+   * Remove event listener
+   * @param {String} name Event name
+   * @param {Function} callback Event callback
+   */
+  removeEventListener(listener) {
+    return EventRegister.removeEventListener(listener);
+  }
+
+  /*
+   * Remove all event listeners
+   */
+  removeAllListeners() {
+    return EventRegister.removeAllListeners();
   }
 
   /*
@@ -488,12 +507,17 @@ class Iaphub {
         };
       };
 
+      var oldUser = this.user;
       this.user = {
         productsForSale: data.productsForSale.map((product) => formatProduct(product, true)).filter((product) => product),
         activeProducts: data.activeProducts.map((product) => formatProduct(product, false))
       };
       this.userFetchDate = new Date();
-
+      // Check if the user has been updated, if that's the case trigger the 'onUserUpdate' event
+      if (oldUser && JSON.stringify(oldUser) != JSON.stringify(this.user)) {
+        EventRegister.emit('onUserUpdate');
+      }
+      // Update pricing
       try {
         await this.setPricing(
           [].concat(this.user.productsForSale).concat(this.user.activeProducts)
@@ -501,7 +525,7 @@ class Iaphub {
       } catch (err) {
         console.error(err);
       }
-
+      // Resolve promises
       this.userFetchPromises.forEach((promise) => promise.resolve(this.user));
     }
     catch (err) {
@@ -603,6 +627,37 @@ class Iaphub {
   }
 
   /**************************************************** PRIVATE ********************************************************/
+
+  /*
+   * Event triggered when the app is on the background
+   */
+  onBackground() {
+    // Pause the queues on iOS
+    // It is necessary to do it like that because an interrupted purchase on iOS will trigger first an error and then a purchase when the action is completed
+    if (this.platform == 'ios') {
+      clearTimeout(this.resumeQueuesTimeout);
+      this.pauseQueues();
+    }
+  }
+
+  /*
+   * Event triggered when the app is on the foreground
+   */
+  async onForeground() {
+    // Resume the queues on iOS after 10 secs
+    if (this.platform == 'ios') {
+      clearTimeout(this.resumeQueuesTimeout);
+      this.resumeQueuesTimeout = setTimeout(() => {
+        this.resumeQueues();
+      }, 10000);
+    }
+    // Refresh user (by using the getActiveProducts method since it has a caching of only 1min if the user has an active subscription)
+    try {
+      await this.getActiveProducts();
+    }
+    // There is nothing we can do about an error, the most likely error is that the user isn't authenticated
+    catch (err) {}
+  }
 
   /*
    * Pause receipt and error queues
@@ -855,6 +910,12 @@ class Iaphub {
     }
     // Save receipt infos
     this.lastReceiptInfos = {date: opts.date, token: receipt.token, shouldFinishReceipt: shouldFinishReceipt, productType: productType};
+    // Refresh user
+    try {
+      await this.fetchUser();
+    } catch (err) {
+      console.error(err);
+    }
 
     return newTransactions || [];
   }
@@ -994,7 +1055,7 @@ class Iaphub {
       throw this.error(
         `Network error, request to the Iaphub API failed (${err.message})`,
         "network_error",
-        {response: text, status: response.status}
+        {response: text, status: response ? response.status : null}
       );
     }
 
