@@ -126,6 +126,15 @@ export default class IAPPage extends React.Component {
     );
   }
 
+  renderPromoCode = () => {
+    return (
+      <View>
+        <Text style={styles.title}>Promo code</Text>
+        <Button title="Redeem promo code" onPress={iap.presentCodeRedemptionSheetIOS}/>
+      </View>
+    );
+  }
+
   renderLogout = () => {
     return (
       <View>
@@ -151,6 +160,7 @@ export default class IAPPage extends React.Component {
           {this.renderProductsForSale()}
           {this.renderActiveProducts()}
           {this.renderRestore()}
+          {Platform.OS == 'ios' && this.renderPromoCode()}
           {this.renderLogout()}
         </View>
       </ScrollView>

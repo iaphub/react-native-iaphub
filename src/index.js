@@ -626,6 +626,13 @@ class Iaphub {
     this.userFetchDate = null;
   }
 
+  /*
+   * Present ios code redemption sheet
+   */
+  async presentCodeRedemptionSheetIOS() {
+    await RNIap.presentCodeRedemptionSheetIOS();
+  }
+
   /**************************************************** PRIVATE ********************************************************/
 
   /*

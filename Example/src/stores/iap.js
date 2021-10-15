@@ -134,6 +134,11 @@ class IAPStore {
 		Alert.alert("Restore", "Purchases restored");
 	}
 
+	// Call this method to present the ios code redemption sheet
+	async presentCodeRedemptionSheetIOS() {
+		await Iaphub.presentCodeRedemptionSheetIOS();
+	}
+
 }
 
 decorate(IAPStore, {

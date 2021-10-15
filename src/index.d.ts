@@ -337,6 +337,11 @@ declare module 'react-native-iaphub' {
    */
   export function removeAllListeners(): Promise<boolean>;
 
+  /***
+   * Present ios code redemption sheet
+   */
+  export function presentCodeRedemptionSheetIOS(): Promise<void>;
+
 //#endregion
 
   export type {
