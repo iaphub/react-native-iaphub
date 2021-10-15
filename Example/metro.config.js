@@ -13,20 +13,21 @@ const extraNodeModules = {
   'react-native-iaphub': path.resolve(__dirname + '/..'),
   'react-native-iap': path.resolve(__dirname + '/node_modules/react-native-iap')
 };
+
 const watchFolders = [
   path.resolve(__dirname + '/..')
 ];
 
 module.exports = {
   resolver: {
-    extraNodeModules,
+    extraNodeModules
   },
   watchFolders,
   transformer: {
     getTransformOptions: async () => ({
       transform: {
         experimentalImportSupport: false,
-        inlineRequires: false,
+        inlineRequires: true,
       },
     }),
   },

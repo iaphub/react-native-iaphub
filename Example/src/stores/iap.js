@@ -26,6 +26,10 @@ class IAPStore {
 			Iaphub.setDeviceParams({appVersion: pkg.version});
 			// Iaphub is now initialized and ready to use
 			this.isInitialized = true;
+			// Listen to user updates and refresh productsForSale/activeProducts
+			Iaphub.addEventListener('onUserUpdate', async () => {
+				await this.refreshProducts();
+			});
 		} catch (err) {
 			console.error(err);
 			// The init has failed (the error code is available in the 'err.code' property)
@@ -41,14 +45,14 @@ class IAPStore {
 		Iaphub.setUserId(userId);
 	}
 
-	// Get products for sale
-	async getProductsForSale() {
-		this.productsForSale = await Iaphub.getProductsForSale();
-	}
-
-	// Get active products
-	async getActiveProducts() {
-		this.activeProducts = await Iaphub.getActiveProducts();
+	// Refresh products
+	async refreshProducts() {
+		try {
+			this.activeProducts = await Iaphub.getActiveProducts();
+			this.productsForSale = await Iaphub.getProductsForSale();
+		} catch (err) {
+			console.error(err);
+		}
 	}
 
 	// Call this method when an user click on one of your products
@@ -70,13 +74,6 @@ class IAPStore {
 					"Purchase successful",
 					"Your purchase has been processed successfully!"
 				);
-			}
-			// Refresh the user to update the products for sale
-			try {
-				await this.getActiveProducts();
-				await this.getProductsForSale();
-			} catch (err) {
-				console.error(err);
 			}
 		} catch (err) {
 			this.skuProcessing = null;
@@ -134,8 +131,6 @@ class IAPStore {
 	// Call this method to restore the user purchases (you should have a button, it is usually displayed on the settings page)
 	async restore() {
 		await Iaphub.restore();
-		await Iaphub.getActiveProducts();
-		await Iaphub.getProductsForSale();
 		Alert.alert("Restore", "Purchases restored");
 	}
 
