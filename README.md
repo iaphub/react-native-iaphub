@@ -61,12 +61,13 @@ Call the `init` method at the start of your app to initialize your configuration
 ## Events
 Call the `addEventListener` method to listen to an event and 'removeEventListener' to stop listening to an event.<br/><br/>
 
-- onUserUpdate: event triggered when the user products have been updated
+- **onUserUpdate**: event triggered when the user products have been updated
 ```js
   // Listen to the user update event in order to know when the activeProducts/productsForSale are updated
   var listener = Iaphub.addEventListener('onUserUpdate', async () => {
-	  await this.refreshProducts();
-	});
+    // TODO here: Refresh the state of your products in order to refresh the screen
+    // You can use the getActiveProducts/getProductsForSale methods to get the updated products
+  });
   // You can also unlisten the event
   Iaphub.removeEventListener(listener);
 ```
