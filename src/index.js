@@ -917,11 +917,13 @@ class Iaphub {
     }
     // Save receipt infos
     this.lastReceiptInfos = {date: opts.date, token: receipt.token, shouldFinishReceipt: shouldFinishReceipt, productType: productType};
-    // Refresh user
-    try {
-      await this.fetchUser();
-    } catch (err) {
-      console.error(err);
+    // Refresh user if process successful
+    if (!error) {
+      try {
+        await this.fetchUser();
+      } catch (err) {
+        console.error(err);
+      }
     }
 
     return newTransactions || [];
