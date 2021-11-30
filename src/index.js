@@ -232,7 +232,7 @@ class Iaphub {
         // On android we need to provide the old sku if it is an upgrade/downgrade
         if (this.platform == 'android' && activeSubscription && activeSubscription.sku != product.sku) {
           this.buyRequest.prorationMode = opts.prorationMode;
-          await RNIap.requestSubscription(product.sku, false, activeSubscription.sku, activeSubscription.androidToken, opts.androidProrationMode || 1);
+          await RNIap.requestSubscription(product.sku, false, activeSubscription.androidToken, opts.androidProrationMode || 1);
         }
         // Otherwise request subscription normally
         else {
