@@ -509,6 +509,7 @@ class Iaphub {
 
       var oldUser = this.user;
       this.user = {
+        id: data.id,
         productsForSale: data.productsForSale.map((product) => formatProduct(product, true)).filter((product) => product),
         activeProducts: data.activeProducts.map((product) => formatProduct(product, false))
       };
@@ -877,6 +878,14 @@ class Iaphub {
     } catch (err) {
       error = err;
     }
+    // Refresh user if process successful
+    if (!error) {
+      try {
+        await this.fetchUser();
+      } catch (err) {
+        console.error(err);
+      }
+    }
     // Resolve buy request if active
     if (this.buyRequest) {
       var transaction = null;
@@ -897,12 +906,22 @@ class Iaphub {
 
           // Check if it is because the product is already purchased
           if (oldTransaction && ((oldTransaction.type == 'non_consumable') || (oldTransaction.subscriptionState && oldTransaction.subscriptionState != 'expired'))) {
-            error = this.error("Product already purchased, if not returned in the active products it may be owned by a different user (restore needed)", "product_already_purchased");
+            // Check if the transaction belongs to a different user
+            if (oldTransaction.user && this.user.id && oldTransaction.user != this.user.id) {
+              error = this.error("Product already purchased but it belongs to a different user, a restore might be needed", "user_conflict");
+            }
+            else {
+              error = this.error("Product already purchased", "product_already_purchased");
+            }
           }
           // Otherwise it means the product sku wasn't in the receipt
           else {
             error = this.error("Transaction not found, the product sku wasn't in the receipt, the purchase failed", "transaction_not_found");
           }
+        }
+        // Check if the transaction belongs to the same user
+        if (transaction && transaction.user && this.user.id && transaction.user != this.user.id) {
+          error = this.error("The transaction is successful but it belongs to a different user", "user_conflict");
         }
       }
       // If there was an error, reject the request
@@ -912,19 +931,15 @@ class Iaphub {
       // Otherwise resolve with the transaction
       else {
         var product = this.user.productsForSale.find((product) => product.sku == transaction.sku);
+
+        if (!product) {
+          product = this.user.activeProducts.find((product) => product.sku == transaction.sku);
+        }
         request.resolve({...product, ...transaction});
       }
     }
     // Save receipt infos
     this.lastReceiptInfos = {date: opts.date, token: receipt.token, shouldFinishReceipt: shouldFinishReceipt, productType: productType};
-    // Refresh user if process successful
-    if (!error) {
-      try {
-        await this.fetchUser();
-      } catch (err) {
-        console.error(err);
-      }
-    }
 
     return newTransactions || [];
   }

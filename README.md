@@ -330,6 +330,16 @@ try {
       `You have to use the same platform to change your subscription or wait for your current subscription to expire`
     );
   }
+  /*
+   * The transaction is successful but the product belongs to a different user
+   * You should ask the user to use the account with which he originally bought the product or ask him to restore its purchases in order to transfer the previous purchases to the new account
+   */
+  else if (err.code == "user_conflict") {
+    Alert.alert(
+      `Product owned by a different user`,
+      `Please use the account with which you originally bought the product or restore your purchases`
+    );
+  }
   // Couldn't buy product for many other reasons (the user shouldn't be charged)
   else {
     Alert.alert(

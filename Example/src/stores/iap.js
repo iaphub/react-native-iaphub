@@ -118,6 +118,13 @@ class IAPStore {
 					`Please use the same platform to change your subscription or wait for your current subscription to expire`
 				);
 			}
+			// The transaction is successful but the product belongs to a different user
+			else if (err.code == "user_conflict") {
+				Alert.alert(
+					`Product owned by a different user`,
+					`Please use the account with which you originally bought the product or restore your purchases`
+				);
+			}
 			// Couldn't buy product for many other reasons (the user shouldn't be charged)
 			else {
 				Alert.alert(
