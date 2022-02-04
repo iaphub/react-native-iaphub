@@ -20,7 +20,12 @@ class IAPStore {
 				// The (client) api key is available on the settings page of your app
 				apiKey: "SDp7aY220RtzZrsvRpp4BGFm6qZqNkNf",
 				// The environment is used to determine the webhooks configuration ('production', 'staging', 'development')
-				environment: "production"
+				environment: "production",
+				// Buy request (triggered for promoted in-app purchases)
+				onBuyRequest: async (sku) => {
+					// Call the buy method to start the purchase
+					await this.buy(sku);
+				}
 			});
 			// Add device params
 			Iaphub.setDeviceParams({appVersion: pkg.version});

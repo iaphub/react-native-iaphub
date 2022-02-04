@@ -47,6 +47,7 @@ class Iaphub {
    * @param {String} opts.apiKey - The (client) api key is available on the settings page of your app
    * @param {String} opts.environment - App environment
    * @param {Function} opts.onReceiptProcessed - Event triggered after IAPHUB processed a receipt
+   * @param {Function} opts.onBuyRequest - Event triggered on a buy request (triggered for promoted products)
    */
   async init(opts = {}) {
     if (!opts.appId) {
@@ -60,6 +61,7 @@ class Iaphub {
     this.environment = opts.environment || "production";
     this.isInitialized = true;
     this.onReceiptProcessed = opts.onReceiptProcessed;
+    this.onBuyRequest = opts.onBuyRequest;
 
     // Init connection
     try {
@@ -113,11 +115,18 @@ class Iaphub {
         var productId = await RNIap.getPromotedProductIOS();
 
         if (productId !== null) {
-          try {
-            await RNIap.buyPromotedProductIOS();
+          // Call onBuyRequest if defined
+          if (typeof this.onBuyRequest == 'function') {
+            this.onBuyRequest(productId);
           }
-          catch(err) {
-            console.error(err);
+          // Otherwise trigger automatic purchase of promoted product
+          else {
+            try {
+              await RNIap.buyPromotedProductIOS();
+            }
+            catch(err) {
+              console.error(err);
+            }
           }
         }
       });
