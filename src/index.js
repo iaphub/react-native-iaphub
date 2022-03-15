@@ -1000,12 +1000,7 @@ class Iaphub {
 
     if (this.platform == "android") {
       // If we didn't find the product type we cannot finish the transaction properly
-      if (!productType) {
-        throw this.error(
-          "Cannot finish android receipt, product type required",
-          "product_type_required"
-        );
-      }
+      if (!productType) return;
       // We have to consume 'consumable' and 'subscription' types (The subscription because it is a managed product on android that an user should be able to buy again in the future)
       var shouldBeConsumed = (["consumable", "subscription"].indexOf(productType) != -1) ? true : false;
       // If the purchase has already been ackknowledged, no need to finish the transaction (otherwise react-native-iap will throw an error)
