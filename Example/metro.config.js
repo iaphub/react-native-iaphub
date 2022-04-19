@@ -10,8 +10,7 @@ const extraNodeModules = {
   'react': path.resolve(__dirname + '/node_modules/react'),
   'react-native': path.resolve(__dirname + '/node_modules/react-native'),
   '@babel/runtime': path.resolve(__dirname + '/node_modules/@babel/runtime'),
-  'react-native-iaphub': path.resolve(__dirname + '/..'),
-  'react-native-iap': path.resolve(__dirname + '/node_modules/react-native-iap')
+  'react-native-iaphub': path.resolve(__dirname + '/..')
 };
 
 const watchFolders = [

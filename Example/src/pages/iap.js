@@ -32,14 +32,17 @@ export default class IAPPage extends React.Component {
       else if (product.subscriptionPeriodType == "intro" && product.subscriptionIntroPayment == "upfront") {
         return `Enjoy an introductory offer of ${product.subscriptionIntroPrice} for ${isoToHuman(product.subscriptionIntroDuration)} (then ${product.price} every ${isoToHuman(product.subscriptionDuration)})`;
       }
+      else {
+        return `${product.localizedPrice} / ${isoToHuman(product.subscriptionDuration)}`;
+      }
     }
     // Non-renewable subscriptions
     if (product.type == "subscription") {
-      return `${product.price} for ${isoToHuman(product.subscriptionDuration)}`;
+      return `${product.localizedPrice} / ${isoToHuman(product.subscriptionDuration)}`;
     }
     // Everything else
     else {
-      return product.price || 'Price not available';
+      return product.localizedPrice || 'Price not available';
     }
   }
 
@@ -50,7 +53,7 @@ export default class IAPPage extends React.Component {
       <TouchableOpacity key={product.id} onPress={onPress}>
         <View style={styles.product}>
           <View style={styles.productDetails}>
-            <Text style={styles.productTitle}>{product.title || 'Title not available'}</Text>
+            <Text style={styles.productTitle}>{product.localizedTitle || 'Title not available'}</Text>
             <Text style={styles.productPrice}>{this.renderPrice(product)}</Text>
           </View>
           {(product.sku && skuProcessing == product.sku) && <ActivityIndicator/>}
@@ -130,7 +133,7 @@ export default class IAPPage extends React.Component {
     return (
       <View>
         <Text style={styles.title}>Promo code</Text>
-        <Button title="Redeem promo code" onPress={iap.presentCodeRedemptionSheetIOS}/>
+        <Button title="Redeem promo code" onPress={iap.presentCodeRedemptionSheet}/>
       </View>
     );
   }

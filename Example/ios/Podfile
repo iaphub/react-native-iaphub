@@ -12,6 +12,8 @@ target 'Example' do
     :hermes_enabled => false
   )
 
+  pod 'react-native-iaphub', :path => '../..'
+
   target 'ExampleTests' do
     inherit! :complete
     # Pods for testing

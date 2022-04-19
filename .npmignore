@@ -4,4 +4,5 @@ npm-debug.log*
 node_modules
 *.todo
 *~
-Example
+example
+guides
