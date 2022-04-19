@@ -343,7 +343,7 @@ await Iaphub.presentCodeRedemptionSheet();
 | subscriptionPeriodType | `string` | ⚠ Only available for a subscription<br>Subscription period type (Possible values: 'normal', 'trial', 'intro')<br>If the subscription is active it is the current period otherwise it is the period if the user purchase the subscription |
 | subscriptionDuration | `string` | ⚠ Only available for a subscription<br> Duration of the subscription cycle specified in the ISO 8601 format (Possible values: 'P1W', 'P1M', 'P3M', 'P6M', 'P1Y') |
 | subscriptionIntroPrice | `number` | ⚠ Only available for a subscription with an introductory price<br>Introductory price amount (Ex: 2.99) |
-| subscriptionIntroLocalizedPrice | `String?` | ⚠ Only available for a subscription with an introductory price<br>Localized introductory price (Ex: "$2.99") |
+| subscriptionIntroLocalizedPrice | `string` | ⚠ Only available for a subscription with an introductory price<br>Localized introductory price (Ex: "$2.99") |
 | subscriptionIntroPayment | `string` | ⚠ Only available for a subscription with an introductory price<br>Payment type of the introductory offer (Possible values: 'as_you_go', 'upfront') |
 | subscriptionIntroDuration | `string` | ⚠ Only available for a subscription with an introductory price<br>Duration of an introductory cycle specified in the ISO 8601 format (Possible values: 'P1W', 'P1M', 'P3M', 'P6M', 'P1Y') |
 | subscriptionIntroCycles | `number` | ⚠ Only available for a subscription with an introductory price<br>Number of cycles in the introductory offer |
@@ -373,12 +373,10 @@ await Iaphub.presentCodeRedemptionSheet();
 | :------------ |:---------------:| :-----|
 | message | `string` | Error message |
 | code | `string` | Error code |
-| subcode | `string?` | Error code |
-| params | `object?` | Error params |
+| subcode | `string` | Error code |
+| params | `object` | Error params |
 
 ## Full example
 
 You should check out the [Example app](https://github.com/iaphub/react-native-iaphub/tree/master/Example).
 <br/>
-
-```
