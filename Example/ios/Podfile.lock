@@ -273,7 +273,7 @@ PODS:
   - React-jsinspector (0.66.0)
   - React-logger (0.66.0):
     - glog
-  - react-native-iaphub (7.0.0):
+  - react-native-iaphub (7.0.1):
     - Iaphub (= 2.0.5)
     - React-Core
   - React-perflogger (0.66.0)
@@ -520,7 +520,7 @@ SPEC CHECKSUMS:
   React-jsiexecutor: 6a05173dc0142abc582bd4edd2d23146b8cc218a
   React-jsinspector: be95ad424ba9f7b817aff22732eb9b1b810a000a
   React-logger: 9a9cd87d4ea681ae929b32ef580638ff1b50fb24
-  react-native-iaphub: 7a36cba4efabb211afd6ab718af5d7c5bd2a8069
+  react-native-iaphub: 1d7585df35741f0d087b74a7c2b213e0f9e56af9
   React-perflogger: 1f554c2b684e2f484f9edcdfdaeedab039fbaca8
   React-RCTActionSheet: 610d5a5d71ab4808734782c8bca6a12ec3563672
   React-RCTAnimation: ec6ed97370ace32724c253f29f0586cafcab8126
