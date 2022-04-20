@@ -129,7 +129,7 @@ class RNIaphubModule(reactContext: ReactApplicationContext) : ReactContextBaseJa
   fun buy(sku: String, options: ReadableMap, promise: Promise) {
     val activity = this.currentActivity
     val prorationMode = options.getString("prorationMode")
-    val crossPlatformConflict = options.getBoolean("crossPlatformConflict")
+    val crossPlatformConflict = if (options.hasKey("crossPlatformConflict")) options.getBoolean("crossPlatformConflict") else true
 
     if (activity == null) {
       this.rejectWithUnexpectedError("activity_null", "activity not found", promise)
