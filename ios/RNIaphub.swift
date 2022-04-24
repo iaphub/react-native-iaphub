@@ -222,8 +222,8 @@ class RNIaphub: RCTEventEmitter, IaphubDelegate {
     Present code redemption
     */
    @objc
-   func presentCodeRedemptionSheet(_ resolve: @escaping RCTPromiseResolveBlock, reject: @escaping RCTPromiseRejectBlock) {
-      Iaphub.getProducts({ (err, productsForSale, activeProducts) in
+   func presentCodeRedemptionSheet(_ resolve: @escaping RCTPromiseResolveBlock, rejecter reject: @escaping RCTPromiseRejectBlock) {
+      Iaphub.presentCodeRedemptionSheet({ (err) in
          if let err = err {
             return reject("iaphub_error", self.createError(err), nil)
          }
