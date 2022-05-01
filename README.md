@@ -40,7 +40,13 @@ npm install react-native-iaphub --save
 pod install
 ```
 
-⚠ If you're migrating from v6.X.X to v7.X.X please read [this](https://github.com/iaphub/react-native-iaphub/tree/master/guides/migrate-v6-to-v7.md)
+3. Make sure the **In-App purchases capability** of your ios project is enabled on XCode
+
+4. Setup your sandbox environment ([ios](ios_url) / [android](android_url))
+
+<br>
+
+⚠ If you're migrating from v6.X.X to v7.X.X, read [this](https://github.com/iaphub/react-native-iaphub/tree/master/guides/migrate-v6-to-v7.md).
 
 ## Start
 Call the `start` method in order to initialize IAPHUB.<br/><br/>
@@ -62,9 +68,9 @@ Call the `start` method in order to initialize IAPHUB.<br/><br/>
 ```
 
 ## Events
-Call the `addEventListener` method to listen to an event and 'removeEventListener' to stop listening to an event.<br/><br/>
+Call the `addEventListener` method to listen to an event and `removeEventListener` to stop listening to an event.<br/>
 
-- **onUserUpdate**: event triggered when the user products have been updated
+#### onUserUpdate - Event triggered when the user products have been updated
 ```js
   // Listen to the user update event in order to know when the activeProducts/productsForSale are updated
   var listener = Iaphub.addEventListener('onUserUpdate', async () => {
@@ -74,6 +80,44 @@ Call the `addEventListener` method to listen to an event and 'removeEventListene
   // You can also unlisten the event
   Iaphub.removeEventListener(listener);
 ```
+
+#### onBuyRequest - Event triggered when a purchase intent is made from outside the app (like a promoted In-App purchase)
+```js
+  // Add listener
+  var listener = Iaphub.addEventListener('onBuyRequest', async (sku) => {
+    // If you want to allow/disallow a purchase intent (to wait until the user is logged in for example) you can implement this method
+    // You'll have to call the buy method whenever you're ready
+    // Also note you'll have a callback to know when the transaction is done (you woudn't otherwise)
+    var transaction = await Iaphub.buy(sku);
+    console.log("Purchase done: ", transaction);
+  });
+  // Remove listener
+  Iaphub.removeEventListener(listener);
+```
+
+#### onError - Event triggered when IAPHUB has detected an error
+```js
+  // Add listener
+  var listener = Iaphub.addEventListener('onError', async (err) => {
+    // You'll catch any error here (even errors thrown by IAPHUB methods)
+    console.log("Error: ", err.message);
+  });
+  // Remove listener
+  Iaphub.removeEventListener(listener);
+```
+
+#### onReceipt - Event triggered after a receipt has been processed
+```js
+  // Add listener
+  var listener = Iaphub.addEventListener('onReceipt', async (data) => {
+    console.log("Receipt err: ", data.err);
+    console.log("Receipt data: ", err.receipt);
+  });
+  // Remove listener
+  Iaphub.removeEventListener(listener);
+```
+
+ℹ️ You can also remove all the listeners by using the method `removeAllListeners()`
 
 ## Login
 Call the `login` method to authenticate a user.<br/>
