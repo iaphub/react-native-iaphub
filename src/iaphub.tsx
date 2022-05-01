@@ -46,6 +46,7 @@ interface GetProductsOptions {
 export default class Iaphub {
 
   nativeEventEmitter;
+  errorListener?: EmitterSubscription;
   listeners: EmitterSubscription[] = [];
 
   constructor() {
@@ -101,6 +102,12 @@ export default class Iaphub {
     this.removeAllListeners();
     // Start IAPHUB
     RNIaphub.start(Object.assign(opts, {sdkVersion: pkg.version}));
+    // Display product missing error
+    this.errorListener = this.nativeEventEmitter.addListener("onError", (err) => {
+      if (err.code == "unexpected" && err.subcode == "product_missing_from_store") {
+        console.error(err.message);
+      }
+    });
   }
 
   /**
@@ -111,6 +118,10 @@ export default class Iaphub {
     this.removeAllListeners();
     // Stop IAPHUB
     RNIaphub.stop();
+    // Remove error listener
+    if (this.errorListener) {
+      this.errorListener.remove();
+    }
   }
 
   /**
