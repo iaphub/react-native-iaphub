@@ -42,7 +42,7 @@ pod install
 
 3. Make sure the **In-App purchases capability** of your ios project is enabled on XCode
 
-4. Setup your sandbox environment ([ios](ios_url) / [android](android_url))
+4. Setup your sandbox environment ([ios](https://www.iaphub.com/docs/set-up-ios/configure-sandbox-testing) / [android](https://www.iaphub.com/docs/set-up-android/configure-sandbox-testing))
 
 <br>
 
