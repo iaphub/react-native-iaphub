@@ -5,6 +5,11 @@
  * @format
  */
 const path = require('path');
+const exclusionList = require('metro-config/src/defaults/exclusionList');
+const escape = require('escape-string-regexp');
+const rootPath = path.resolve(__dirname, '..');
+
+const exclude = ['react', 'react-native', '@babel/runtime'];
 
 const extraNodeModules = {
   'react': path.resolve(__dirname + '/node_modules/react'),
@@ -19,7 +24,8 @@ const watchFolders = [
 
 module.exports = {
   resolver: {
-    extraNodeModules
+    blacklistRE: exclusionList(exclude.map((name) => new RegExp(`^${escape(path.join(rootPath, 'node_modules', name))}\\/.*$`))),
+    extraNodeModules: extraNodeModules
   },
   watchFolders,
   transformer: {

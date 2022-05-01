@@ -1,5 +1,5 @@
 {
-  "name": "example",
+  "name": "Example",
   "version": "0.0.1",
   "private": true,
   "scripts": {
@@ -10,20 +10,20 @@
     "lint": "eslint ."
   },
   "dependencies": {
-    "@react-native-async-storage/async-storage": "^1.15.9",
-    "mobx": "5.15.4",
-    "mobx-react": "5.4.4",
+    "@react-native-async-storage/async-storage": "^1.17.3",
+    "mobx": "^5.15.4",
+    "mobx-react": "^5.4.4",
     "react": "17.0.2",
-    "react-native": "0.66.0"
+    "react-native": "0.68.1"
   },
   "devDependencies": {
     "@babel/core": "^7.12.9",
     "@babel/runtime": "^7.12.5",
     "@react-native-community/eslint-config": "^2.0.0",
     "babel-jest": "^26.6.3",
-    "eslint": "7.14.0",
+    "eslint": "^7.32.0",
     "jest": "^26.6.3",
-    "metro-react-native-babel-preset": "^0.66.2",
+    "metro-react-native-babel-preset": "^0.67.0",
     "react-test-renderer": "17.0.2"
   },
   "jest": {
