@@ -2,7 +2,17 @@
 
 The version 7 of react-native-iaphub is a major update, the library is now using the latest version of our [iOS](https://github.com/iaphub/iaphub-ios-sdk) and [Android](https://github.com/iaphub/iaphub-android-sdk) SDKs.
 
-Here is that it'll change for you:
+```js
+// Install react-native-iaphub
+npm install react-native-iaphub@latest --save
+// Update dependency on xcode (in the ios folder)
+pod install
+```
+
+Here is what it'll change for you:
+
+### The react-native-iap dependency isn't necessary anymore
+The library is now using our [iOS](https://github.com/iaphub/iaphub-ios-sdk) and [Android](https://github.com/iaphub/iaphub-android-sdk) SDKs, you can uninstall the dependency.
 
 ### New methods
 
