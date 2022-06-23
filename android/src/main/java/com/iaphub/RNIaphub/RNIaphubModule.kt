@@ -7,6 +7,7 @@ import com.facebook.react.modules.core.DeviceEventManagerModule.RCTDeviceEventEm
 import com.iaphub.Iaphub
 import com.iaphub.IaphubError
 import com.facebook.react.bridge.ReactMethod
+import java.math.BigDecimal
 
 class RNIaphubModule(reactContext: ReactApplicationContext) : ReactContextBaseJavaModule(reactContext) {
 
@@ -265,6 +266,7 @@ class RNIaphubModule(reactContext: ReactApplicationContext) : ReactContextBaseJa
         null -> map.putNull(key)
         is Boolean -> map.putBoolean(key, value)
         is Double -> map.putDouble(key, value)
+        is BigDecimal -> map.putDouble(key, value.toDouble())
         is Int -> map.putInt(key, value)
         is String -> map.putString(key, value)
         is Map<*, *> -> map.putMap(key, this.writableMapOf(value as Map<String, *>))
