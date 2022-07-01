@@ -19,6 +19,7 @@ class RNIaphubModule(reactContext: ReactApplicationContext) : ReactContextBaseJa
    * Required for the EventEmitter to work properly without a warning
    */
   @ReactMethod
+  @Suppress("UNUSED_PARAMETER")
   fun addListener(eventName: String?) {
 
   }
@@ -27,6 +28,7 @@ class RNIaphubModule(reactContext: ReactApplicationContext) : ReactContextBaseJa
    * Required for the EventEmitter to work properly without a warning
    */
   @ReactMethod
+  @Suppress("UNUSED_PARAMETER")
   fun removeListeners(count: Int?) {
 
   }
@@ -169,7 +171,7 @@ class RNIaphubModule(reactContext: ReactApplicationContext) : ReactContextBaseJa
    */
   @ReactMethod
   fun getActiveProducts(options: ReadableMap, promise: Promise) {
-    var includeSubscriptionStatesValue = options.getArray("includeSubscriptionStates")
+    val includeSubscriptionStatesValue = options.getArray("includeSubscriptionStates")
     var includeSubscriptionStates: List<String> = listOf()
 
     if (includeSubscriptionStatesValue != null) {
@@ -211,7 +213,7 @@ class RNIaphubModule(reactContext: ReactApplicationContext) : ReactContextBaseJa
    */
   @ReactMethod
   fun getProducts(options: ReadableMap, promise: Promise) {
-    var includeSubscriptionStatesValue = options.getArray("includeSubscriptionStates")
+    val includeSubscriptionStatesValue = options.getArray("includeSubscriptionStates")
     var includeSubscriptionStates: List<String> = listOf()
 
     if (includeSubscriptionStatesValue != null) {
@@ -258,8 +260,13 @@ class RNIaphubModule(reactContext: ReactApplicationContext) : ReactContextBaseJa
   /**
    * Method to create a writable map
    */
-  private fun writableMapOf(data: Map<String, Any?>): WritableMap {
+  @Suppress("UNCHECKED_CAST")
+  private fun writableMapOf(data: Map<String, Any?>?): WritableMap {
     val map = WritableNativeMap()
+
+    if (data == null) {
+      return map
+    }
 
     for ((key, value) in data) {
       when (value) {
@@ -269,8 +276,8 @@ class RNIaphubModule(reactContext: ReactApplicationContext) : ReactContextBaseJa
         is BigDecimal -> map.putDouble(key, value.toDouble())
         is Int -> map.putInt(key, value)
         is String -> map.putString(key, value)
-        is Map<*, *> -> map.putMap(key, this.writableMapOf(value as Map<String, *>))
-        is Array<*> -> map.putArray(key, this.writableArrayOf(value as List<Any?>))
+        is Map<*, *> -> map.putMap(key, this.writableMapOf(value as? Map<String, *>))
+        is Array<*> -> map.putArray(key, this.writableArrayOf(value as? List<Any?>))
         is List<*> -> map.putArray(key, this.writableArrayOf(value.toTypedArray().toList()))
       }
     }
@@ -280,9 +287,13 @@ class RNIaphubModule(reactContext: ReactApplicationContext) : ReactContextBaseJa
   /**
    * Method to create a writable array
    */
-  private fun writableArrayOf(data: List<Any?>): WritableArray {
+  @Suppress("UNCHECKED_CAST")
+  private fun writableArrayOf(data: List<Any?>?): WritableArray {
     val arr = WritableNativeArray()
 
+    if (data == null) {
+      return arr
+    }
     for (item in data) {
       when (item) {
         null -> arr.pushNull()
@@ -290,8 +301,8 @@ class RNIaphubModule(reactContext: ReactApplicationContext) : ReactContextBaseJa
         is Int -> arr.pushInt(item)
         is Double -> arr.pushDouble(item)
         is String -> arr.pushString(item)
-        is Map<*, *> -> arr.pushMap(this.writableMapOf(item as Map<String, Any?>))
-        is Array<*> -> arr.pushArray(this.writableArrayOf(item as List<Any>))
+        is Map<*, *> -> arr.pushMap(this.writableMapOf(item as? Map<String, Any?>))
+        is Array<*> -> arr.pushArray(this.writableArrayOf(item as? List<Any>))
         is List<*> -> arr.pushArray(this.writableArrayOf(item.toTypedArray().toList()))
       }
     }
@@ -327,6 +338,7 @@ class RNIaphubModule(reactContext: ReactApplicationContext) : ReactContextBaseJa
     for (index in 0 until data.size()) {
       when (data.getType(index)) {
         ReadableType.String -> list.add(data.getString(index))
+        else -> throw IllegalArgumentException("Unsupported value, must be a string")
       }
     }
 
