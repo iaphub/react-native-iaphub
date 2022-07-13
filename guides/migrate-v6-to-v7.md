@@ -20,6 +20,22 @@ The library is now using our [iOS](https://github.com/iaphub/iaphub-ios-sdk) and
 - The `setUserId` method has been renamed to `login`
 - The `logout` method has been created
 
+### New properties
+
+- The property `price` has been renamed to `localizedPrice`
+- The property `priceCurrency` has been renamed to `currency`
+- The property `priceAmount` has been renamed to `price`
+- The property `title` has been renamed to `localizedTitle`
+- The property `description` has been renamed to `localizedDescription`
+- The property `subscriptionIntroPrice` has been renamed to `subscriptionIntroLocalizedPrice`
+- The property `subscriptionIntroPrice` is now returning the introductory price amount (number)
+
+### Errors enhanced
+
+The error sytem has been enhanced.<br/>
+An error still has the property `code` but we added added an extra property `subcode` in order to get more details about the error.<br/>
+Some errors have been renamed, you can check the updated [code example to buy a product](https://github.com/iaphub/react-native-iaphub#buy-a-product).
+
 ### New authentication system
 
 **In the version 6** of the library it wasn't possible to display the products or purchase a product without authenticating the user.<br/>
