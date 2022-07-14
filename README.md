@@ -58,12 +58,13 @@ Call the `start` method in order to initialize IAPHUB.<br/><br/>
     appId: "5e4890f6c61fc971cf46db4d",
     // The (client) api key is available on the settings page of your app
     apiKey: "SDp7aY220RtzZrsvRpp4BGFm6qZqNkNf",
-    // Optional app environment (production by default, other environments must be created on the IAPHUB dashboard)
-    environment: "production",
     // Optional, ff you want to allow purchases when the user has an anonymous user id
     // If you're listenning to IAPHUB webhooks your implementation must support users with anonymous user ids
     // This option is disabled by default, when disabled the buy method will return an error when the user isn't logged in
     allowAnonymousPurchase: true
+    // -- OPTIONAL -- //
+    // App environment (IAPHUB supports multiple environments, an environment act like a separate app and must be created on the IAPHUB dashboard)
+    //environment: "staging"
   });
 ```
 
