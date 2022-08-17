@@ -1,3 +1,5 @@
+import type SubscriptionIntroPhase from './subscription-intro-phase';
+
 export default interface Product {
   
   /**
@@ -41,36 +43,11 @@ export default interface Product {
    */
   readonly groupName: string | null;
   /**
-   * Subscription period type ("normal", "trial", "intro")
-   */
-  readonly subscriptionPeriodType: string | null;
-  /**
    * Duration of the subscription cycle specified in the ISO 8601 format
    */
   readonly subscriptionDuration: string | null;
   /**
-   * Introductory price amount
+   * Subscription intro phases
    */
-  readonly subscriptionIntroPrice: number | null;
-  /**
-   * Localized introductory price
-   */
-  readonly subscriptionIntroLocalizedPrice: string | null;
-  /**
-   * Payment type of the introductory offer ("as_you_go", "upfront")
-   */
-  readonly subscriptionIntroPayment: string | null;
-  /**
-   * Duration of an introductory cycle specified in the ISO 8601 format
-   */
-  readonly subscriptionIntroDuration: string | null;
-  /**
-   * Number of cycles in the introductory offer
-   */
-  readonly subscriptionIntroCycles: number | 0;
-  /**
-   * Duration of the trial specified in the ISO 8601 format
-   */
-  readonly subscriptionTrialDuration: string | null;
-
+  readonly subscriptionIntroPhases: [SubscriptionIntroPhase] | null;
 }

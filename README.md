@@ -188,6 +188,8 @@ You should use this method when displaying the page with the list of your produc
 
 ⚠ If a product is returned by the [API](https://www.iaphub.com/docs/api/get-user/) but the sku cannot be loaded, it'll be filtered from the list and an error message will be displayed in the console
 
+⚠ If you have multiple Android offers, the oldest (first one you've created) will be used by default. We've decided to not support multiple Android offers in order to have a common system with iOS. To have a different offer simply create a new product, you can do pretty much everything with [smart listings](https://www.iaphub.com/docs/resources/smart-listing).
+
 ```js
 var products = await Iaphub.getProductsForSale();
 
@@ -199,23 +201,42 @@ console.log(products);
     sku: "membership2_tier10",
     group: "3e5198930c48ed07aa275fd8",
     groupName: "subscription_group_1",
-    title: "Membership",
-    description: "Become a member of the community",
-    price: "$9.99",
-    priceAmount: 9.99,
-    priceCurrency: "USD",
-    subscriptionPeriodType: "normal",
-    subscriptionDuration: "P1M"
+    localizedTitle: "Membership",
+    localizedDescription: "Become a member of the community",
+    localizedPrice: "$9.99",
+    price: 9.99,
+    currency: "USD",
+    subscriptionDuration: "P1M",
+    subscriptionIntroPhases: [
+      {
+        type: "trial",
+        price: 0,
+        currency: "USD",
+        localizedPrice: "FREE",
+        cycleDuration: "P1M",
+        cycleCount: 1,
+        payment: "upfront"
+      },
+      {
+        type: "intro",
+        price: 4.99,
+        currency: "USD",
+        localizedPrice: "$4.99",
+        cycleDuration: "P1M",
+        cycleCount: 3,
+        payment: "as_you_go"
+      }
+    ]
   },
   {
     id: "5e5198930c48ed07aa275fd9",
     type: "consumable",
     sku: "pack10_tier15",
-    title: "Pack 10",
-    description: "Pack of 10 coins",
-    price: "$14.99",
-    priceAmount: 14.99,
-    priceCurrency: "USD"
+    localizedTitle: "Pack 10",
+    localizedDescription: "Pack of 10 coins",
+    localizedPrice: "$14.99",
+    price: 14.99,
+    currency: "USD"
   }
 ]
 ```
@@ -272,11 +293,11 @@ try {
     webhookStatus: "success",
     group: "3e5198930c48ed07aa275fd8",
     groupName: "pack",
-    title: "Pack 10",
-    description: "Pack of 10 coins",
-    price: "$14.99",
-    priceAmount: 14.99,
-    priceCurrency: "USD"
+    localizedTitle: "Pack 10",
+    localizedDescription: "Pack of 10 coins",
+    localizedPrice: "$14.99",
+    price: 14.99,
+    currency: "USD"
   }
 
   /*
@@ -385,14 +406,18 @@ await Iaphub.presentCodeRedemptionSheet();
 | localizedDescription | `string` | Product description (Ex: "Join the community with a membership") |
 | group | `string` | ⚠ Only available if the product as a group<br>Group id (From IAPHUB) |
 | groupName | `string` | ⚠ Only available if the product as a group<br>Name of the product group created on IAPHUB (Ex: "premium") |
-| subscriptionPeriodType | `string` | ⚠ Only available for a subscription<br>Subscription period type (Possible values: 'normal', 'trial', 'intro')<br>If the subscription is active it is the current period otherwise it is the period if the user purchase the subscription |
 | subscriptionDuration | `string` | ⚠ Only available for a subscription<br> Duration of the subscription cycle specified in the ISO 8601 format (Possible values: 'P1W', 'P1M', 'P3M', 'P6M', 'P1Y') |
-| subscriptionIntroPrice | `number` | ⚠ Only available for a subscription with an introductory price<br>Introductory price amount (Ex: 2.99) |
-| subscriptionIntroLocalizedPrice | `string` | ⚠ Only available for a subscription with an introductory price<br>Localized introductory price (Ex: "$2.99") |
-| subscriptionIntroPayment | `string` | ⚠ Only available for a subscription with an introductory price<br>Payment type of the introductory offer (Possible values: 'as_you_go', 'upfront') |
-| subscriptionIntroDuration | `string` | ⚠ Only available for a subscription with an introductory price<br>Duration of an introductory cycle specified in the ISO 8601 format (Possible values: 'P1W', 'P1M', 'P3M', 'P6M', 'P1Y') |
-| subscriptionIntroCycles | `number` | ⚠ Only available for a subscription with an introductory price<br>Number of cycles in the introductory offer |
-| subscriptionTrialDuration | `string` | ⚠ Only available for a subscription with a trial<br>Duration of the trial specified in the ISO 8601 format |
+| subscriptionIntroPhases | `[SubscriptionIntroPhase]?` | ⚠ Only available for a subscription<br> Ordered list of the subscription intro phases (intro price, free trial) |
+
+### SubscriptionIntroPhase
+| Prop  | Type | Description |
+| :------------ |:---------------:| :-----|
+| type | `string` | Introductory type (Possible values: 'trial', 'intro')  |
+| price | `number` | Introductory price amount (Ex: 2.99) |
+| currency | `string` | Introductory price currency code (Ex: "USD") |
+| localizedPrice | `string` | Localized introductory price (Ex: "$2.99") |
+| cycleCount | `string` | Number of cycles in the introductory offer |
+| cycleDuration | `string` | Duration of a introductory cycle specified in the ISO 8601 format (Possible values: 'P1W', 'P1M', 'P3M', 'P6M', 'P1Y') |
 
 ### ActiveProduct (inherit from Product)
 | Prop  | Type | Description |
@@ -402,9 +427,11 @@ await Iaphub.presentCodeRedemptionSheet();
 | platform | `string` | Platform of the purchase (Possible values: 'ios', 'android') |
 | expirationDate | `string` | Subscription expiration date |
 | isSubscriptionRenewable | `boolean` | True if the auto-renewal is enabled |
+| isFamilyShare | `boolean` | True if the subscription is shared by a family member (iOS subscriptions only) |
 | subscriptionRenewalProduct | `string` | Subscription product id of the next renewal (only defined if different than the current product) |
 | subscriptionRenewalProductSku | `string` | Subscription product sku of the next renewal |
 | subscriptionState | `string` | State of the subscription<br>(Possible values: 'active', 'grace_period', 'retry_period', 'paused') |
+| subscriptionPeriodType | `string` | Current phase type of the subscription<br>(Possible values: 'normal', 'trial', 'intro') |
 | androidToken | `string` | ⚠ Only available for an android purchase<br>Android purchase token of the transaction |
 
 ### ReceiptTransaction (inherit from ActiveProduct)

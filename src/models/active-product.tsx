@@ -23,6 +23,10 @@ export default interface ActiveProduct extends Product {
    */
   readonly isSubscriptionRenewable: boolean | false;
   /**
+   * True if the subscription is shared by a family member (iOS subscriptions only)
+   */
+   readonly isFamilyShare: boolean | false;
+  /**
    * Subscription product of the next renewal (only defined if different than the current product)
    */
   readonly subscriptionRenewalProduct: string | null;
@@ -34,5 +38,9 @@ export default interface ActiveProduct extends Product {
    * Subscription state ("active", "retry_period", "grace_period", "paused")
    */
   readonly subscriptionState: string | null;
+  /**
+   * Subscription period type ("normal", "trial", "intro")
+   */
+  readonly subscriptionPeriodType: string | null;
 
 }
