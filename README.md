@@ -46,7 +46,8 @@ pod install
 
 <br>
 
-⚠ If you're migrating from v6.X.X to v7.X.X, read [this](https://github.com/iaphub/react-native-iaphub/tree/master/guides/migrate-v6-to-v7.md).
+⚠ If you're migrating from v6.X.X to v7.X.X, read [this](https://github.com/iaphub/react-native-iaphub/tree/master/guides/migrate-v6-to-v7.md).<br/>
+⚠ If you're migrating from v7.X.X to v8.X.X, read [this](https://github.com/iaphub/react-native-iaphub/tree/master/guides/migrate-v7-to-v8.md).
 
 ## Start
 Call the `start` method in order to initialize IAPHUB.<br/><br/>
