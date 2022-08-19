@@ -3,6 +3,13 @@
 </a>
 <br/>
 <br/>
+
+![npm](https://img.shields.io/npm/dt/react-native-iaphub)
+![npm](https://img.shields.io/npm/dm/react-native-iaphub)
+<a href="https://shoutem.com" target="_blank">
+  <img height="48px" src="https://iaphub.com/img/github/github-shoutem.png?v=4" alt="Shoutem">
+</a>
+
 Implementing and developping all the tools to manage your In-App purchases properly can be very complex and time consuming.
 You should spend this precious time building your app!
 <br/>
@@ -22,66 +29,167 @@ You should spend this precious time building your app!
 ## Getting started
 
 Implementing In-app purchases in your app should be a piece of cake!<br/>
-This module implements the IAPHUB API on top of the [react-native-iap](https://github.com/dooboolab/react-native-iap) module 👏
 
 1. Create an account on [IAPHUB](https://www.iaphub.com)
 
 2. Install the package
 ```js
-// Install react-native-iap which is a required peer dependency (Be sure you install version 4.6.3)
-npm install react-native-iap@4.6.3 --save-exact
 // Install react-native-iaphub
-npm install react-native-iaphub@5.1.0 --save-exact
+npm install react-native-iaphub --save
 // Update dependency on xcode (in the ios folder)
 pod install
 ```
 
-## Init
-Call the `init` method at the start of your app to initialize your configuration<br/><br/>
+3. Make sure the **In-App purchases capability** of your ios project is enabled on XCode
+
+4. Setup your sandbox environment ([ios](https://www.iaphub.com/docs/set-up-ios/configure-sandbox-testing) / [android](https://www.iaphub.com/docs/set-up-android/configure-sandbox-testing))
+
+<br>
+
+⚠ If you're migrating from v6.X.X to v7.X.X, read [this](https://github.com/iaphub/react-native-iaphub/tree/master/guides/migrate-v6-to-v7.md).<br/>
+⚠ If you're migrating from v7.X.X to v8.X.X, read [this](https://github.com/iaphub/react-native-iaphub/tree/master/guides/migrate-v7-to-v8.md).
+
+## Start
+Call the `start` method in order to initialize IAPHUB.<br/><br/>
 ℹ️ It should be called as soon as possible when starting your app.
 
 ```js
-  await Iaphub.init({
+  await Iaphub.start({
     // The app id is available on the settings page of your app
     appId: "5e4890f6c61fc971cf46db4d",
     // The (client) api key is available on the settings page of your app
     apiKey: "SDp7aY220RtzZrsvRpp4BGFm6qZqNkNf",
-    // App environment (production by default, other environments must be created on the IAPHUB dashboard)
-    environment: "production"
+    // Optional, ff you want to allow purchases when the user has an anonymous user id
+    // If you're listenning to IAPHUB webhooks your implementation must support users with anonymous user ids
+    // This option is disabled by default, when disabled the buy method will return an error when the user isn't logged in
+    allowAnonymousPurchase: true
+    // -- OPTIONAL -- //
+    // App environment (IAPHUB supports multiple environments, an environment act like a separate app and must be created on the IAPHUB dashboard)
+    //environment: "staging"
   });
 ```
 
-## Set user id
-Call the `setUserId` method to authenticate an user.<br/>
+## Events
+Call the `addEventListener` method to listen to an event and `removeEventListener` to stop listening to an event.<br/>
 
-If you have an authentication system, provide the `user id` of the user right after the user log in.<br/>
-If you don't and want to handle IAP on the client side, you can provide the `device id` when the app start instead by using a module such as [react-native-device-info](https://github.com/react-native-community/react-native-device-info#getuniqueid) to get a device unique ID.<br/>
-
-⚠ You should provide an id that is non-guessable and isn't public. (Email not allowed)
+#### onUserUpdate - Event triggered when the user products have been updated
 ```js
-await Iaphub.setUserId("1e5494930c48ed07aa275fd2");
+  // Listen to the user update event in order to know when the activeProducts/productsForSale are updated
+  var listener = Iaphub.addEventListener('onUserUpdate', async () => {
+    // TODO here: Refresh the state of your products in order to refresh the screen
+    // You can use the getActiveProducts/getProductsForSale methods to get the updated products
+  });
+  // You can also unlisten the event
+  Iaphub.removeEventListener(listener);
 ```
 
-You should provide the `null` value when a user logout.
+#### onBuyRequest - Event triggered when a purchase intent is made from outside the app (like a promoted In-App purchase)
 ```js
-await Iaphub.setUserId(null);
+  // Add listener
+  var listener = Iaphub.addEventListener('onBuyRequest', async (sku) => {
+    // If you want to allow/disallow a purchase intent (to wait until the user is logged in for example) you can implement this method
+    // You'll have to call the buy method whenever you're ready
+    // Also note you'll have a callback to know when the transaction is done (you woudn't otherwise)
+    var transaction = await Iaphub.buy(sku);
+    console.log("Purchase done: ", transaction);
+  });
+  // Remove listener
+  Iaphub.removeEventListener(listener);
+```
+
+#### onError - Event triggered when IAPHUB has detected an error
+```js
+  // Add listener
+  var listener = Iaphub.addEventListener('onError', async (err) => {
+    // You'll catch any error here (even errors thrown by IAPHUB methods)
+    console.log("Error: ", err.message);
+  });
+  // Remove listener
+  Iaphub.removeEventListener(listener);
+```
+
+#### onReceipt - Event triggered after a receipt has been processed
+```js
+  // Add listener
+  var listener = Iaphub.addEventListener('onReceipt', async (data) => {
+    console.log("Receipt err: ", data.err);
+    console.log("Receipt data: ", err.receipt);
+  });
+  // Remove listener
+  Iaphub.removeEventListener(listener);
+```
+
+ℹ️ You can also remove all the listeners by using the method `removeAllListeners()`
+
+## Login
+Call the `login` method to authenticate a user.<br/>
+
+⚠ When a user isn't logged he's considered *anonymous*, we'll generate automatically a anonymous user id (prefixed with 'a:')
+
+⚠ You should provide an id that is non-guessable and isn't public. (Email not allowed)
+
+⚠ The user will be reset, `setOnUserUpdateListener` will only be called until after the user has been loaded first (using getProductsForSale/getActiveProducts).<br/>
+
+```js
+await Iaphub.login("1e5494930c48ed07aa275fd2");
+```
+
+## Logout
+Call the `logout` method to log the user out.<br/>
+The user will switch back to his anonymous user id (prefixed with 'a:').<br/>
+
+⚠ The user will be reset, `setOnUserUpdateListener` will only be called until after the user has been loaded first (using getProductsForSale/getActiveProducts).<br/>
+
+```js
+Iaphub.logout()
 ```
 
 ## Set user tags
 Call the `setUserTags` method to update the user tags.<br/>
-Tags are a powerful tool that allows you to offer to your users different products depending on custom properties.<br/>
-
-⚠ This method will throw an error if the tag name hasn't been created on the IAPHUB dashboard
+User tags will appear on the user page of the IAPHUB dashboard.<br/>
+When using IAPHUB's smart listings, you'll be able to return different products depending on the user tags.
 
 ```js
-await Iaphub.setUserTags({gender: 'male'});
+// To set a tag
+await Iaphub.setUserTags({status: 'vip'});
+// To clear the user tags
+await Iaphub.setUserTags({status: null});
 ```
+
+A few details:
+  - A tag must be created on the IAPHUB dashboard (otherwise the method will throw an error)
+  - When creating a tag on the IAPHUB dashboard you must check the option to allow editing the tag from the client (otherwise you'll only be able to edit the tag using the [IAPHUB API](https://www.iaphub.com/docs/api/post-user) from your server)
+  - A tag key is limited to 32 characters
+  - A tag value is limited to 64 characters
+
+## Set device params
+Call the `setDeviceParams` method to set parameters for the device<br/>
+When using IAPHUB's smart listings, you'll be able to return different products depending on the device params.
+
+```js
+// For instance you can provide the app version on app launch
+// Useful to return a product only supported in a new version
+Iaphub.setDeviceParams({appVersion: '1.2.0'});
+// To clear the device params
+Iaphub.setDeviceParams({});
+```
+
+A few details:
+  - The params are not saved on the device, they won't persist if the app is restarted
+  - The params are not saved on IAPHUB, they are just provided to the API when fetching the products for sale
+  - A param key limited to 32 characters and must be a valid key (``^[a-zA-Z_]*$``)
+  - A param value limited to 32 characters
+  - You can provide up to 5 params
 
 ## Get products for sale
 Call the ``getProductsForSale`` method to get the user's products for sale<br/>
 You should use this method when displaying the page with the list of your products for sale.
 
 ⚠ If the request fails because of a network issue, the method returns the latest request in cache (if available, otherwise an error is thrown).
+
+⚠ If a product is returned by the [API](https://www.iaphub.com/docs/api/get-user/) but the sku cannot be loaded, it'll be filtered from the list and an error message will be displayed in the console
+
+⚠ If you have multiple Android offers, the oldest (first one you've created) will be used by default. We've decided to not support multiple Android offers in order to have a common system with iOS. To have a different offer simply create a new product, you can do pretty much everything with [smart listings](https://www.iaphub.com/docs/resources/smart-listing).
 
 ```js
 var products = await Iaphub.getProductsForSale();
@@ -94,128 +202,79 @@ console.log(products);
     sku: "membership2_tier10",
     group: "3e5198930c48ed07aa275fd8",
     groupName: "subscription_group_1",
-    title: "Membership",
-    description: "Become a member of the community",
-    price: "$9.99",
-    priceAmount: 9.99,
-    priceCurrency: "USD",
-    subscriptionPeriodType: "normal",
-    subscriptionDuration: "P1M"
+    localizedTitle: "Membership",
+    localizedDescription: "Become a member of the community",
+    localizedPrice: "$9.99",
+    price: 9.99,
+    currency: "USD",
+    subscriptionDuration: "P1M",
+    subscriptionIntroPhases: [
+      {
+        type: "trial",
+        price: 0,
+        currency: "USD",
+        localizedPrice: "FREE",
+        cycleDuration: "P1M",
+        cycleCount: 1,
+        payment: "upfront"
+      },
+      {
+        type: "intro",
+        price: 4.99,
+        currency: "USD",
+        localizedPrice: "$4.99",
+        cycleDuration: "P1M",
+        cycleCount: 3,
+        payment: "as_you_go"
+      }
+    ]
   },
   {
     id: "5e5198930c48ed07aa275fd9",
     type: "consumable",
     sku: "pack10_tier15",
-    title: "Pack 10",
-    description: "Pack of 10 coins",
-    price: "$14.99",
-    priceAmount: 14.99,
-    priceCurrency: "USD"
+    localizedTitle: "Pack 10",
+    localizedDescription: "Pack of 10 coins",
+    localizedPrice: "$14.99",
+    price: 14.99,
+    currency: "USD"
   }
 ]
 ```
 
-#### Product properties
-| Prop  | Type | Description |
-| :------------ |:---------------:| :-----|
-| id | `string` | Product id (From IAPHUB) |
-| type | `string` | Product type (Possible values: 'consumable', 'non_consumable', 'subscription', 'renewable_subscription') |
-| sku | `string` | Product sku (Ex: "membership_tier1") |
-| price | `string` | Localized price (Ex: "$12.99") |
-| priceCurrency | `string` | Price currency code (Ex: "USD") |
-| priceAmount | `number` | Price amount (Ex: 12.99) |
-| title | `string` | Product title (Ex: "Membership") |
-| description | `string` | Product description (Ex: "Join the community with a membership") |
-| group | `string` | ⚠ Only available if the product as a group<br>Group id (From IAPHUB) |
-| groupName | `string` | ⚠ Only available if the product as a group<br>Name of the product group created on IAPHUB (Ex: "premium") |
-| purchase | `string` | ⚠ Only available for an active product<br> Purchase id (From IAPHUB) |
-| purchaseDate | `string` | ⚠ Only available for an active product<br> Purchase date |
-| subscriptionDuration | `string` | ⚠ Only available for a subscription<br> Duration of the subscription cycle specified in the ISO 8601 format (Possible values: 'P1W', 'P1M', 'P3M', 'P6M', 'P1Y') |
-| expirationDate | `string` | ⚠ Only available for an active subscription<br> Subscription expiration date |
-| isSubscriptionRenewable | `boolean` | ⚠ Only available for an active subscription<br> If the subscription can be renewed |
-| isSubscriptionRetryPeriod | `boolean` | ⚠ Only available for an active subscription<br> If the subscription is currently in a retry period |
-| isSubscriptionGracePeriod | `boolean` | ⚠ Only available for an active subscription<br> If the subscription is currently in a grace period |
-| subscriptionPeriodType | `string` | ⚠ Only available for a subscription<br>Subscription period type (Possible values: 'normal', 'trial', 'intro')<br>If the subscription is active it is the current period otherwise it is the period if the user purchase the subscription |
-| subscriptionIntroPrice | `string` | ⚠ Only available for a subscription with an introductory price<br>Localized introductory price (Ex: "$2.99") |
-| subscriptionIntroPriceAmount | `number` | ⚠ Only available for a subscription with an introductory price<br>Introductory price amount (Ex: 2.99) |
-| subscriptionIntroPayment | `string` | ⚠ Only available for a subscription with an introductory price<br>Payment type of the introductory offer (Possible values: 'as_you_go', 'upfront') |
-| subscriptionIntroDuration | `string` | ⚠ Only available for a subscription with an introductory price<br>Duration of an introductory cycle specified in the ISO 8601 format (Possible values: 'P1W', 'P1M', 'P3M', 'P6M', 'P1Y') |
-| subscriptionIntroCycles | `number` | ⚠ Only available for a subscription with an introductory price<br>Number of cycles in the introductory offer |
-| subscriptionTrialDuration | `string` | ⚠ Only available for a subscription with a trial<br>Duration of the trial specified in the ISO 8601 format |
-
 ## Get active products
-If you're relying on IAPHUB on the client side (instead of using your server with webhooks) to detect if the user has active products (renewable subscriptions or non-consumables), you should use the `getActiveProducts` method when the app is brought to the foreground.<br/>
+If you're relying on IAPHUB on the client side (instead of using your server with webhooks) to detect if the user has active products (auto-renewable subscriptions, non-renewing subscriptions or non-consumables), you should use the `getActiveProducts` method.<br/>
 
-⚠ If the request fails because of a network issue, the method returns the latest request in cache (if available, otherwise an error is thrown).
+⚠ If the request fails because of a network issue, the method returns the latest request in cache (if available with no expired subscription, otherwise an error is thrown).
 
+⚠ If an active product is returned by the API but the sku cannot be loaded, the product will be returned but only with the properties coming from the [API](https://www.iaphub.com/docs/api/get-user/) (The price, title, description.... properties won't be returned).
+
+#### Subscription state
+
+Value | Description |
+| :------------ |:---------------
+| active | The subscription is active
+| grace_period | The subscription is in the grace period, the user should still access the features offered by your subscription
+| retry_period | The subscription is in the retry period, you must restrict the access to the features offered by your subscription and display a message asking for the user to update its payment informations.
+| paused | The subscription is paused (Android only) and will automatically resume at a later date (`autoResumeDate` property), you must restrict the access to the features offered by your subscription.
+
+By default only subscriptions with an `active` or `grace_period` state are returned by the `getActiveProducts()` method because you must restrict the access to the features offered by your subscription on a `retry_period` or `paused` state.<br/>
+<br/>
+If you're looking to display a message when a user has a subscription on a `retry_period` or `paused` state, you can use the `includeSubscriptionStates` option.
 ```js
-class App extends Component {
-
-  state = {
-    appState: AppState.currentState
-  };
-
-  componentDidMount() {
-    AppState.addEventListener("change", this.handleAppStateChange);
-  }
-
-  componentWillUnmount() {
-    AppState.removeEventListener("change", this.handleAppStateChange);
-  }
-
-  handleAppStateChange = (nextAppState) => {
-    if (
-      this.state.appState.match(/inactive|background/) &&
-      nextAppState === "active"
-    ) {
-      var products = await Iaphub.getActiveProducts();
-      
-      console.log(products);
-      [{
-        id: "5e5198930c48ed07aa275fd9",
-        type: "renewable_subscription",
-        sku: "membership1_tier5",
-        purchase: "5e5198930c48ed07aa275fe8",
-        purchaseDate: "2020-03-11T00:42:28.000Z",
-        expirationDate: "2021-03-11T00:42:28.000Z",
-        isSubscriptionRenewable: true,
-        isSubscriptionRetryPeriod: false,
-        group: "3e5198930c48ed07aa275fd8",
-        groupName: "subscription_group_1",
-        title: "Membership",
-        description: "Become a member of the community",
-        price: "$4.99",
-        priceAmount: 4.99,
-        priceCurrency: "USD",
-        subscriptionDuration: "P1M",
-        subscriptionPeriodType: "intro",
-        subscriptionIntroPrice: "$1.99",
-        subscriptionIntroPriceAmount: 1.99,
-        subscriptionIntroPayment: "as_you_go",
-        subscriptionIntroDuration: "P1M",
-        subscriptionIntroCycles: 3
-      }]
-    }
-    this.setState({ appState: nextAppState });
-  };
-
-  render() {
-    return (
-      <View>
-        <Text>My app</Text>
-      </View>
-    );
-  }
-}
+  var allActiveProducts = await Iaphub.getActiveProducts({
+    includeSubscriptionStates: ['retry_period', 'paused']
+  });
 ```
 
-#### Check subscription status
+## Get all products
+You can also get the products for sale and active products using one method `getProducts()`
 
-When retrieving a subscription from the active products, you should also check if it is in a retry period using the `isSubscriptionRetryPeriod` and `isSubscriptionGracePeriod` properties.<br/>
-- On a **retry period with a grace period** the user should still have access to the features offered by the subscription and you should display a message asking for the user to update its payment informations.
-- On a **retry period with no grace period** you should restrict the access to the features offered by your subscription and display a message asking for the user to update its payment informations.
-
-More informations on the [IAPHUB documentation](https://iaphub.com/docs/getting-started/manage-subscription-states#subscription-renewal-retry).
+```js
+  var data = await Iaphub.getProducts();
+  console.log("Products for sale: ", data.productsForSale);
+  console.log("Active products: ", data.activeProducts);
+```
 
 ## Buy a product
 Call the ``buy`` method to buy a product<br/><br/>
@@ -224,14 +283,7 @@ Call the ``buy`` method to buy a product<br/><br/>
 
 ```js
 try {
-  var transaction = await Iaphub.buy("pack10_tier15", {
-    // Optional property to override the default proration mode on Android (https://developer.android.com/reference/com/android/billingclient/api/BillingFlowParams.ProrationMode)
-    androidProrationMode: 1,
-    // Optional callback triggered before the receipt is processed
-    onReceiptProcess: (receipt) => {
-      console.log('Purchase success, processing receipt...');
-    }
-  });
+  var transaction = await Iaphub.buy("pack10_tier15");
   console.log(transaction);
   {
     id: "2e5198930c48ed07aa275fd3",
@@ -242,11 +294,11 @@ try {
     webhookStatus: "success",
     group: "3e5198930c48ed07aa275fd8",
     groupName: "pack",
-    title: "Pack 10",
-    description: "Pack of 10 coins",
-    price: "$14.99",
-    priceAmount: 14.99,
-    priceCurrency: "USD"
+    localizedTitle: "Pack 10",
+    localizedDescription: "Pack of 10 coins",
+    localizedPrice: "$14.99",
+    price: 14.99,
+    currency: "USD"
   }
 
   /*
@@ -267,138 +319,137 @@ try {
       "Your purchase has been processed successfully!"
     );
   }
-} catch (err) {
-  // Purchase popup cancelled by the user (ios only)
-  if (err.code == "user_cancelled") return
-  // Couldn't buy product because it has been bought in the past but hasn't been consumed (restore needed)
-  else if (err.code == "product_already_owned") {
-    Alert.alert(
-      "Product already owned",
-      "Please restore your purchases in order to fix that issue",
-      [
-        {text: 'Cancel', style: 'cancel'},
-        {text: 'Restore', onPress: () => Iaphub.restore()}
-      ]
-    );
+}
+catch (err) {
+  var errors = {
+    // Couldn't buy product because it has been bought in the past but hasn't been consumed (restore needed)
+    "product_already_owned": "Product already owned, please restore your purchases in order to fix that issue",
+    // The payment has been deferred (its final status is pending external action such as 'Ask to Buy')
+    "deferred_payment": "Purchase awaiting approval, your purchase has been processed but is awaiting approval",
+    // The billing is unavailable (An iPhone can be restricted from accessing the Apple App Store)
+    "billing_unavailable": "In-app purchase not allowed",
+    // The remote server couldn't be reached properly
+    "network_error": "Network error, please try to restore your purchases later (Button in the settings) or contact the support (support@myapp.com)",
+    // The receipt has been processed on IAPHUB but something went wrong
+    "receipt_failed": "We're having trouble validating your transaction, give us some time, we'll retry to validate your transaction ASAP",
+    // The receipt has been processed on IAPHUB but is invalid, it could be a fraud attempt, using apps such as Freedom or Lucky Patcher on an Android rooted device
+    "receipt_invalid": "We were not able to process your purchase, if you've been charged please contact the support (support@myapp.com)",
+    /*
+     * The user has already an active subscription on a different platform (android or ios)
+     * This security has been implemented to prevent a user from ending up with two subscriptions of different platforms
+     * You can disable the security by providing the 'crossPlatformConflict' parameter to the buy method (Iaphub.buy(sku, {crossPlatformConflict: false}))
+     */
+    "cross_platform_conflict": "It seems like you already have a subscription on a different platform, please use the same platform to change your subscription or wait for your current subscription to expire",
+    /*
+     * The transaction is successful but the product belongs to a different user
+     * You should ask the user to use the account with which he originally bought the product or ask him to restore its purchases in order to transfer the previous purchases to the new account
+     */
+    "user_conflict": "Product owned by a different user, please use the account with which you originally bought the product or restore your purchases",
+    // Unknown
+    "unexpected": "We were not able to process your purchase, please try again later or contact the support (support@myapp.com)"
+  };
+  var errorsToIgnore = ["user_cancelled", "product_already_purchased"];
+  var errorMessage = errors[err.code];
+
+  if (!errorMessage && errorsToIgnore.indexOf(err.code) == -1) {
+    errorMessage = errors["unexpected"];
   }
-  // The payment has been deferred (awaiting approval from parental control)
-  else if (err.code == "deferred_payment") {
-    Alert.alert(
-      "Purchase awaiting approval",
-      "Your purchase is awaiting approval from the parental control"
-    );
-  }
-  /*
-   * The receipt has been processed on IAPHUB but something went wrong
-   * It is probably because of an issue with the configuration of your app or a call to the Itunes/GooglePlay API that failed
-   * IAPHUB will send you an email notification when a receipt fails, by checking the receipt on the dashboard you'll find a detailed report of the error
-   * After fixing the issue (if there's any), just click on the 'New report' button in order to process the receipt again
-   * If it is an error contacting the Itunes/GooglePlay API, IAPHUB will retry to process the receipt automatically as well
-   */
-  else if (err.code == "receipt_validation_failed") {
-    Alert.alert(
-      "We're having trouble validating your transaction",
-      "Give us some time, we'll retry to validate your transaction ASAP!"
-    );
-  }
-  /*
-   * The receipt has been processed on IAPHUB but is invalid
-   * It could be a fraud attempt, using apps such as Freedom or Lucky Patcher on an Android rooted device
-   */
-  else if (err.code == "receipt_invalid") {
-    Alert.alert(
-      "Purchase error",
-      "We were not able to process your purchase, if you've been charged please contact the support (support@myapp.com)"
-    );
-  }
-  /*
-   * The receipt hasn't been validated on IAPHUB (Could be an issue like a network error...)
-   * The user will have to restore its purchases in order to validate the transaction
-   * An automatic restore should be triggered on every relaunch of your app since the transaction hasn't been 'finished'
-   * Android should automatically refund transactions that are not 'finished' after 3 days
-   */
-  else if (err.code == "receipt_request_failed") {
-    Alert.alert(
-      "We're having trouble validating your transaction",
-      "Please try to restore your purchases later (Button in the settings) or contact the support (support@myapp.com)"
-    );
-  }
-  // Couldn't buy product for many other reasons (the user shouldn't be charged)
-  else {
-    Alert.alert(
-      "Purchase error",
-      "We were not able to process your purchase, please try again later or contact the support (support@myapp.com)"
-    );
+  if (errorMessage) {
+    Alert.alert("Error", errorMessage);
   }
 }
 ```
 
+#### Proration mode (Android only)
+
+You can specify the proration mode when replacing a subscription.
+
+```js
+var transaction = await Iaphub.buy("membership_tier1", {
+  prorationMode: 'immediate_and_charge_prorated_price'
+});
+```
+
+Value | Description |
+| :------------ |:---------------
+| immediate_with_time_proration | The replacement takes effect immediately, the remaining time will be prorated for the new subscription. **(default)**
+| immediate_and_charge_prorated_price | The replacement takes effect immediately, the price of the previous subscription will be prorated (partial refund).
+| immediate_without_proration | The replacement takes effect immediately with no extra charge, the new price will be charged on next recurrence time.
+| deferred | The replacement takes effect when the current subscription expires
+
 ## Restore user purchases
 Call the ``restore`` method to restore the user purchases<br/><br/>
-ℹ️ You should display a restore button somewhere in your app (usually on the settings page).<br/>
-ℹ️ If you logged in using the `device id`, an user using a new device will have to restore its purchases since the `device id` will be different.
+ℹ️ You must display a button somewhere in your app in order to allow the user to restore its purchases.<br/>
 
 ```js
 await Iaphub.restore();
 ```
 
+## Present code redemption sheet (iOS only)
+Call the ``presentCodeRedemptionSheet`` to display a sheet that enable users to redeem subscription offer codes that you configure in App Store Connect<br/><br/>
+
+```js
+await Iaphub.presentCodeRedemptionSheet();
+```
+
+## Properties
+
+### Product
+| Prop  | Type | Description |
+| :------------ |:---------------:| :-----|
+| id | `string` | Product id (From IAPHUB) |
+| type | `string` | Product type (Possible values: 'consumable', 'non_consumable', 'subscription', 'renewable_subscription') |
+| sku | `string` | Product sku (Ex: "membership_tier1") |
+| price | `number` | Price amount (Ex: 12.99) |
+| currency | `string` | Price currency code (Ex: "USD") |
+| localizedPrice | `string` | Localized price (Ex: "$12.99") |
+| localizedTitle | `string` | Product title (Ex: "Membership") |
+| localizedDescription | `string` | Product description (Ex: "Join the community with a membership") |
+| group | `string` | ⚠ Only available if the product as a group<br>Group id (From IAPHUB) |
+| groupName | `string` | ⚠ Only available if the product as a group<br>Name of the product group created on IAPHUB (Ex: "premium") |
+| subscriptionDuration | `string` | ⚠ Only available for a subscription<br> Duration of the subscription cycle specified in the ISO 8601 format (Possible values: 'P1W', 'P1M', 'P3M', 'P6M', 'P1Y') |
+| subscriptionIntroPhases | `[SubscriptionIntroPhase]?` | ⚠ Only available for a subscription<br> Ordered list of the subscription intro phases (intro price, free trial) |
+
+### SubscriptionIntroPhase
+| Prop  | Type | Description |
+| :------------ |:---------------:| :-----|
+| type | `string` | Introductory type (Possible values: 'trial', 'intro')  |
+| price | `number` | Introductory price amount (Ex: 2.99) |
+| currency | `string` | Introductory price currency code (Ex: "USD") |
+| localizedPrice | `string` | Localized introductory price (Ex: "$2.99") |
+| cycleCount | `string` | Number of cycles in the introductory offer |
+| cycleDuration | `string` | Duration of a introductory cycle specified in the ISO 8601 format (Possible values: 'P1W', 'P1M', 'P3M', 'P6M', 'P1Y') |
+
+### ActiveProduct (inherit from Product)
+| Prop  | Type | Description |
+| :------------ |:---------------:| :-----|
+| purchase | `string` | Purchase id (From IAPHUB) |
+| purchaseDate | `string` | Purchase date |
+| platform | `string` | Platform of the purchase (Possible values: 'ios', 'android') |
+| expirationDate | `string` | Subscription expiration date |
+| isSubscriptionRenewable | `boolean` | True if the auto-renewal is enabled |
+| isFamilyShare | `boolean` | True if the subscription is shared by a family member (iOS subscriptions only) |
+| subscriptionRenewalProduct | `string` | Subscription product id of the next renewal (only defined if different than the current product) |
+| subscriptionRenewalProductSku | `string` | Subscription product sku of the next renewal |
+| subscriptionState | `string` | State of the subscription<br>(Possible values: 'active', 'grace_period', 'retry_period', 'paused') |
+| subscriptionPeriodType | `string` | Current phase type of the subscription<br>(Possible values: 'normal', 'trial', 'intro') |
+| androidToken | `string` | ⚠ Only available for an android purchase<br>Android purchase token of the transaction |
+
+### ReceiptTransaction (inherit from ActiveProduct)
+| Prop  | Type | Description |
+| :------------ |:---------------:| :-----|
+| webhookStatus | `string` | Webhook status (Possible values: 'success', 'failed', 'disabled') |
+| user | `string` | User id (From IAPHUB) |
+
+### Error
+| Prop  | Type | Description |
+| :------------ |:---------------:| :-----|
+| message | `string` | Error message |
+| code | `string` | Error code |
+| subcode | `string` | Error code |
+| params | `object` | Error params |
+
 ## Full example
 
 You should check out the [Example app](https://github.com/iaphub/react-native-iaphub/tree/master/Example).
 <br/>
-
-## FAQ
-
-### I'm already validating receipts on my server, can I run receipt validation on both my server and IAPHUB?
-Yes! It can be pretty handy if you want to:
-- Slowly migrate over IAPHUB
-- Give IAPHUB a try without shutting down your current receipt validation system
-- Implement a fallback system to validate receipts when an error occurs
-- Run both systems in parallel
-
-It's easy to implement by using the `onReceiptProcessed` event that is triggered after IAPHUB processed a receipt
-```js
-  await Iaphub.init({
-    appId: "5e4890f6c61fc971cf46db4d",
-    apiKey: "SDp7aY220RtzZrsvRpp4BGFm6qZqNkNf",
-    environment: "production"
-    /*
-     * Event triggered after IAPHUB processed a receipt
-     * @param {Object} err Error object if the receipt processing failed (otherwise null)
-     * @param {Object} receipt - Receipt object
-     * @param {String} receipt.sku - Product sku
-     * @param {String} receipt.token - Receipt token
-     * @param {Boolean} receipt.isRestore - If the event is triggered from a restore
-     */
-    onReceiptProcessed: async (err, receipt) => {
-      console.log(receipt);
-      {
-        sku: "pack10_tier15",
-        token: "dzw4d....sd",
-        isRestore: false
-      }
-      /*
-       * Send the receipt to yout server
-       * If you want to override the transaction returned by the buy method, your server must return the new transactions of the receipt
-       * Warning: Do not return the old transactions already processed!
-       */
-      var newTransactions = await fetch("https://api.myapp.com/receipt", {
-        method: "POST",
-        headers: {'Accept': 'application/json', 'Content-Type': 'application/json'},
-        body: JSON.stringify(receipt)
-      });
-      console.log(newTransactions);
-      [{
-        sku: "pack10_tier15"
-      }]
-      /*
-       * If an array is returned by this function it'll override the receipt transactions returned by IAPHUB
-       * For instance, below we only override the transactions if the receipt processing failed with an error
-       * A transaction must contain at least the property 'sku' in order to identify the transaction that will be returned from the buy method
-       */
-      if (err) {
-        return newTransactions;
-      }
-    }
-  });
-```
