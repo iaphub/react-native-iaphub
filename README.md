@@ -44,6 +44,8 @@ pod install
 
 4. Setup your sandbox environment ([ios](https://www.iaphub.com/docs/set-up-ios/configure-sandbox-testing) / [android](https://www.iaphub.com/docs/set-up-android/configure-sandbox-testing))
 
+5. Read our complete guide to [set up your app](https://www.iaphub.com/docs/getting-started/set-up-app/).
+
 <br>
 
 ⚠ If you're migrating from v6.X.X to v7.X.X, read [this](https://github.com/iaphub/react-native-iaphub/tree/master/guides/migrate-v6-to-v7.md).<br/>
