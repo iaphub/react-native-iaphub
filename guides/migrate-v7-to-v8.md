@@ -10,7 +10,7 @@ To update the library:
 // Install react-native-iaphub
 npm install react-native-iaphub@latest --save
 // Update dependency on xcode (in the ios folder)
-pod update Iaphub
+pod install
 ```
 
 The only major change is that the following properties are removed:
