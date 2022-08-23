@@ -1,6 +1,6 @@
 import {Platform, NativeModules, NativeEventEmitter, EmitterSubscription} from 'react-native';
 
-import pkg from '../package.json';
+import config from './config';
 import type Transaction from './models/transaction';
 import type Product from './models/product';
 import type ActiveProduct from './models/active-product';
@@ -101,7 +101,7 @@ export default class Iaphub {
     // Clear listeners
     this.removeAllListeners();
     // Start IAPHUB
-    RNIaphub.start(Object.assign(opts, {sdkVersion: pkg.version}));
+    RNIaphub.start(Object.assign(opts, {sdkVersion: config.version}));
     // Display product missing error
     this.errorListener = this.nativeEventEmitter.addListener("onError", (err) => {
       if (err.code == "unexpected" && err.subcode == "product_missing_from_store") {
