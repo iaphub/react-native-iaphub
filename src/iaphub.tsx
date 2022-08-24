@@ -98,10 +98,15 @@ export default class Iaphub {
    * @param {String} environment Option to specify a different environment than production
    */
   public start(opts: StartOptions): void {
+    // Build sdk version (we dot not define it in StartOptions on purpose, it is private)
+    var sdkVersion = config.version;
+    if (opts["sdkVersion"]) {
+      sdkVersion += "/" + opts["sdkVersion"];
+    }
     // Clear listeners
     this.removeAllListeners();
     // Start IAPHUB
-    RNIaphub.start(Object.assign(opts, {sdkVersion: config.version}));
+    RNIaphub.start(Object.assign(opts, {sdkVersion: sdkVersion}));
     // Display product missing error
     this.errorListener = this.nativeEventEmitter.addListener("onError", (err) => {
       if (err.code == "unexpected" && err.subcode == "product_missing_from_store") {

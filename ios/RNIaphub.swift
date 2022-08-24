@@ -81,7 +81,11 @@ class RNIaphub: RCTEventEmitter, IaphubDelegate {
       let allowAnonymousPurchase = options.value(forKey: "allowAnonymousPurchase") as? Bool ?? false
       let environment = options.value(forKey: "environment") as? String ?? "production"
       let sdkVersion = options.value(forKey: "sdkVersion") as? String ?? ""
+      var sdk = "react_native"
 
+      if let extraSdk = options.value(forKey: "sdk") as? String {
+         sdk = "\(sdk)/\(extraSdk)"
+      }
       Iaphub.delegate = self
       Iaphub.start(
          appId: appId,
@@ -89,7 +93,7 @@ class RNIaphub: RCTEventEmitter, IaphubDelegate {
          userId: userId,
          allowAnonymousPurchase: allowAnonymousPurchase,
          environment: environment,
-         sdk: "react_native",
+         sdk: sdk,
          sdkVersion: sdkVersion
       )
     }

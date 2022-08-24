@@ -44,7 +44,12 @@ class RNIaphubModule(reactContext: ReactApplicationContext) : ReactContextBaseJa
     val allowAnonymousPurchase = if (options.hasKey("allowAnonymousPurchase")) options.getBoolean("allowAnonymousPurchase") else false
     val environment = options.getString("environment") ?: "production"
     val sdkVersion = options.getString("sdkVersion") ?: ""
+    val extraSdk = options.getString("sdk")
+    var sdk = "react_native"
 
+    if (extraSdk != null) {
+      sdk = "${sdk}/${extraSdk}"
+    }
     // Start SDK
     Iaphub.start(
       context=this.reactApplicationContext,
@@ -53,7 +58,7 @@ class RNIaphubModule(reactContext: ReactApplicationContext) : ReactContextBaseJa
       userId=userId,
       allowAnonymousPurchase=allowAnonymousPurchase,
       environment=environment,
-      sdk="react_native",
+      sdk=sdk,
       sdkVersion=sdkVersion
     )
     // Register listeners
