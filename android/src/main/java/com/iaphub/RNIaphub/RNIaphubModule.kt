@@ -38,13 +38,13 @@ class RNIaphubModule(reactContext: ReactApplicationContext) : ReactContextBaseJa
    */
   @ReactMethod
   fun start(options: ReadableMap) {
-    val appId = options.getString("appId") ?: ""
-    val apiKey = options.getString("apiKey") ?: ""
-    val userId = options.getString("userId")
-    val allowAnonymousPurchase = if (options.hasKey("allowAnonymousPurchase")) options.getBoolean("allowAnonymousPurchase") else false
-    val environment = options.getString("environment") ?: "production"
-    val sdkVersion = options.getString("sdkVersion") ?: ""
-    val extraSdk = options.getString("sdk")
+    val appId = this.getString(options, "appId", "")
+    val apiKey = this.getString(options, "apiKey", "")
+    val userId = this.getStringOrNull(options, "userId")
+    val allowAnonymousPurchase = this.getBoolean(options, "getBoolean", false)
+    val environment = this.getString(options, "environment", "production")
+    val sdkVersion = this.getString(options, "sdkVersion", "")
+    val extraSdk = this.getStringOrNull(options, "sdk")
     var sdk = "react_native"
 
     if (extraSdk != null) {
@@ -136,8 +136,8 @@ class RNIaphubModule(reactContext: ReactApplicationContext) : ReactContextBaseJa
   @ReactMethod
   fun buy(sku: String, options: ReadableMap, promise: Promise) {
     val activity = this.currentActivity
-    val prorationMode = options.getString("prorationMode")
-    val crossPlatformConflict = if (options.hasKey("crossPlatformConflict")) options.getBoolean("crossPlatformConflict") else true
+    val prorationMode = this.getStringOrNull(options, "prorationMode")
+    val crossPlatformConflict = this.getBoolean(options, "crossPlatformConflict", true)
 
     if (activity == null) {
       this.rejectWithUnexpectedError("activity_null", "activity not found", promise)
@@ -238,6 +238,27 @@ class RNIaphubModule(reactContext: ReactApplicationContext) : ReactContextBaseJa
         )))
       }
     }
+  }
+
+  /**
+   * Get readable map boolean
+   */
+  private fun getBoolean(options: ReadableMap, key: String, default: Boolean = false): Boolean {
+    return if (options.hasKey(key)) options.getBoolean(key) else default
+  }
+
+  /**
+   * Get readable map string
+   */
+  private fun getString(options: ReadableMap, key: String, default: String): String {
+    return if (options.hasKey(key)) options.getString(key) ?: default else default
+  }
+
+  /**
+   * Get readable map string or null
+   */
+  private fun getStringOrNull(options: ReadableMap, key: String): String? {
+    return if (options.hasKey(key)) options.getString(key) else null
   }
 
   /**
