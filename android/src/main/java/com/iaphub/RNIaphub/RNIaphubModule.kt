@@ -342,7 +342,7 @@ class RNIaphubModule(reactContext: ReactApplicationContext) : ReactContextBaseJa
 
     for (index in 0 until data.size()) {
       when (data.getType(index)) {
-        ReadableType.String -> list.add(data.getString(index))
+        ReadableType.String -> list.add(data.getString(index) ?: "")
         else -> throw IllegalArgumentException("Unsupported value, must be a string")
       }
     }
