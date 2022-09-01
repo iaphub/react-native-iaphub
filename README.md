@@ -387,6 +387,19 @@ Call the ``restore`` method to restore the user purchases<br/><br/>
 await Iaphub.restore();
 ```
 
+## Show manage subscriptions
+Call the ``showManageSubscriptions`` to display the GooglePlay/AppStore page to manage the subscriptions.<br/><br/>
+
+```js
+await Iaphub.showManageSubscriptions();
+```
+
+You can also specify the sku of an active subscription and you'll be redirected to the specified susbcription (Android only).
+
+```js
+await Iaphub.showManageSubscriptions({sku: "subscription1"});
+```
+
 ## Present code redemption sheet (iOS only)
 Call the ``presentCodeRedemptionSheet`` to display a sheet that enable users to redeem subscription offer codes that you configure in App Store Connect<br/><br/>
 
