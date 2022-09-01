@@ -241,6 +241,23 @@ class RNIaphubModule(reactContext: ReactApplicationContext) : ReactContextBaseJa
   }
 
   /**
+   * Show manage subscriptions
+   */
+  @ReactMethod
+  fun showManageSubscriptions(options: ReadableMap, promise: Promise) {
+    val sku = this.getStringOrNull(options, "sku")
+
+    Iaphub.showManageSubscriptions(sku) { err ->
+      if (err != null) {
+        this.rejectWithError(err, promise)
+      }
+      else {
+        promise.resolve(null)
+      }
+    }
+  }
+
+  /**
    * Get readable map boolean
    */
   private fun getBoolean(options: ReadableMap, key: String, default: Boolean = false): Boolean {

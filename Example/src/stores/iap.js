@@ -116,6 +116,11 @@ class IAPStore {
 		Alert.alert("Restore", "Purchases restored");
 	}
 
+	// Call this method to show the subscriptions page
+	async showManageSubscriptions() {
+		await Iaphub.showManageSubscriptions();
+	}
+
 	// Call this method to present the ios code redemption sheet
 	async presentCodeRedemptionSheet() {
 		await Iaphub.presentCodeRedemptionSheet();

@@ -129,6 +129,15 @@ export default class IAPPage extends React.Component {
     );
   }
 
+  renderShowManageSubscriptions = () => {
+    return (
+      <View>
+        <Text style={styles.title}>Manage subscriptions</Text>
+        <Button title="Manage subscriptions" onPress={iap.showManageSubscriptions}/>
+      </View>
+    );
+  }
+
   renderPromoCode = () => {
     return (
       <View>
@@ -164,6 +173,7 @@ export default class IAPPage extends React.Component {
           {this.renderActiveProducts()}
           {this.renderRestore()}
           {Platform.OS == 'ios' && this.renderPromoCode()}
+          {this.renderShowManageSubscriptions()}
           {this.renderLogout()}
         </View>
       </ScrollView>

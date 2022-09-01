@@ -43,6 +43,10 @@ interface GetProductsOptions {
   includeSubscriptionStates: string[]
 }
 
+interface ShowManageSubscriptionsOptions {
+  sku?: string
+}
+
 export default class Iaphub {
 
   nativeEventEmitter;
@@ -251,6 +255,19 @@ export default class Iaphub {
   public async presentCodeRedemptionSheet(): Promise<void> {
     try {
       await RNIaphub.presentCodeRedemptionSheet();
+    }
+    catch (err) {
+      throw IaphubError.parse(err);
+    }
+  }
+
+  /**
+   * Show manage subscriptions page
+   * @returns {Promise<void>}
+   */
+   public async showManageSubscriptions(opts: ShowManageSubscriptionsOptions = {sku: undefined}): Promise<void> {
+    try {
+      await RNIaphub.showManageSubscriptions(opts);
     }
     catch (err) {
       throw IaphubError.parse(err);

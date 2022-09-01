@@ -235,6 +235,19 @@ class RNIaphub: RCTEventEmitter, IaphubDelegate {
       })
    }
    
+   /**
+    Show manage subscriptions page
+    */
+   @objc
+   func showManageSubscriptions(_ options: NSDictionary, resolver resolve: @escaping RCTPromiseResolveBlock, rejecter reject: @escaping RCTPromiseRejectBlock) {
+      Iaphub.showManageSubscriptions({ (err) in
+         if let err = err {
+            return reject("iaphub_error", self.createError(err), nil)
+         }
+         resolve(nil)
+      })
+   }
+   
    /***************************** PRIVATE ******************************/
    
    /**
