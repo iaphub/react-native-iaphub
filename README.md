@@ -10,21 +10,10 @@
   <img height="48px" src="https://iaphub.com/img/github/github-shoutem.png?v=4" alt="Shoutem">
 </a>
 
-Implementing and developping all the tools to manage your In-App purchases properly can be very complex and time consuming.
-You should spend this precious time building your app!
+We're making in-app purchases EASY.<br/>
+Stop wasting time & resources to reinvent the wheel.<br/>
+@ [IAPHUB](https://www.iaphub.com) we developed all the tools you need to sell in-app purchases & subscriptions, manage your customers and grow your revenue. 🚀
 <br/>
-<br/>
-
-[IAPHUB](https://www.iaphub.com) has all the features you need to increase your sales 🚀
-
-|   | Features |
-| --- | --- |
-📜 | Receipt validation - Send the receipt, we'll take care of the rest.
-📨 | Webhooks - Receive webhooks directly to your server to be notified of any event such as a purchase or a subscription cancellation.    
-📊 | Realtime Analytics - Out of the box insights of on all your sales, subscriptions, customers and everything you need to improve your revenues.
-🧪 | A/B Testing - Test different pricings and get analytics of which one performs the best.
-🌎 | Product Segmentation - Offer different product or pricings to your customers depending on defined criterias such as the country.
-👤 | Customer Management - Access easily the details of a customer, everything you need to know such as the past transactions and the active subscriptions on one page.
 
 ## Getting started
 
@@ -50,6 +39,11 @@ pod install
 
 ⚠ If you're migrating from v6.X.X to v7.X.X, read [this](https://github.com/iaphub/react-native-iaphub/tree/master/guides/migrate-v6-to-v7.md).<br/>
 ⚠ If you're migrating from v7.X.X to v8.X.X, read [this](https://github.com/iaphub/react-native-iaphub/tree/master/guides/migrate-v7-to-v8.md).
+
+## UI
+
+The package provides all the methods of the IAPHUB SDK to easily implement in-app purchases but it doesn't provide any UI.<br/>
+If you're looking for a plug & play component with all the UI included, take a look at [react-native-iaphub-ui](https://github.com/iaphub/react-native-iaphub-ui).
 
 ## Start
 Call the `start` method in order to initialize IAPHUB.<br/><br/>
