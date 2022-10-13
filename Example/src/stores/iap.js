@@ -1,7 +1,9 @@
-import {decorate, observable} from 'mobx';
+import {makeAutoObservable, configure} from "mobx"
 import {Alert} from 'react-native';
 import Iaphub from 'react-native-iaphub';
 import pkg from '../../package.json';
+
+configure({enforceActions: "never"});
 
 class IAPStore {
 
@@ -9,6 +11,10 @@ class IAPStore {
 	skuProcessing = null;
 	productsForSale = null;
 	activeProducts = null;
+
+	constructor() {
+    makeAutoObservable(this)
+  }
 
 	// Init IAPHUB
 	async init() {
@@ -128,10 +134,4 @@ class IAPStore {
 
 }
 
-decorate(IAPStore, {
-	isInitialized: observable,
-	skuProcessing: observable,
-	productsForSale: observable,
-	activeProducts: observable
-})
 export default new IAPStore();

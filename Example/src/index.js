@@ -1,6 +1,6 @@
 import React from 'react';
 import {View, StyleSheet} from 'react-native';
-import {Observer} from 'mobx-react/custom';
+import {Observer} from 'mobx-react';
 import IAP from './pages/iap';
 import Login from './pages/login';
 import app from './stores/app';

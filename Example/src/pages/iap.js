@@ -1,6 +1,6 @@
 import React from 'react';
 import {StyleSheet, View, ScrollView, Text, Button, TouchableOpacity, ActivityIndicator} from 'react-native';
-import {Observer} from 'mobx-react/custom';
+import {Observer} from 'mobx-react';
 import app from '../stores/app';
 import iap from '../stores/iap';
 

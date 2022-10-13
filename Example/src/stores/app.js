@@ -1,5 +1,4 @@
-import {decorate, observable} from 'mobx';
-import {AppState} from 'react-native';
+import {makeAutoObservable} from "mobx"
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import iap from './iap';
 
@@ -8,6 +7,7 @@ class AppStore {
   isLogged = false;
 
   constructor() {
+    makeAutoObservable(this)
     this.start()
   }
 
@@ -33,7 +33,4 @@ class AppStore {
 
 }
 
-decorate(AppStore, {
-  isLogged: observable
-})
 export default new AppStore();

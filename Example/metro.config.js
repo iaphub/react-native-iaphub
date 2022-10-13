@@ -14,8 +14,9 @@ const exclude = ['react', 'react-native', '@babel/runtime'];
 const extraNodeModules = {
   'react': path.resolve(__dirname + '/node_modules/react'),
   'react-native': path.resolve(__dirname + '/node_modules/react-native'),
+  'react-native-iaphub': path.resolve(__dirname + '/node_modules/react-native-iaphub'),
   '@babel/runtime': path.resolve(__dirname + '/node_modules/@babel/runtime'),
-  'react-native-iaphub': path.resolve(__dirname + '/..')
+  'react-native-iaphub-ui': path.resolve(__dirname + '/..'),
 };
 
 const watchFolders = [
