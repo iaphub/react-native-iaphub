@@ -148,6 +148,20 @@ export default class Iaphub {
   }
 
   /**
+   * Ger user id
+   * @returns {Promise<string>}
+   */
+   public async getUserId(): Promise<string> {
+    try {
+      var userId = await RNIaphub.getUserId();
+      return userId;
+    }
+    catch (err) {
+      throw IaphubError.parse(err);
+    }
+  }
+
+  /**
    * Log out user
    */
   public logout(): void {

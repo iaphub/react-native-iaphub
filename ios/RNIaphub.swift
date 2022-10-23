@@ -120,6 +120,21 @@ class RNIaphub: RCTEventEmitter, IaphubDelegate {
    }
    
    /**
+    Get user id
+    */
+   @objc
+   func getUserId(_ resolve: @escaping RCTPromiseResolveBlock, rejecter reject: @escaping RCTPromiseRejectBlock) {
+      let userId = Iaphub.getUserId()
+      
+      if (userId == nil) {
+         reject("iaphub_error", self.createError(code: "unexpected", subcode: "start_missing", message: "iaphub not started"), nil)
+      }
+      else {
+         resolve(userId)
+      }
+   }
+
+   /**
     Logout
     */
    @objc
@@ -249,6 +264,16 @@ class RNIaphub: RCTEventEmitter, IaphubDelegate {
    }
    
    /***************************** PRIVATE ******************************/
+   
+   /**
+    Create error
+    */
+   func createError(code: String, subcode: String, message: String, params: Dictionary<String, Any> = [:]) -> String? {
+      if let json = try? JSONSerialization.data(withJSONObject: ["code": code, "subcode": subcode, "message": message, "params": params]) {
+         return String(data: json, encoding: .utf8)
+      }
+      return nil
+   }
    
    /**
     Create error

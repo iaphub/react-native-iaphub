@@ -100,6 +100,21 @@ class RNIaphubModule(reactContext: ReactApplicationContext) : ReactContextBaseJa
   }
 
   /**
+   * Get user id
+   */
+  @ReactMethod
+  fun getUserId(promise: Promise) {
+    val userId = Iaphub.getUserId()
+
+    if (userId == null) {
+      this.rejectWithUnexpectedError("start_missing", "iaphub not started", promise)
+    }
+    else {
+      promise.resolve(userId)
+    }
+  }
+
+  /**
    * Logout
    */
   @ReactMethod

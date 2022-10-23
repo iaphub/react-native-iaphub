@@ -15,6 +15,11 @@ RCT_EXTERN_METHOD(
    rejecter:               (RCTPromiseRejectBlock)reject
 )
 
+RCT_EXTERN_METHOD(
+   getUserId:              (RCTPromiseResolveBlock)resolve
+   rejecter:               (RCTPromiseRejectBlock)reject
+)
+
 RCT_EXTERN_METHOD(logout)
 
 RCT_EXTERN_METHOD(
