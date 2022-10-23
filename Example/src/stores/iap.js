@@ -19,14 +19,14 @@ class IAPStore {
 	// Init IAPHUB
 	async init() {
 		// Init iaphub2
-		Iaphub.start({
+		await Iaphub.start({
 			// The app id is available on the settings page of your app
 			appId: "5e4890f6c61fc971cf46db4d",
 			// The (client) api key is available on the settings page of your app
 			apiKey: "SDp7aY220RtzZrsvRpp4BGFm6qZqNkNf"
 		});
 		// Add device params
-		Iaphub.setDeviceParams({appVersion: pkg.version});
+		await Iaphub.setDeviceParams({appVersion: pkg.version});
 		// Iaphub is now initialized and ready to use
 		this.isInitialized = true;
 		// Listen to user updates and refresh productsForSale/activeProducts
@@ -47,7 +47,7 @@ class IAPStore {
 
 	// Set user id
 	async setUserId(userId) {
-		Iaphub.login(userId);
+		await Iaphub.login(userId);
 	}
 
 	// Refresh products

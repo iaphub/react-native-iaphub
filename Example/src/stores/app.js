@@ -12,15 +12,15 @@ class AppStore {
   }
 
   start = async () => {
-    iap.init();
+    await iap.init();
     this.isLogged = (await AsyncStorage.getItem('isLogged')) == "true" ? true : false;
     if (this.isLogged) {
-      this.login();
+      await this.login();
     }
   }
 
   login = async () => {
-    iap.setUserId("1");
+    await iap.setUserId("1");
     await iap.refreshProducts();
     await AsyncStorage.setItem('isLogged', "true");
     this.isLogged = true;
