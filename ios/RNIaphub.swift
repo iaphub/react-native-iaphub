@@ -74,7 +74,7 @@ class RNIaphub: RCTEventEmitter, IaphubDelegate {
     Start IAPHUB
     */
     @objc
-    func start(_ options: NSDictionary) -> Void {
+    func start(_ options: NSDictionary, resolver resolve: @escaping RCTPromiseResolveBlock, rejecter reject: @escaping RCTPromiseRejectBlock) -> Void {
       let appId = options.value(forKey: "appId") as? String ?? ""
       let apiKey = options.value(forKey: "apiKey") as? String ?? ""
       let userId = options.value(forKey: "userId") as? String
@@ -96,14 +96,16 @@ class RNIaphub: RCTEventEmitter, IaphubDelegate {
          sdk: sdk,
          sdkVersion: sdkVersion
       )
+      resolve(nil)
     }
    
    /**
     Stop IAPHUB
     */
     @objc
-    func stop() -> Void {
+    func stop(_ resolve: @escaping RCTPromiseResolveBlock, rejecter reject: @escaping RCTPromiseRejectBlock) -> Void {
        Iaphub.stop()
+       resolve(nil)
     }
    
    /**
@@ -138,16 +140,18 @@ class RNIaphub: RCTEventEmitter, IaphubDelegate {
     Logout
     */
    @objc
-   func logout() {
+   func logout(_ resolve: @escaping RCTPromiseResolveBlock, rejecter reject: @escaping RCTPromiseRejectBlock) {
       Iaphub.logout()
+      resolve(nil)
    }
    
    /**
     Set device params
     */
    @objc
-   func setDeviceParams(_ params: Dictionary<String, String>) {
+   func setDeviceParams(_ params: Dictionary<String, String>, resolver resolve: @escaping RCTPromiseResolveBlock, rejecter reject: @escaping RCTPromiseRejectBlock) {
       Iaphub.setDeviceParams(params: params)
+      resolve(nil)
    }
    
    /**

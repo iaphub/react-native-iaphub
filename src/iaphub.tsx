@@ -100,36 +100,48 @@ export default class Iaphub {
    * @param {String} apiKey Api key that can be found on the IAPHUB dashboard
    * @param {Boolean} allowAnonymousPurchase Option to allow purchases without being logged in
    * @param {String} environment Option to specify a different environment than production
+   * @returns {Promise<void>}
    */
-  public start(opts: StartOptions): void {
-    // Build sdk version (we dot not define it in StartOptions on purpose, it is private)
-    var sdkVersion = config.version;
-    if (opts["sdkVersion"]) {
-      sdkVersion += "/" + opts["sdkVersion"];
-    }
-    // Clear listeners
-    this.removeAllListeners();
-    // Start IAPHUB
-    RNIaphub.start(Object.assign(opts, {sdkVersion: sdkVersion}));
-    // Display product missing error
-    this.errorListener = this.nativeEventEmitter.addListener("onError", (err) => {
-      if (err.code == "unexpected" && err.subcode == "product_missing_from_store") {
-        console.error(err.message);
+  public async start(opts: StartOptions): Promise<void> {
+    try {
+      // Build sdk version (we dot not define it in StartOptions on purpose, it is private)
+      var sdkVersion = config.version;
+      if (opts["sdkVersion"]) {
+        sdkVersion += "/" + opts["sdkVersion"];
       }
-    });
+      // Clear listeners
+      this.removeAllListeners();
+      // Start IAPHUB
+      await RNIaphub.start(Object.assign(opts, {sdkVersion: sdkVersion}));
+      // Display product missing error
+      this.errorListener = this.nativeEventEmitter.addListener("onError", (err) => {
+        if (err.code == "unexpected" && err.subcode == "product_missing_from_store") {
+          console.error(err.message);
+        }
+      });
+    }
+    catch (err) {
+      throw IaphubError.parse(err);
+    }
   }
 
   /**
    * Stop Iaphub
+   * @returns {Promise<void>}
    */
-  public stop(): void {
-    // Clear listeners
-    this.removeAllListeners();
-    // Stop IAPHUB
-    RNIaphub.stop();
-    // Remove error listener
-    if (this.errorListener) {
-      this.errorListener.remove();
+  public async stop(): Promise<void> {
+    try {
+      // Clear listeners
+      this.removeAllListeners();
+      // Stop IAPHUB
+      await RNIaphub.stop();
+      // Remove error listener
+      if (this.errorListener) {
+        this.errorListener.remove();
+      }
+    }
+    catch (err) {
+      throw IaphubError.parse(err);
     }
   }
 
@@ -163,17 +175,29 @@ export default class Iaphub {
 
   /**
    * Log out user
+   * @returns {Promise<void>}
    */
-  public logout(): void {
-    RNIaphub.logout();
+  public async logout(): Promise<void> {
+    try {
+      await RNIaphub.logout();
+    }
+    catch (err) {
+      throw IaphubError.parse(err);
+    }
   }
 
   /**
    * Set device params
    * @param {Dict} params Device params
+   * @returns {Promise<void>}
    */
-  public setDeviceParams(params: { [key: string]: any }): void {
-    RNIaphub.setDeviceParams(params);
+  public async setDeviceParams(params: { [key: string]: any }): Promise<void> {
+    try {
+      await RNIaphub.setDeviceParams(params);
+    }
+    catch (err) {
+      throw IaphubError.parse(err);
+    }
   }
 
   /**
@@ -194,7 +218,7 @@ export default class Iaphub {
    * Buy product
    * @param {String} sku Product sku
    * @param {Boolean} [crossPlatformConflict=true] Throws an error if the user has already a subscription on a different platform
-   * @returns {Promise<void>}
+   * @returns {Promise<Transaction>}
    */
   public async buy(sku: string, opts: BuyOptions = {crossPlatformConflict: true}): Promise<Transaction> {
     try {
@@ -222,7 +246,7 @@ export default class Iaphub {
   /**
    * Get active products
    * @param {String[]} [includeSubscriptionStates=[]] Include subscription states (only 'active' and 'grace_period' states are returned by default)
-   * @returns {Promise<void>}
+   * @returns {Promise<ActiveProduct[]>}
    */
   public async getActiveProducts(opts: GetProductsOptions = {includeSubscriptionStates: []}): Promise<ActiveProduct[]> {
     try {
@@ -236,7 +260,7 @@ export default class Iaphub {
 
   /**
    * Get products for sale
-   * @returns {Promise<void>}
+   * @returns {Promise<Product[]>}
    */
   public async getProductsForSale(): Promise<Product[]> {
     try {
@@ -250,7 +274,7 @@ export default class Iaphub {
 
   /**
    * Get products (active and for sale)
-   * @returns {Promise<void>}
+   * @returns {Promise<Products>}
    */
   public async getProducts(opts: GetProductsOptions = {includeSubscriptionStates: []}): Promise<Products> {
     try {

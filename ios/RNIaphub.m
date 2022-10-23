@@ -5,9 +5,14 @@
 
 RCT_EXTERN_METHOD(
    start:                  (NSDictionary)options
+   resolver:               (RCTPromiseResolveBlock)resolve
+   rejecter:               (RCTPromiseRejectBlock)reject
 )
 
-RCT_EXTERN_METHOD(stop)
+RCT_EXTERN_METHOD(
+   stop:                   (RCTPromiseResolveBlock)resolve
+   rejecter:               (RCTPromiseRejectBlock)reject
+)
 
 RCT_EXTERN_METHOD(
    login:                  (NSString)userId
@@ -20,10 +25,15 @@ RCT_EXTERN_METHOD(
    rejecter:               (RCTPromiseRejectBlock)reject
 )
 
-RCT_EXTERN_METHOD(logout)
+RCT_EXTERN_METHOD(
+   logout:                 (RCTPromiseResolveBlock)resolve
+   rejecter:               (RCTPromiseRejectBlock)reject
+)
 
 RCT_EXTERN_METHOD(
    setDeviceParams:        (NSDictionary)params
+   resolver:               (RCTPromiseResolveBlock)resolve
+   rejecter:               (RCTPromiseRejectBlock)reject
 )
 
 RCT_EXTERN_METHOD(

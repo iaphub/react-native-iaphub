@@ -37,7 +37,7 @@ class RNIaphubModule(reactContext: ReactApplicationContext) : ReactContextBaseJa
    * Start IAPHUB
    */
   @ReactMethod
-  fun start(options: ReadableMap) {
+  fun start(options: ReadableMap, promise: Promise) {
     val appId = this.getString(options, "appId", "")
     val apiKey = this.getString(options, "apiKey", "")
     val userId = this.getStringOrNull(options, "userId")
@@ -74,14 +74,19 @@ class RNIaphubModule(reactContext: ReactApplicationContext) : ReactContextBaseJa
         "receipt" to if (receipt != null) receipt.getData() else null
       )))
     }
+    // Resolve promise
+    promise.resolve(null)
   }
 
   /**
    * Stop IAPHUB
    */
   @ReactMethod
-  fun stop() {
+  fun stop(promise: Promise) {
+    // Stop IAPHUB
     Iaphub.stop()
+    // Resolve promise
+    promise.resolve(null)
   }
 
   /**
@@ -118,16 +123,22 @@ class RNIaphubModule(reactContext: ReactApplicationContext) : ReactContextBaseJa
    * Logout
    */
   @ReactMethod
-  fun logout() {
+  fun logout(promise: Promise) {
+    // Logout 
     Iaphub.logout()
+    // Resolve promise
+    promise.resolve(null)
   }
 
   /**
    * Set device params
    */
   @ReactMethod
-  fun setDeviceParams(params: ReadableMap) {
+  fun setDeviceParams(params: ReadableMap, promise: Promise) {
+    // Set device params
     Iaphub.setDeviceParams(this.mapOf(params))
+    // Resolve promise
+    promise.resolve(null)
   }
 
   /**
