@@ -130,6 +130,14 @@ Call the `login` method to authenticate a user.<br/>
 await Iaphub.login("1e5494930c48ed07aa275fd2");
 ```
 
+## Get user ID
+Call the `getUserId` method to get the user id of the logged user.<br/>
+If no user is logged the anonymous user id will be returned (prefixed with 'a:').
+
+```js
+var userId = await Iaphub.getUserId()
+```
+
 ## Logout
 Call the `logout` method to log the user out.<br/>
 The user will switch back to his anonymous user id (prefixed with 'a:').<br/>
@@ -137,7 +145,7 @@ The user will switch back to his anonymous user id (prefixed with 'a:').<br/>
 ⚠ The user will be reset, `setOnUserUpdateListener` will only be called until after the user has been loaded first (using getProductsForSale/getActiveProducts).<br/>
 
 ```js
-Iaphub.logout()
+await Iaphub.logout()
 ```
 
 ## Set user tags
@@ -165,9 +173,9 @@ When using IAPHUB's smart listings, you'll be able to return different products 
 ```js
 // For instance you can provide the app version on app launch
 // Useful to return a product only supported in a new version
-Iaphub.setDeviceParams({appVersion: '1.2.0'});
+await Iaphub.setDeviceParams({appVersion: '1.2.0'});
 // To clear the device params
-Iaphub.setDeviceParams({});
+await Iaphub.setDeviceParams({});
 ```
 
 A few details:
