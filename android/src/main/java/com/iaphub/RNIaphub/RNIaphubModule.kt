@@ -41,7 +41,7 @@ class RNIaphubModule(reactContext: ReactApplicationContext) : ReactContextBaseJa
     val appId = this.getString(options, "appId", "")
     val apiKey = this.getString(options, "apiKey", "")
     val userId = this.getStringOrNull(options, "userId")
-    val allowAnonymousPurchase = this.getBoolean(options, "getBoolean", false)
+    val allowAnonymousPurchase = this.getBoolean(options, "allowAnonymousPurchase", false)
     val environment = this.getString(options, "environment", "production")
     val sdkVersion = this.getString(options, "sdkVersion", "")
     val extraSdk = this.getStringOrNull(options, "sdk")
