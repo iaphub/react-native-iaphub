@@ -23,7 +23,9 @@ class IAPStore {
 			// The app id is available on the settings page of your app
 			appId: "5e4890f6c61fc971cf46db4d",
 			// The (client) api key is available on the settings page of your app
-			apiKey: "SDp7aY220RtzZrsvRpp4BGFm6qZqNkNf"
+			apiKey: "SDp7aY220RtzZrsvRpp4BGFm6qZqNkNf",
+			// Allow anonymous purchase
+			allowAnonymousPurchase: true
 		});
 		// Add device params
 		await Iaphub.setDeviceParams({appVersion: pkg.version});
@@ -45,9 +47,14 @@ class IAPStore {
 		});
 	}
 
-	// Set user id
-	async setUserId(userId) {
+	// Login
+	async login(userId) {
 		await Iaphub.login(userId);
+	}
+
+	// Logout
+	async logout() {
+		await Iaphub.logout();
 	}
 
 	// Refresh products

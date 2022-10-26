@@ -8,6 +8,7 @@ export default class LoginPage extends React.Component {
     return (
       <View style={styles.root}>
         <Button title="Login" onPress={app.login}/>
+        <Button title="Login anonymously" onPress={app.loginAnonymously}/>
       </View>
     )
   }

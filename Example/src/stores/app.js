@@ -20,13 +20,20 @@ class AppStore {
   }
 
   login = async () => {
-    await iap.setUserId("1");
+    await iap.login("42");
     await iap.refreshProducts();
     await AsyncStorage.setItem('isLogged', "true");
     this.isLogged = true;
   }
+
+  loginAnonymously = async () => {
+    await iap.refreshProducts();
+    await AsyncStorage.setItem('isLogged', "false");
+    this.isLogged = true;
+  }
   
   logout = async () => {
+    await iap.logout();
     await AsyncStorage.setItem('isLogged', "false");
     this.isLogged = false;
   }
