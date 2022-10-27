@@ -15,6 +15,6 @@ Pod::Spec.new do |s|
 
   s.source_files = "ios/**/*.{h,m,mm,swift}"
 
-  s.dependency "Iaphub", "3.1.6"
+  s.dependency "Iaphub", "3.1.7"
   s.dependency "React-Core"
 end
