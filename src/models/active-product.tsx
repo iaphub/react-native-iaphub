@@ -15,6 +15,19 @@ export default interface ActiveProduct extends Product {
    */
   readonly platform: string | null;
   /**
+   * If it has been purchased using a promo code
+   */
+  readonly isPromo: boolean | false;
+  /**
+   * Promo code used for the purchase
+   * (Android: only available for subscriptions vanity codes, not available for one time codes) (iOS: the value is the offer reference name)
+   */
+  readonly promoCode: string | null;
+  /**
+   * Subscription original purchase id
+   */
+  readonly originalPurchase: string | null;
+  /**
    * Subscription expiration date
    */
   readonly expirationDate: string | null;

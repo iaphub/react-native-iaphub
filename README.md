@@ -460,7 +460,10 @@ await Iaphub.presentCodeRedemptionSheet();
 | purchase | `string` | Purchase id (From IAPHUB) |
 | purchaseDate | `string` | Purchase date |
 | platform | `string` | Platform of the purchase (Possible values: 'ios', 'android') |
+| isPromo | `boolean` | True if purchased using a promo code |
+| promoCode | `string` | Promo code (Android: only available for subscriptions vanity codes, not available for one time codes) (iOS: the value is the offer reference name) |
 | expirationDate | `string` | Subscription expiration date |
+| originalPurchase | `string` | Subscription original purchase id |
 | isSubscriptionRenewable | `boolean` | True if the auto-renewal is enabled |
 | isFamilyShare | `boolean` | True if the subscription is shared by a family member (iOS subscriptions only) |
 | subscriptionRenewalProduct | `string` | Subscription product id of the next renewal (only defined if different than the current product) |
