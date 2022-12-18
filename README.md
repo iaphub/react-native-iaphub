@@ -347,10 +347,12 @@ catch (err) {
     "billing_unavailable": "In-app purchase not allowed",
     // The remote server couldn't be reached properly
     "network_error": "Network error, please try to restore your purchases later (Button in the settings) or contact the support (support@myapp.com)",
-    // The receipt has been processed on IAPHUB but something went wrong
+    /*
+     * The receipt has been processed on IAPHUB but something went wrong
+     * It is probably because of an issue with the configuration of your app or a call to the Itunes/GooglePlay API that failed
+     * IAPHUB will automatically retry to process the receipt if possible (depends on the error)
+     */
     "receipt_failed": "We're having trouble validating your transaction, give us some time, we'll retry to validate your transaction ASAP",
-    // The receipt has been processed on IAPHUB but is invalid, it could be a fraud attempt, using apps such as Freedom or Lucky Patcher on an Android rooted device
-    "receipt_invalid": "We were not able to process your purchase, if you've been charged please contact the support (support@myapp.com)",
     /*
      * The user has already an active subscription on a different platform (android or ios)
      * This security has been implemented to prevent a user from ending up with two subscriptions of different platforms

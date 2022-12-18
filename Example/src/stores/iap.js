@@ -105,8 +105,6 @@ class IAPStore {
 				"network_error": "Network error, please try to restore your purchases later (Button in the settings) or contact the support (support@myapp.com)",
 				// The receipt has been processed on IAPHUB but something went wrong
 				"receipt_failed": "We're having trouble validating your transaction, give us some time, we'll retry to validate your transaction ASAP",
-				// The receipt has been processed on IAPHUB but is invalid, it could be a fraud attempt, using apps such as Freedom or Lucky Patcher on an Android rooted device
-				"receipt_invalid": "We were not able to process your purchase, if you've been charged please contact the support (support@myapp.com)",
 				// The user has already an active subscription on a different platform (android or ios)
 				"cross_platform_conflict": "It seems like you already have a subscription on a different platform, please use the same platform to change your subscription or wait for your current subscription to expire",
 				// The transaction is successful but the product belongs to a different user
