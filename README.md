@@ -62,6 +62,9 @@ Call the `start` method in order to initialize IAPHUB.<br/><br/>
     // -- OPTIONAL -- //
     // App environment (IAPHUB supports multiple environments, an environment act like a separate app and must be created on the IAPHUB dashboard)
     //environment: "staging"
+    // If enabled the 'onDeferredPurchase' event will be triggered (true by default)
+    // When disabled, the deferred purchases are only returned by the restore method (in the 'newPurchases' array of the restore response)
+    //enableDeferredPurchaseListener: true
   });
 ```
 
