@@ -79,6 +79,19 @@ Call the `addEventListener` method to listen to an event and `removeEventListene
   Iaphub.removeEventListener(listener);
 ```
 
+#### onDeferredPurchase - Event triggered when a purchase is processed 'outside' of the buy method
+```js
+  // This event could be triggered:
+  // - After a purchase is made outside the app (by redeeming a promo code on the store by example)
+  // - After a deferred payment (when the error code 'deferred_payment' is returned by the buy method)
+  // - After a payment fails because it couldn't be validated by IAPHUB (and succeeds later)
+  var listener = Iaphub.addEventListener('onDeferredPurchase', async (transaction) => {
+    
+  });
+  // You can also unlisten the event
+  Iaphub.removeEventListener(listener);
+```
+
 #### onBuyRequest - Event triggered when a purchase intent is made from outside the app (like a promoted In-App purchase)
 ```js
   // Add listener
@@ -275,9 +288,9 @@ If you're looking to display a message when a user has a subscription on a `retr
 You can also get the products for sale and active products using one method `getProducts()`
 
 ```js
-  var data = await Iaphub.getProducts();
-  console.log("Products for sale: ", data.productsForSale);
-  console.log("Active products: ", data.activeProducts);
+  var products = await Iaphub.getProducts();
+  console.log("Products for sale: ", products.productsForSale);
+  console.log("Active products: ", products.activeProducts);
 ```
 
 ## Buy a product
@@ -386,7 +399,11 @@ Call the ``restore`` method to restore the user purchases<br/><br/>
 ℹ️ You must display a button somewhere in your app in order to allow the user to restore its purchases.<br/>
 
 ```js
-await Iaphub.restore();
+var response = await Iaphub.restore();
+// New purchases
+console.log('New purchases: ', response.newPurchases);
+// Extisting active products transferred to the user
+console.log('Transferred active products: ', response.transferredActiveProducts);
 ```
 
 ## Show manage subscriptions
@@ -457,6 +474,18 @@ await Iaphub.presentCodeRedemptionSheet();
 | :------------ |:---------------:| :-----|
 | webhookStatus | `string` | Webhook status (Possible values: 'success', 'failed', 'disabled') |
 | user | `string` | User id (From IAPHUB) |
+
+### Products
+| Prop  | Type | Description |
+| :------------ |:---------------:| :-----|
+| productsForSale | `[Product]` | Products for sale |
+| activeProducts | `[ActiveProduct]` | Active products |
+
+### RestoreResponse
+| Prop  | Type | Description |
+| :------------ |:---------------:| :-----|
+| newPurchases | `[ReceiptTransaction]` | New purchases processed during the restore |
+| transferredActiveProducts | `[ActiveProduct]` | Active products transferred (from another user) during the restore |
 
 ### Error
 | Prop  | Type | Description |

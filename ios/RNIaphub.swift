@@ -20,7 +20,7 @@ class RNIaphub: RCTEventEmitter, IaphubDelegate {
    }
    
    override func supportedEvents() -> [String]! {
-       return ["onUserUpdate", "onError", "onBuyRequest", "onReceipt"]
+       return ["onUserUpdate", "onDeferredPurchase", "onError", "onBuyRequest", "onReceipt"]
    }
    
    /***************************** EVENTS ******************************/
@@ -33,6 +33,16 @@ class RNIaphub: RCTEventEmitter, IaphubDelegate {
          return
       }
       self.sendEvent(withName: "onUserUpdate", body: nil)
+   }
+   
+   /**
+    Listen for a deferred purchase event
+    */
+   func didReceiveDeferredPurchase(transaction: IHReceiptTransaction) {
+      if (!self.hasListeners) {
+         return
+      }
+      self.sendEvent(withName: "onDeferredPurchase", body: transaction.getDictionary())
    }
    
    /**
@@ -79,6 +89,7 @@ class RNIaphub: RCTEventEmitter, IaphubDelegate {
       let apiKey = options.value(forKey: "apiKey") as? String ?? ""
       let userId = options.value(forKey: "userId") as? String
       let allowAnonymousPurchase = options.value(forKey: "allowAnonymousPurchase") as? Bool ?? false
+      let enableDeferredPurchaseListener = options.value(forKey: "enableDeferredPurchaseListener") as? Bool ?? true
       let environment = options.value(forKey: "environment") as? String ?? "production"
       let sdkVersion = options.value(forKey: "sdkVersion") as? String ?? ""
       var sdk = "react_native"
@@ -92,6 +103,7 @@ class RNIaphub: RCTEventEmitter, IaphubDelegate {
          apiKey: apiKey,
          userId: userId,
          allowAnonymousPurchase: allowAnonymousPurchase,
+         enableDeferredPurchaseListener: enableDeferredPurchaseListener,
          environment: environment,
          sdk: sdk,
          sdkVersion: sdkVersion
@@ -187,11 +199,11 @@ class RNIaphub: RCTEventEmitter, IaphubDelegate {
     */
    @objc
    func restore(_ resolve: @escaping RCTPromiseResolveBlock, rejecter reject: @escaping RCTPromiseRejectBlock) {
-      Iaphub.restore({ (err) in
+      Iaphub.restore({ (err, response) in
          if let err = err {
             return reject("iaphub_error", self.createError(err), nil)
          }
-         resolve(nil)
+         resolve(response?.getDictionary())
       })
    }
    
@@ -230,14 +242,11 @@ class RNIaphub: RCTEventEmitter, IaphubDelegate {
    func getProducts(_ options: NSDictionary, resolver resolve: @escaping RCTPromiseResolveBlock, rejecter reject: @escaping RCTPromiseRejectBlock) {
       let includeSubscriptionStates = options.value(forKey: "includeSubscriptionStates") as? [String] ?? []
       
-      Iaphub.getProducts(includeSubscriptionStates: includeSubscriptionStates, { (err, productsForSale, activeProducts) in
+      Iaphub.getProducts(includeSubscriptionStates: includeSubscriptionStates, { (err, products) in
          if let err = err {
             return reject("iaphub_error", self.createError(err), nil)
          }
-         resolve([
-            "productsForSale": productsForSale?.map({ (product) in product.getDictionary()}),
-            "activeProducts": activeProducts?.map({ (product) in product.getDictionary()})
-         ])
+         resolve(products?.getDictionary())
       })
    }
    

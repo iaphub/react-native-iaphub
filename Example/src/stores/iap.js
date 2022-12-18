@@ -36,6 +36,9 @@ class IAPStore {
 			console.log("-> Got user update");
 			await this.refreshProducts();
 		});
+		Iaphub.addEventListener('onDeferredPurchase', async (transaction) => {
+			console.log("-> Got deferred purchase: ", transaction);
+		});
 		Iaphub.addEventListener('onError', async (err) => {
 			console.log("-> Got err: ", err);
 		});
@@ -125,7 +128,8 @@ class IAPStore {
 
 	// Call this method to restore the user purchases (you should have a button, it is usually displayed on the settings page)
 	async restore() {
-		await Iaphub.restore();
+		var response = await Iaphub.restore();
+		console.log("Response response: ", response);
 		Alert.alert("Restore", "Purchases restored");
 	}
 

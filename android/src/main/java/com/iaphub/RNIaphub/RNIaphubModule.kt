@@ -42,6 +42,7 @@ class RNIaphubModule(reactContext: ReactApplicationContext) : ReactContextBaseJa
     val apiKey = this.getString(options, "apiKey", "")
     val userId = this.getStringOrNull(options, "userId")
     val allowAnonymousPurchase = this.getBoolean(options, "allowAnonymousPurchase", false)
+    val enableDeferredPurchaseListener = this.getBoolean(options, "enableDeferredPurchaseListener", true)
     val environment = this.getString(options, "environment", "production")
     val sdkVersion = this.getString(options, "sdkVersion", "")
     val extraSdk = this.getStringOrNull(options, "sdk")
@@ -57,6 +58,7 @@ class RNIaphubModule(reactContext: ReactApplicationContext) : ReactContextBaseJa
       apiKey=apiKey,
       userId=userId,
       allowAnonymousPurchase=allowAnonymousPurchase,
+      enableDeferredPurchaseListener=enableDeferredPurchaseListener,
       environment=environment,
       sdk=sdk,
       sdkVersion=sdkVersion
@@ -64,6 +66,9 @@ class RNIaphubModule(reactContext: ReactApplicationContext) : ReactContextBaseJa
     // Register listeners
     Iaphub.setOnUserUpdateListener { ->
       this.reactApplicationContext.getJSModule(RCTDeviceEventEmitter::class.java).emit("onUserUpdate", null)
+    }
+    Iaphub.setOnDeferredPurchaseListener { transaction ->
+      this.reactApplicationContext.getJSModule(RCTDeviceEventEmitter::class.java).emit("onDeferredPurchase", this.writableMapOf(transaction.getData()))
     }
     Iaphub.setOnErrorListener { err ->
       this.reactApplicationContext.getJSModule(RCTDeviceEventEmitter::class.java).emit("onError", this.writableMapOf(err.getData()))
@@ -124,7 +129,7 @@ class RNIaphubModule(reactContext: ReactApplicationContext) : ReactContextBaseJa
    */
   @ReactMethod
   fun logout(promise: Promise) {
-    // Logout 
+    // Logout
     Iaphub.logout()
     // Resolve promise
     promise.resolve(null)
@@ -187,12 +192,15 @@ class RNIaphubModule(reactContext: ReactApplicationContext) : ReactContextBaseJa
    */
   @ReactMethod
   fun restore(promise: Promise) {
-    Iaphub.restore { err ->
+    Iaphub.restore { err, response ->
       if (err != null) {
         this.rejectWithError(err, promise)
       }
+      else if (response == null) {
+        this.rejectWithUnexpectedError("unexpected_parameter", "response returned by restore is null", promise)
+      }
       else {
-        promise.resolve(null)
+        promise.resolve(this.writableMapOf(response.getData()))
       }
     }
   }
@@ -250,18 +258,15 @@ class RNIaphubModule(reactContext: ReactApplicationContext) : ReactContextBaseJa
     if (includeSubscriptionStatesValue != null) {
       includeSubscriptionStates = this.listOf(includeSubscriptionStatesValue)
     }
-    Iaphub.getProducts(includeSubscriptionStates) { err, productsForSale, activeProducts ->
+    Iaphub.getProducts(includeSubscriptionStates) { err, products ->
       if (err != null) {
         this.rejectWithError(err, promise)
       }
-      else if (productsForSale == null || activeProducts == null) {
+      else if (products == null) {
         this.rejectWithUnexpectedError("unexpected_parameter", "products returned by getProducts is null", promise)
       }
       else {
-        promise.resolve(this.writableMapOf(mapOf(
-          "productsForSale" to productsForSale.map { product -> product.getData() },
-          "activeProducts" to activeProducts.map { product -> product.getData() }
-        )))
+        promise.resolve(this.writableMapOf(products.getData()))
       }
     }
   }

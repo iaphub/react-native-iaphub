@@ -24,13 +24,15 @@ const RNIaphub = NativeModules.RNIaphub
     );
 
 type Products = {productsForSale: Product[]; activeProducts: ActiveProduct[]};
-type EventName = 'onUserUpdate' | 'onError' | 'onBuyRequest' | 'onReceipt';
+type RestoreResponse = {newPurchases: Transaction[]; transferredActiveProducts: ActiveProduct[]};
+type EventName = 'onUserUpdate' | 'onDeferredPurchase' | 'onError' | 'onBuyRequest' | 'onReceipt';
 
 interface StartOptions {
   appId: string,
   apiKey: string,
   userId?: string,
   allowAnonymousPurchase?: boolean,
+  enableDeferredPurchaseListener?: boolean,
   environment?: string
 };
 
@@ -99,6 +101,7 @@ export default class Iaphub {
    * @param {String} appId App id that can be found on the IAPHUB dashboard
    * @param {String} apiKey Api key that can be found on the IAPHUB dashboard
    * @param {Boolean} allowAnonymousPurchase Option to allow purchases without being logged in
+   * @param {Boolean} enableDeferredPurchaseListener Option to enable the onDeferredPurchase event (true by default)
    * @param {String} environment Option to specify a different environment than production
    * @returns {Promise<void>}
    */
@@ -232,11 +235,12 @@ export default class Iaphub {
 
   /**
    * Restore purchases
-   * @returns {Promise<void>}
+   * @returns {Promise<RestoreResponse>}
    */
-  public async restore(): Promise<void> {
+  public async restore(): Promise<RestoreResponse> {
     try {
-      await RNIaphub.restore();
+      var response = await RNIaphub.restore();
+      return response;
     }
     catch (err) {
       throw IaphubError.parse(err);
