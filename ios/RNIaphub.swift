@@ -251,6 +251,16 @@ class RNIaphub: RCTEventEmitter, IaphubDelegate {
    }
    
    /**
+    Get billing status
+    */
+   @objc
+   func getBillingStatus(_ resolve: @escaping RCTPromiseResolveBlock, rejecter reject: @escaping RCTPromiseRejectBlock) {
+      let status = Iaphub.getBillingStatus()
+      
+      resolve(status.getDictionary())
+   }
+   
+   /**
     Present code redemption
     */
    @objc

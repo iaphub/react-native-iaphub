@@ -272,6 +272,16 @@ class RNIaphubModule(reactContext: ReactApplicationContext) : ReactContextBaseJa
   }
 
   /**
+   * Get billing status
+   */
+  @ReactMethod
+  fun getBillingStatus(promise: Promise) {
+    val status = Iaphub.getBillingStatus()
+
+    promise.resolve(this.writableMapOf(status.getData()))
+  }
+
+  /**
    * Show manage subscriptions
    */
   @ReactMethod

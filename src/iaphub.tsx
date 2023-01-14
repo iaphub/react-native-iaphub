@@ -4,6 +4,7 @@ import config from './config';
 import type Transaction from './models/transaction';
 import type Product from './models/product';
 import type ActiveProduct from './models/active-product';
+import type BillingStatus from './models/billing-status';
 import IaphubError from './models/iaphub-error';
 
 const LINKING_ERROR =
@@ -284,6 +285,20 @@ export default class Iaphub {
     try {
       var products = await RNIaphub.getProducts(opts);
       return products;
+    }
+    catch (err) {
+      throw IaphubError.parse(err);
+    }
+  }
+
+  /**
+   * Get billing status
+   * @returns {Promise<BillingStatus>}
+   */
+   public async getBillingStatus(): Promise<BillingStatus> {
+    try {
+      var status = await RNIaphub.getBillingStatus();
+      return status;
     }
     catch (err) {
       throw IaphubError.parse(err);

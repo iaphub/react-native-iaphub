@@ -78,6 +78,11 @@ RCT_EXTERN_METHOD(
 )
 
 RCT_EXTERN_METHOD(
+   getBillingStatus:       (RCTPromiseResolveBlock)resolve
+   rejecter:               (RCTPromiseRejectBlock)reject
+)
+
+RCT_EXTERN_METHOD(
    presentCodeRedemptionSheet:   (RCTPromiseResolveBlock)resolve
    rejecter:                     (RCTPromiseRejectBlock)reject
 )
