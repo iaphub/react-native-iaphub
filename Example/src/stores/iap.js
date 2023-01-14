@@ -11,6 +11,7 @@ class IAPStore {
 	skuProcessing = null;
 	productsForSale = null;
 	activeProducts = null;
+	billingStatus = null;
 
 	constructor() {
     makeAutoObservable(this)
@@ -63,9 +64,14 @@ class IAPStore {
 	// Refresh products
 	async refreshProducts() {
 		try {
-			this.activeProducts = await Iaphub.getActiveProducts();
-			this.productsForSale = await Iaphub.getProductsForSale();
-		} catch (err) {
+			// Refresh products
+			var products = await Iaphub.getProducts();
+			this.activeProducts = products.activeProducts;
+			this.productsForSale = products.productsForSale;
+			// Resfresh billing status
+			this.billingStatus = await Iaphub.getBillingStatus();
+		}
+		catch (err) {
 			console.error(err);
 		}
 	}

@@ -70,8 +70,18 @@ export default class IAPPage extends React.Component {
     )
   }
 
+  renderBillingError = (error) => {
+    var description = "Billing not available, please try again later";
+
+    if (error.subcode == "play_store_outdated") {
+      description = "Billing not available, you must update your Play Store App";
+    }
+
+    return this.renderEmpty(description);
+  }
+
   renderProductsForSale = () => {
-    var {productsForSale} = iap;
+    var {productsForSale, billingStatus} = iap;
     var groups = {};
 
     if (productsForSale) {
@@ -92,7 +102,8 @@ export default class IAPPage extends React.Component {
             <ActivityIndicator size="small"/>
           </View>
         }
-        {productsForSale && !productsForSale.length && this.renderEmpty("No products for sale")}
+        {productsForSale && !productsForSale.length && (!billingStatus || !billingStatus.error) && this.renderEmpty("No products for sale")}
+        {productsForSale && !productsForSale.length && billingStatus && billingStatus.error && this.renderBillingError(billingStatus.error)}
         {Object.keys(groups).map((groupName) => (
           <View key={groupName}>
             <Text style={styles.groupTitle}>{groupName}</Text>
