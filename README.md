@@ -296,6 +296,26 @@ You can also get the products for sale and active products using one method `get
   console.log("Active products: ", products.activeProducts);
 ```
 
+## Get billing status
+The `getBillingStatus` method will return useful informations if you have an issue with the products returned by the `getProducts` or `getProductsForSale` methods (for instance if no products for sale were returned).
+```js
+  var status = await Iaphub.getBillingStatus();
+
+  // You should display an appropriate message if the billing is unavailable
+  if (status.error && status.error.code == "billing_unavailable") {
+    if (status.error.subcode == "play_store_outdated") {
+      // Display a message saying that the Play Store app on the user's device is out of date, it must be updated
+    }
+    else {
+      // Display a message saying that the in-app billing isn't available on the device
+    }
+  }
+  // Check the products that were filtered from the products for sale
+  if (status.filteredProductIds.length) {
+    // The product ids in the array were not returned by iTunes/GooglePlay
+  }
+```
+
 ## Buy a product
 Call the ``buy`` method to buy a product<br/><br/>
 ℹ️ The method needs the product sku that you would get from one of the products of `getProductsForSale()`.<br/>
