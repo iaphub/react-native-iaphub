@@ -9,6 +9,6 @@ export default interface BillingStatus {
   /**
    * Filtered products ids
    */
-  readonly filteredProductIds: [string]
+  readonly filteredProductIds: string[]
 
 }
