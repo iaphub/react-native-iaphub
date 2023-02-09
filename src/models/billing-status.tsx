@@ -3,7 +3,7 @@ import type IaphubError from './iaphub-error';
 export default interface BillingStatus {
 
   /**
-   * Product id
+   * Error
    */
   readonly error: IaphubError | null;
   /**
