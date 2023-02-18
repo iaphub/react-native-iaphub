@@ -515,6 +515,12 @@ await Iaphub.presentCodeRedemptionSheet();
 | newPurchases | `[ReceiptTransaction]` | New purchases processed during the restore |
 | transferredActiveProducts | `[ActiveProduct]` | Active products transferred (from another user) during the restore |
 
+### BillingStatus
+| Prop  | Type | Description |
+| :------------ |:---------------:| :-----|
+| error | `Error` | Error |
+| filteredProductIds | `[string]` | Products that were filtered from the products for sale |
+
 ### Error
 | Prop  | Type | Description |
 | :------------ |:---------------:| :-----|
