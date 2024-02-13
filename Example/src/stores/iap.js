@@ -68,6 +68,8 @@ class IAPStore {
 			var products = await Iaphub.getProducts();
 			this.activeProducts = products.activeProducts;
 			this.productsForSale = products.productsForSale;
+			console.log('activeProducts: ', products.activeProducts);
+			console.log('productsForSale: ', products.productsForSale);
 			// Resfresh billing status
 			this.billingStatus = await Iaphub.getBillingStatus();
 		}
@@ -81,6 +83,7 @@ class IAPStore {
 		try {
 			this.skuProcessing = productSku;
 			var transaction = await Iaphub.buy(productSku);
+			console.log('purchase: ', transaction);
 			this.skuProcessing = null;
 			// The webhook could not been sent to my server (Only needed if you're relying on webhooks)
 			if (transaction.webhookStatus == "failed") {

@@ -1,9 +1,4 @@
-/**
- * Metro configuration for React Native
- * https://github.com/facebook/react-native
- *
- * @format
- */
+const {getDefaultConfig, mergeConfig} = require('@react-native/metro-config');
 const path = require('path');
 const exclusionList = require('metro-config/src/defaults/exclusionList');
 const escape = require('escape-string-regexp');
@@ -14,16 +9,16 @@ const exclude = ['react', 'react-native', '@babel/runtime'];
 const extraNodeModules = {
   'react': path.resolve(__dirname + '/node_modules/react'),
   'react-native': path.resolve(__dirname + '/node_modules/react-native'),
-  'react-native-iaphub': path.resolve(__dirname + '/node_modules/react-native-iaphub'),
   '@babel/runtime': path.resolve(__dirname + '/node_modules/@babel/runtime'),
-  'react-native-iaphub-ui': path.resolve(__dirname + '/..'),
+  'react-native-iaphub': path.resolve(__dirname + '/..'),
+  'react-native-iaphub-ui': path.resolve(__dirname + '/..')
 };
 
 const watchFolders = [
   path.resolve(__dirname + '/..')
 ];
 
-module.exports = {
+const config = {
   resolver: {
     blacklistRE: exclusionList(exclude.map((name) => new RegExp(`^${escape(path.join(rootPath, 'node_modules', name))}\\/.*$`))),
     extraNodeModules: extraNodeModules
@@ -38,3 +33,5 @@ module.exports = {
     }),
   },
 };
+
+module.exports = mergeConfig(getDefaultConfig(__dirname), config);
