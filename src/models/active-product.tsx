@@ -15,6 +15,10 @@ export default interface ActiveProduct extends Product {
    */
   readonly platform: string | null;
   /**
+   * If it is a sandbox transaction
+   */
+  readonly isSandbox: boolean | false;
+  /**
    * If it has been purchased using a promo code
    */
   readonly isPromo: boolean | false;

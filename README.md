@@ -485,6 +485,7 @@ await Iaphub.presentCodeRedemptionSheet();
 | purchase | `string` | Purchase id (From IAPHUB) |
 | purchaseDate | `string` | Purchase date |
 | platform | `string` | Platform of the purchase (Possible values: 'ios', 'android') |
+| isSandbox | `boolean` | True if sandbox transaction |
 | isPromo | `boolean` | True if purchased using a promo code |
 | promoCode | `string` | Promo code (Android: only available for subscriptions vanity codes, not available for one time codes) (iOS: the value is the offer reference name) |
 | expirationDate | `string` | Subscription expiration date |
