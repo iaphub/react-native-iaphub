@@ -26,7 +26,9 @@ class IAPStore {
 			// The (client) api key is available on the settings page of your app
 			apiKey: "SDp7aY220RtzZrsvRpp4BGFm6qZqNkNf",
 			// Allow anonymous purchase
-			allowAnonymousPurchase: true
+			allowAnonymousPurchase: true,
+			// Enable StoreKit V2 if supported by the phone (iOS 15+)
+			enableStorekitV2: true
 		});
 		// Add device params
 		await Iaphub.setDeviceParams({appVersion: pkg.version});

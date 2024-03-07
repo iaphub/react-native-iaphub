@@ -90,6 +90,7 @@ class RNIaphub: RCTEventEmitter, IaphubDelegate {
       let userId = options.value(forKey: "userId") as? String
       let allowAnonymousPurchase = options.value(forKey: "allowAnonymousPurchase") as? Bool ?? false
       let enableDeferredPurchaseListener = options.value(forKey: "enableDeferredPurchaseListener") as? Bool ?? true
+      let enableStorekitV2 = options.value(forKey: "enableStorekitV2") as? Bool ?? false
       let environment = options.value(forKey: "environment") as? String ?? "production"
       let sdkVersion = options.value(forKey: "sdkVersion") as? String ?? ""
       var sdk = "react_native"
@@ -104,6 +105,7 @@ class RNIaphub: RCTEventEmitter, IaphubDelegate {
          userId: userId,
          allowAnonymousPurchase: allowAnonymousPurchase,
          enableDeferredPurchaseListener: enableDeferredPurchaseListener,
+         enableStorekitV2: enableStorekitV2,
          environment: environment,
          sdk: sdk,
          sdkVersion: sdkVersion

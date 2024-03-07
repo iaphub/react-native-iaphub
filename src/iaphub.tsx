@@ -34,6 +34,7 @@ interface StartOptions {
   userId?: string,
   allowAnonymousPurchase?: boolean,
   enableDeferredPurchaseListener?: boolean,
+  enableStorekitV2?: boolean,
   environment?: string
 };
 
@@ -103,6 +104,7 @@ export default class Iaphub {
    * @param {String} apiKey Api key that can be found on the IAPHUB dashboard
    * @param {Boolean} allowAnonymousPurchase Option to allow purchases without being logged in
    * @param {Boolean} enableDeferredPurchaseListener Option to enable the onDeferredPurchase event (true by default)
+   * @param {Boolean} enableStorekitV2 Enable StoreKit V2 if supported by the phone (iOS 15+) (false by default)
    * @param {String} environment Option to specify a different environment than production
    * @returns {Promise<void>}
    */
