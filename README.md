@@ -59,9 +59,6 @@ Call the `start` method in order to initialize IAPHUB.<br/><br/>
     // If you're listenning to IAPHUB webhooks your implementation must support users with anonymous user ids
     // This option is disabled by default, when disabled the buy method will return an error when the user isn't logged in
     allowAnonymousPurchase: true,
-    // Enable StoreKit V2 if supported by the phone (iOS 15+). If enabled, also ensure it's enabled in the IAPHUB dashboard settings.
-    // This option is currently in beta test (disabled by default)
-    enableStorekitV2: true
     // -- OPTIONAL -- //
     // App environment (IAPHUB supports multiple environments, an environment act like a separate app and must be created on the IAPHUB dashboard)
     //environment: "staging"
