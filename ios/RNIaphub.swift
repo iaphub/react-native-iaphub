@@ -92,6 +92,7 @@ class RNIaphub: RCTEventEmitter, IaphubDelegate {
       let enableDeferredPurchaseListener = options.value(forKey: "enableDeferredPurchaseListener") as? Bool ?? true
       let enableStorekitV2 = options.value(forKey: "enableStorekitV2") as? Bool ?? false
       let environment = options.value(forKey: "environment") as? String ?? "production"
+      let lang = options.value(forKey: "lang") as? String ?? ""
       let sdkVersion = options.value(forKey: "sdkVersion") as? String ?? ""
       var sdk = "react_native"
 
@@ -107,6 +108,7 @@ class RNIaphub: RCTEventEmitter, IaphubDelegate {
          enableDeferredPurchaseListener: enableDeferredPurchaseListener,
          enableStorekitV2: enableStorekitV2,
          environment: environment,
+         lang: lang,
          sdk: sdk,
          sdkVersion: sdkVersion
       )
@@ -121,6 +123,15 @@ class RNIaphub: RCTEventEmitter, IaphubDelegate {
        Iaphub.stop()
        resolve(nil)
     }
+
+   /**
+   Set lang
+   */
+   @objc
+   func setLang(_ lang: String, resolver resolve: @escaping RCTPromiseResolveBlock, rejecter reject: @escaping RCTPromiseRejectBlock) {
+      let result = Iaphub.setLang(lang);
+      resolve(result);
+   }
    
    /**
     Login

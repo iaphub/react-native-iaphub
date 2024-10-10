@@ -35,6 +35,7 @@ interface StartOptions {
   allowAnonymousPurchase?: boolean,
   enableDeferredPurchaseListener?: boolean,
   enableStorekitV2?: boolean,
+  lang?: string
   environment?: string
 };
 
@@ -145,6 +146,21 @@ export default class Iaphub {
       if (this.errorListener) {
         this.errorListener.remove();
       }
+    }
+    catch (err) {
+      throw IaphubError.parse(err);
+    }
+  }
+
+  /**
+   * Set lang
+   * @param {String} lang Language
+   * @returns {Promise<boolean>}
+   */
+  public async setLang(lang: string): Promise<boolean> {
+    try {
+      var result = await RNIaphub.setLang(lang);
+      return result;
     }
     catch (err) {
       throw IaphubError.parse(err);

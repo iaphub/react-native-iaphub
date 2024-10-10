@@ -15,6 +15,12 @@ RCT_EXTERN_METHOD(
 )
 
 RCT_EXTERN_METHOD(
+   setLang:                (NSString)lang
+   resolver:               (RCTPromiseResolveBlock)resolve
+   rejecter:               (RCTPromiseRejectBlock)reject
+)
+
+RCT_EXTERN_METHOD(
    login:                  (NSString)userId
    resolver:               (RCTPromiseResolveBlock)resolve
    rejecter:               (RCTPromiseRejectBlock)reject

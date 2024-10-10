@@ -28,7 +28,9 @@ class IAPStore {
 			// Allow anonymous purchase
 			allowAnonymousPurchase: true,
 			// Enable StoreKit V2 if supported by the phone (iOS 15+)
-			enableStorekitV2: true
+			enableStorekitV2: true,
+			// Add lang
+			lang: "en"
 		});
 		// Add device params
 		await Iaphub.setDeviceParams({appVersion: pkg.version});

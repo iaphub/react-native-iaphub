@@ -50,4 +50,8 @@ export default interface Product {
    * Subscription intro phases
    */
   readonly subscriptionIntroPhases: [SubscriptionIntroPhase] | null;
+  /**
+   * Metadata for the product as key/value pairs
+   */
+  readonly metadata: { [key: string]: string };
 }

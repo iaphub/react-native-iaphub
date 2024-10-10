@@ -44,6 +44,7 @@ class RNIaphubModule(reactContext: ReactApplicationContext) : ReactContextBaseJa
     val allowAnonymousPurchase = this.getBoolean(options, "allowAnonymousPurchase", false)
     val enableDeferredPurchaseListener = this.getBoolean(options, "enableDeferredPurchaseListener", true)
     val environment = this.getString(options, "environment", "production")
+    val lang = this.getString(options, "lang", "")
     val sdkVersion = this.getString(options, "sdkVersion", "")
     val extraSdk = this.getStringOrNull(options, "sdk")
     var sdk = "react_native"
@@ -60,6 +61,7 @@ class RNIaphubModule(reactContext: ReactApplicationContext) : ReactContextBaseJa
       allowAnonymousPurchase=allowAnonymousPurchase,
       enableDeferredPurchaseListener=enableDeferredPurchaseListener,
       environment=environment,
+      lang=lang,
       sdk=sdk,
       sdkVersion=sdkVersion
     )
@@ -92,6 +94,15 @@ class RNIaphubModule(reactContext: ReactApplicationContext) : ReactContextBaseJa
     Iaphub.stop()
     // Resolve promise
     promise.resolve(null)
+  }
+
+  /**
+   * Set lang
+   */
+  @ReactMethod
+  fun setLang(lang: String, promise: Promise) {
+    val result = Iaphub.setLang(lang)
+    promise.resolve(result)
   }
 
   /**
