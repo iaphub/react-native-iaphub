@@ -97,6 +97,15 @@ class RNIaphubModule(reactContext: ReactApplicationContext) : ReactContextBaseJa
   }
 
   /**
+   * Get SDK version
+   */
+  @ReactMethod
+  fun getSDKVersion(promise: Promise) {
+    val version = Iaphub.getSDKVersion()
+    promise.resolve(version)
+  }
+
+  /**
    * Set lang
    */
   @ReactMethod
