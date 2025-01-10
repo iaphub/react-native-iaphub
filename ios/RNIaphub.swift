@@ -116,17 +116,26 @@ class RNIaphub: RCTEventEmitter, IaphubDelegate {
     }
    
    /**
-    Stop IAPHUB
-    */
-    @objc
-    func stop(_ resolve: @escaping RCTPromiseResolveBlock, rejecter reject: @escaping RCTPromiseRejectBlock) -> Void {
-       Iaphub.stop()
-       resolve(nil)
-    }
+   Stop IAPHUB
+   */
+   @objc
+   func stop(_ resolve: @escaping RCTPromiseResolveBlock, rejecter reject: @escaping RCTPromiseRejectBlock) -> Void {
+      Iaphub.stop()
+      resolve(nil)
+   }
 
    /**
-   Set lang
-   */
+    Get SDK version
+    */
+   @objc
+   func getSDKVersion(_ resolve: @escaping RCTPromiseResolveBlock, rejecter reject: @escaping RCTPromiseRejectBlock) -> Void {
+      let version = Iaphub.getSDKVersion();
+      resolve(version)
+   }
+
+   /**
+    Set lang
+    */
    @objc
    func setLang(_ lang: String, resolver resolve: @escaping RCTPromiseResolveBlock, rejecter reject: @escaping RCTPromiseRejectBlock) {
       let result = Iaphub.setLang(lang);

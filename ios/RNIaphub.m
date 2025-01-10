@@ -15,6 +15,11 @@ RCT_EXTERN_METHOD(
 )
 
 RCT_EXTERN_METHOD(
+   getSDKVersion:          (RCTPromiseResolveBlock)resolve
+   rejecter:               (RCTPromiseRejectBlock)reject
+)
+
+RCT_EXTERN_METHOD(
    setLang:                (NSString)lang
    resolver:               (RCTPromiseResolveBlock)resolve
    rejecter:               (RCTPromiseRejectBlock)reject
