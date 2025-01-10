@@ -126,6 +126,14 @@ export default class Iaphub {
           console.error(err.message);
         }
       });
+      // Check SDK version
+      var nativeSDKVersion = RNIaphub.getSDKVersion ? await RNIaphub.getSDKVersion() : null;
+      if (Platform.OS == "ios" && nativeSDKVersion != config.iosSDKVersion) {
+        console.error(`The "react-native-iaphub" plugin requires the native IAPHUB iOS SDK version ${config.iosSDKVersion}.\n\nTo fix this issue:\nRun \`pod update Iaphub\` in the ios folder of your project to update the IAPHUB iOS SDK to the required version.`);
+      }
+      else if (Platform.OS == "android" && nativeSDKVersion != config.androidSDKVersion) {
+        console.error(`The "react-native-iaphub" plugin requires the native IAPHUB Android SDK version ${config.androidSDKVersion}.\n\nTo fix this issue:\nRebuild your Android project to update the dependencies with the correct SDK version.`);
+      }
     }
     catch (err) {
       throw IaphubError.parse(err);
