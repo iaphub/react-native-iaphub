@@ -35,6 +35,10 @@ export default interface Product {
    */
   readonly localizedDescription: string | null;
   /**
+   * Product alias
+   */
+  readonly alias: string | null;
+  /**
    * Product group id
    */
   readonly group: string | null;
