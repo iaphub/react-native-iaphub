@@ -7,7 +7,7 @@ PODS:
   - hermes-engine (0.76.5):
     - hermes-engine/Pre-built (= 0.76.5)
   - hermes-engine/Pre-built (0.76.5)
-  - Iaphub (4.6.2)
+  - Iaphub (4.6.3)
   - RCT-Folly (2024.01.01.00):
     - boost
     - DoubleConversion
@@ -1243,8 +1243,8 @@ PODS:
     - ReactCommon/turbomodule/bridging
     - ReactCommon/turbomodule/core
     - Yoga
-  - react-native-iaphub (8.10.0):
-    - Iaphub (= 4.6.2)
+  - react-native-iaphub (8.10.1):
+    - Iaphub (= 4.6.3)
     - React-Core
   - React-nativeconfig (0.76.5)
   - React-NativeModulesApple (0.76.5):
@@ -1751,7 +1751,7 @@ SPEC CHECKSUMS:
   fmt: 10c6e61f4be25dc963c36bd73fc7b1705fe975be
   glog: 08b301085f15bcbb6ff8632a8ebaf239aae04e6a
   hermes-engine: 06a9c6900587420b90accc394199527c64259db4
-  Iaphub: 856f1273787f159d0495c4f2c424e7f0eac09e72
+  Iaphub: 9ad2525b50ca077db46b20289ad06bed3befe2ec
   RCT-Folly: 84578c8756030547307e4572ab1947de1685c599
   RCTDeprecation: fb7d408617e25d7f537940000d766d60149c5fea
   RCTRequired: 9aaf0ffcc1f41f0c671af863970ef25c422a9920
@@ -1781,7 +1781,7 @@ SPEC CHECKSUMS:
   React-logger: 697873f06b8ba436e3cddf28018ab4741e8071b6
   React-Mapbuffer: c174e11bdea12dce07df8669d6c0dc97eb0c7706
   React-microtasksnativemodule: 8a80099ad7391f4e13a48b12796d96680f120dc6
-  react-native-iaphub: fe3ee6e5dd8d3ed28757e709b551a76a6064ebc4
+  react-native-iaphub: f92d77d98b44328ce24a682a10e5a7ed05792ade
   React-nativeconfig: f7ab6c152e780b99a8c17448f2d99cf5f69a2311
   React-NativeModulesApple: 70600f7edfc2c2a01e39ab13a20fd59f4c60df0b
   React-perflogger: ceb97dd4e5ca6ff20eebb5a6f9e00312dcdea872
