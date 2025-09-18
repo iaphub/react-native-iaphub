@@ -186,14 +186,13 @@ class RNIaphubModule(reactContext: ReactApplicationContext) : ReactContextBaseJa
    */
   @ReactMethod
   fun buy(sku: String, options: ReadableMap, promise: Promise) {
-    val activity = this.currentActivity
-    val prorationMode = this.getStringOrNull(options, "prorationMode")
-    val crossPlatformConflict = this.getBoolean(options, "crossPlatformConflict", true)
-
-    if (activity == null) {
+    val activity = reactApplicationContext.getCurrentActivity() ?: run {
       this.rejectWithUnexpectedError("activity_null", "activity not found", promise)
       return
     }
+    val prorationMode = this.getStringOrNull(options, "prorationMode")
+    val crossPlatformConflict = this.getBoolean(options, "crossPlatformConflict", true)
+
     Iaphub.buy(activity=activity, sku=sku, prorationMode=prorationMode, crossPlatformConflict=crossPlatformConflict, completion={ err, transaction ->
       if (err != null) {
         this.rejectWithError(err, promise)
