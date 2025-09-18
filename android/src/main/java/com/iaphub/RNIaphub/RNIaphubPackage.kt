@@ -7,6 +7,7 @@ import com.facebook.react.uimanager.ViewManager
 
 
 class RNIaphubPackage : ReactPackage {
+    @Deprecated("React Native is migrating away from createNativeModules; kept for legacy bridge support")
     override fun createNativeModules(reactContext: ReactApplicationContext): List<NativeModule> {
         return listOf(RNIaphubModule(reactContext))
     }
