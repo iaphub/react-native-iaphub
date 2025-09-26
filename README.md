@@ -33,5 +33,5 @@ If you're upgrading to a new major version of the plugin, please consult our mig
 
 ## Example
 
-You can check our [Example app](https://github.com/iaphub/react-native-iaphub/tree/master/Example).
+You can check our [Example app](https://github.com/iaphub/react-native-iaphub/tree/master/examples/example-expo).
 <br/>

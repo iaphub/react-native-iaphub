@@ -1,7 +1,8 @@
 import Foundation
+import React
 import Iaphub
 
-@objc(RNIaphub)
+@objc(NativeIaphub)
 class RNIaphub: RCTEventEmitter, IaphubDelegate {
    
    private var hasListeners = false
@@ -73,8 +74,8 @@ class RNIaphub: RCTEventEmitter, IaphubDelegate {
          return
       }
       self.sendEvent(withName: "onReceipt", body: [
-         "err": err?.getDictionary(),
-         "receipt": receipt?.getDictionary()
+         "err": err?.getDictionary() as Any,
+         "receipt": receipt?.getDictionary() as Any
       ])
    }
    

@@ -7,8 +7,8 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
-		960FD6C327F7FF9A006A36AF /* RNIaphub.m in Sources */ = {isa = PBXBuildFile; fileRef = B3E7B5891CC2AC0600A0062D /* RNIaphub.m */; };
-		F4FF95D7245B92E800C19C63 /* RNIaphub.swift in Sources */ = {isa = PBXBuildFile; fileRef = F4FF95D6245B92E800C19C63 /* RNIaphub.swift */; };
+		96D93E382E85E8C600A614B9 /* RNIaphub.swift in Sources */ = {isa = PBXBuildFile; fileRef = 96D93E372E85E8C600A614B9 /* RNIaphub.swift */; };
+		96D93E3A2E85E8D700A614B9 /* RNIaphub.m in Sources */ = {isa = PBXBuildFile; fileRef = 96D93E392E85E8D700A614B9 /* RNIaphub.m */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXCopyFilesBuildPhase section */
@@ -25,9 +25,8 @@
 
 /* Begin PBXFileReference section */
 		134814201AA4EA6300B7C361 /* libRNIaphub.a */ = {isa = PBXFileReference; explicitFileType = archive.ar; includeInIndex = 0; path = libRNIaphub.a; sourceTree = BUILT_PRODUCTS_DIR; };
-		B3E7B5891CC2AC0600A0062D /* RNIaphub.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = RNIaphub.m; sourceTree = "<group>"; };
-		F4FF95D5245B92E700C19C63 /* RNIaphub-Bridging-Header.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = "RNIaphub-Bridging-Header.h"; sourceTree = "<group>"; };
-		F4FF95D6245B92E800C19C63 /* RNIaphub.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RNIaphub.swift; sourceTree = "<group>"; };
+		96D93E372E85E8C600A614B9 /* RNIaphub.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RNIaphub.swift; sourceTree = "<group>"; };
+		96D93E392E85E8D700A614B9 /* RNIaphub.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = RNIaphub.m; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -52,9 +51,8 @@
 		58B511D21A9E6C8500147676 = {
 			isa = PBXGroup;
 			children = (
-				F4FF95D6245B92E800C19C63 /* RNIaphub.swift */,
-				B3E7B5891CC2AC0600A0062D /* RNIaphub.m */,
-				F4FF95D5245B92E700C19C63 /* RNIaphub-Bridging-Header.h */,
+				96D93E392E85E8D700A614B9 /* RNIaphub.m */,
+				96D93E372E85E8C600A614B9 /* RNIaphub.swift */,
 				134814211AA4EA7D00B7C361 /* Products */,
 			);
 			sourceTree = "<group>";
@@ -116,8 +114,8 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				960FD6C327F7FF9A006A36AF /* RNIaphub.m in Sources */,
-				F4FF95D7245B92E800C19C63 /* RNIaphub.swift in Sources */,
+				96D93E3A2E85E8D700A614B9 /* RNIaphub.m in Sources */,
+				96D93E382E85E8C600A614B9 /* RNIaphub.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

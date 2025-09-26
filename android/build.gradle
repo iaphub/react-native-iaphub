@@ -1,38 +1,34 @@
-buildscript {
-  // Buildscript is evaluated before everything else so we can't use getExtOrDefault
-  def kotlin_version = rootProject.ext.has('kotlinVersion') ? rootProject.ext.get('kotlinVersion') : project.properties['Iaphub_kotlinVersion']
-
-  repositories {
-    google()
-    mavenCentral()
-    jcenter()
-  }
-
-  dependencies {
-    classpath 'com.android.tools.build:gradle:3.2.1'
-    // noinspection DifferentKotlinGradleVersion
-    classpath "org.jetbrains.kotlin:kotlin-gradle-plugin:$kotlin_version"
-  }
-}
-
 apply plugin: 'com.android.library'
 apply plugin: 'kotlin-android'
 
-def getExtOrDefault(name) {
-  return rootProject.ext.has(name) ? rootProject.ext.get(name) : project.properties['Iaphub_' + name]
+def safeExtGet(String prop, Object fallback) {
+  return rootProject.ext.has(prop) ? rootProject.ext.get(prop) : fallback
 }
 
-def getExtOrIntegerDefault(name) {
-  return rootProject.ext.has(name) ? rootProject.ext.get(name) : (project.properties['Iaphub_' + name]).toInteger()
+def safeExtGetInt(String prop, Number fallback) {
+  return safeExtGet(prop, fallback).toString().toInteger()
+}
+
+def kotlinVersion = safeExtGet('kotlinVersion', '1.9.22')
+
+def isNewArchitectureEnabled() {
+  return rootProject.hasProperty('newArchEnabled') &&
+      rootProject.getProperty('newArchEnabled') == 'true'
+}
+
+if (isNewArchitectureEnabled()) {
+  apply plugin: 'com.facebook.react'
 }
 
 android {
-  compileSdkVersion getExtOrIntegerDefault('compileSdkVersion')
+  namespace 'com.iaphub.RNIaphub'
+  compileSdkVersion safeExtGetInt('compileSdkVersion', 35)
+
   defaultConfig {
-    minSdkVersion getExtOrIntegerDefault('minSdkVersion')
-    targetSdkVersion getExtOrIntegerDefault('targetSdkVersion')
+    minSdkVersion safeExtGetInt('minSdkVersion', 23)
+    targetSdkVersion safeExtGetInt('targetSdkVersion', 35)
     versionCode 1
-    versionName "8.5.0"
+    versionName safeExtGet('versionName', '1.0').toString()
   }
 
   buildTypes {
@@ -40,92 +36,37 @@ android {
       minifyEnabled false
     }
   }
+
   lintOptions {
     disable 'GradleCompatible'
   }
-  compileOptions {
-    sourceCompatibility JavaVersion.VERSION_1_8
-    targetCompatibility JavaVersion.VERSION_1_8
+
+  buildFeatures {
+    buildConfig = false
+  }
+
+  sourceSets {
+    main {
+      java.srcDir('src/main/java')
+      if (isNewArchitectureEnabled()) {
+        java.srcDir('src/newarch/java')
+        java.srcDir("$buildDir/generated/source/codegen/java")
+      } else {
+        java.srcDir('src/oldarch/java')
+      }
+    }
   }
 }
 
 repositories {
   mavenCentral()
-  jcenter()
   google()
-
-  def found = false
-  def defaultDir = null
-  def androidSourcesName = 'React Native sources'
-
-  if (rootProject.ext.has('reactNativeAndroidRoot')) {
-    defaultDir = rootProject.ext.get('reactNativeAndroidRoot')
-  } else {
-    defaultDir = new File(
-            projectDir,
-            '/../../../node_modules/react-native/android'
-    )
-  }
-
-  if (defaultDir.exists()) {
-    maven {
-      url defaultDir.toString()
-      name androidSourcesName
-    }
-
-    logger.info(":${project.name}:reactNativeAndroidRoot ${defaultDir.canonicalPath}")
-    found = true
-  } else {
-    def parentDir = rootProject.projectDir
-
-    1.upto(5, {
-      if (found) return true
-      parentDir = parentDir.parentFile
-
-      def androidSourcesDir = new File(
-              parentDir,
-              'node_modules/react-native'
-      )
-
-      def androidPrebuiltBinaryDir = new File(
-              parentDir,
-              'node_modules/react-native/android'
-      )
-
-      if (androidPrebuiltBinaryDir.exists()) {
-        maven {
-          url androidPrebuiltBinaryDir.toString()
-          name androidSourcesName
-        }
-
-        logger.info(":${project.name}:reactNativeAndroidRoot ${androidPrebuiltBinaryDir.canonicalPath}")
-        found = true
-      } else if (androidSourcesDir.exists()) {
-        maven {
-          url androidSourcesDir.toString()
-          name androidSourcesName
-        }
-
-        logger.info(":${project.name}:reactNativeAndroidRoot ${androidSourcesDir.canonicalPath}")
-        found = true
-      }
-    })
-  }
-
-  if (!found) {
-    throw new FileNotFoundException(
-            "${project.name}: unable to locate React Native android sources. " +
-                    "Ensure you have you installed React Native as a dependency in your project and try again."
-    )
-  }
+  maven { url("$rootDir/../node_modules/react-native/android") }
 }
 
-def kotlin_version = getExtOrDefault('kotlinVersion')
-
 dependencies {
-  // noinspection GradleDynamicVersion
-  api 'com.facebook.react:react-native:+'
+  implementation 'com.facebook.react:react-native:+'
   implementation 'com.iaphub:iaphub-android-sdk:5.0.0'
   implementation 'com.google.code.gson:gson:2.8.9'
-  implementation "org.jetbrains.kotlin:kotlin-stdlib:$kotlin_version"
+  implementation "org.jetbrains.kotlin:kotlin-stdlib:$kotlinVersion"
 }

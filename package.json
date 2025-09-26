@@ -16,6 +16,8 @@
     "react-native-iaphub.podspec",
     "!lib/typescript/example",
     "!android/build",
+    "!android/.gradle",
+    "!android/.settings",
     "!ios/build",
     "!**/__tests__",
     "!**/__fixtures__",
@@ -27,8 +29,8 @@
     "lint": "eslint \"**/*.{js,ts,tsx}\"",
     "prepare": "bob build",
     "release": "release-it",
-    "example": "yarn --cwd example",
-    "pods": "cd example && pod-install --quiet",
+    "example": "yarn --cwd examples/example-expo",
+    "pods": "cd examples/example-expo && pod-install --quiet",
     "bootstrap": "yarn example && yarn && yarn pods"
   },
   "keywords": [
@@ -52,7 +54,7 @@
     "@release-it/conventional-changelog": "^2.0.0",
     "@types/jest": "^26.0.0",
     "@types/react": "^16.9.19",
-    "@types/react-native": "0.62.13",
+    "@types/react-native": "0.73.0",
     "commitlint": "^11.0.0",
     "eslint": "^7.2.0",
     "eslint-config-prettier": "^7.0.0",
@@ -74,7 +76,7 @@
   "jest": {
     "preset": "react-native",
     "modulePathIgnorePatterns": [
-      "<rootDir>/example/node_modules",
+      "<rootDir>/examples/example-expo/node_modules",
       "<rootDir>/lib/"
     ]
   },
@@ -143,5 +145,17 @@
         }
       ]
     ]
+  },
+  "codegenConfig": {
+    "name": "NativeIaphub",
+    "type": "modules",
+    "jsSrcsDir": "src/specs",
+    "android": {
+      "javaPackageName": "com.iaphub.RNIaphub"
+    },
+    "ios": {
+      "headerDir": "RNIaphub",
+      "sourceDir": "ios"
+    }
   }
 }
