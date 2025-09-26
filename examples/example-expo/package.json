@@ -1,0 +1,27 @@
+{
+  "name": "example-expo",
+  "version": "1.0.0",
+  "main": "App.js",
+  "scripts": {
+    "start": "expo start",
+    "start:clear": "expo start --clear",
+    "android": "expo run:android",
+    "ios": "expo run:ios",
+    "prebuild": "expo prebuild",
+    "web": "expo start --web",
+    "clean": "rm -rf node_modules/.cache .expo && npm cache clean --force",
+    "install-lib": "TARBALL=$(npm pack ../../ --silent | tail -n 1 | tr -d '\\r\\n') && npm install --no-save \"./$TARBALL\" && rm \"$TARBALL\""
+  },
+  "dependencies": {
+    "expo": "~54.0.7",
+    "expo-status-bar": "~3.0.8",
+    "react": "19.1.0",
+    "react-native": "0.81.4",
+    "react-native-iaphub": "file:../.."
+  },
+  "private": true,
+  "devDependencies": {
+    "@babel/plugin-transform-runtime": "^7.28.3",
+    "babel-preset-expo": "^54.0.3"
+  }
+}
