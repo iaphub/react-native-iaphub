@@ -27,10 +27,13 @@ type NativeShowManageSubscriptionsOptions = {
   sku?: string;
 };
 type NativeSubscriptionIntroPhase = {
-  period: string | null;
-  price: number | null;
-  localizedPrice: string | null;
-  type: string | null;
+  type: string;
+  price: number;
+  currency: string;
+  localizedPrice: string;
+  cycleDuration: string;
+  cycleCount: number;
+  payment: string;
 };
 
 type NativeProduct = {
@@ -46,7 +49,7 @@ type NativeProduct = {
   group: string | null;
   groupName: string | null;
   subscriptionDuration: string | null;
-  subscriptionIntroPhases: NativeSubscriptionIntroPhase[] | null;
+  subscriptionIntroPhases?: NativeSubscriptionIntroPhase[];
   metadata: {[key: string]: string};
 };
 

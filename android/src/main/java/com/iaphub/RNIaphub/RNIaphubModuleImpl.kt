@@ -16,6 +16,9 @@ import com.iaphub.IaphubError
 
 internal class RNIaphubModuleImpl(private val reactContext: ReactApplicationContext) {
 
+  // Keys here are skipped when null so the React Native spec can treat them as optional fields rather than union types.
+  private val optionalProperties = setOf("subscriptionIntroPhases")
+
   fun addListener(@Suppress("UNUSED_PARAMETER") eventName: String?) {
     // Required for EventEmitter parity
   }
@@ -277,6 +280,9 @@ internal class RNIaphubModuleImpl(private val reactContext: ReactApplicationCont
     }
 
     for ((key, value) in data) {
+      if (value == null && optionalProperties.contains(key)) {
+        continue
+      }
       when (value) {
         null -> map.putNull(key)
         is Boolean -> map.putBoolean(key, value)

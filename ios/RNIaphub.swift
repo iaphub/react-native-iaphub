@@ -6,6 +6,8 @@ import Iaphub
 class RNIaphub: RCTEventEmitter, IaphubDelegate {
    
    private var hasListeners = false
+   // Keys listed here are omitted when their native value is null so React Native codegen sees them as optional instead of union types.
+   private let optionalProperties: Set<String> = ["subscriptionIntroPhases"]
    
    
    override static func requiresMainQueueSetup() -> Bool {
@@ -38,12 +40,12 @@ class RNIaphub: RCTEventEmitter, IaphubDelegate {
    
    /**
     Listen for a deferred purchase event
-    */
+   */
    func didReceiveDeferredPurchase(transaction: IHReceiptTransaction) {
       if (!self.hasListeners) {
          return
       }
-      self.sendEvent(withName: "onDeferredPurchase", body: transaction.getDictionary())
+      self.sendEvent(withName: "onDeferredPurchase", body: sanitizeValue(transaction.getDictionary()))
    }
    
    /**
@@ -53,7 +55,7 @@ class RNIaphub: RCTEventEmitter, IaphubDelegate {
       if (!self.hasListeners) {
          return
       }
-      self.sendEvent(withName: "onError", body: err.getDictionary())
+      self.sendEvent(withName: "onError", body: sanitizeValue(err.getDictionary()))
    }
    
    /**
@@ -74,8 +76,8 @@ class RNIaphub: RCTEventEmitter, IaphubDelegate {
          return
       }
       self.sendEvent(withName: "onReceipt", body: [
-         "err": err?.getDictionary() as Any,
-         "receipt": receipt?.getDictionary() as Any
+         "err": sanitizePayload(err?.getDictionary()) ?? NSNull(),
+         "receipt": sanitizePayload(receipt?.getDictionary()) ?? NSNull()
       ])
    }
    
@@ -213,7 +215,12 @@ class RNIaphub: RCTEventEmitter, IaphubDelegate {
          if let err = err {
             return reject("iaphub_error", self.createError(err), nil)
          }
-         resolve(transaction?.getDictionary())
+         if let transaction = transaction {
+            resolve(self.sanitizeValue(transaction.getDictionary()))
+         }
+         else {
+            resolve(nil)
+         }
       })
    }
    
@@ -226,7 +233,7 @@ class RNIaphub: RCTEventEmitter, IaphubDelegate {
          if let err = err {
             return reject("iaphub_error", self.createError(err), nil)
          }
-         resolve(response?.getDictionary())
+         resolve(self.sanitizePayload(response?.getDictionary()))
       })
    }
    
@@ -241,7 +248,15 @@ class RNIaphub: RCTEventEmitter, IaphubDelegate {
          if let err = err {
             return reject("iaphub_error", self.createError(err), nil)
          }
-         resolve(products?.map({ (product) in product.getDictionary()}))
+         if let products = products {
+            let data = products.map { product in
+               return self.sanitizeValue(product.getDictionary())
+            }
+            resolve(data)
+         }
+         else {
+            resolve(nil)
+         }
       })
    }
    
@@ -254,7 +269,15 @@ class RNIaphub: RCTEventEmitter, IaphubDelegate {
          if let err = err {
             return reject("iaphub_error", self.createError(err), nil)
          }
-         resolve(products?.map({ (product) in product.getDictionary()}))
+         if let products = products {
+            let data = products.map { product in
+               return self.sanitizeValue(product.getDictionary())
+            }
+            resolve(data)
+         }
+         else {
+            resolve(nil)
+         }
       })
    }
    
@@ -269,7 +292,7 @@ class RNIaphub: RCTEventEmitter, IaphubDelegate {
          if let err = err {
             return reject("iaphub_error", self.createError(err), nil)
          }
-         resolve(products?.getDictionary())
+         resolve(self.sanitizePayload(products?.getDictionary()))
       })
    }
    
@@ -280,7 +303,7 @@ class RNIaphub: RCTEventEmitter, IaphubDelegate {
    func getBillingStatus(_ resolve: @escaping RCTPromiseResolveBlock, rejecter reject: @escaping RCTPromiseRejectBlock) {
       let status = Iaphub.getBillingStatus()
       
-      resolve(status.getDictionary())
+      resolve(sanitizeValue(status.getDictionary()))
    }
    
    /**
@@ -314,6 +337,36 @@ class RNIaphub: RCTEventEmitter, IaphubDelegate {
    /**
     Create error
     */
+   private func sanitizePayload(_ value: Any?) -> Any? {
+      guard let value = value else {
+         return nil
+      }
+      return sanitizeValue(value)
+   }
+   
+   private func sanitizeValue(_ value: Any) -> Any {
+      if let dictionary = value as? [String: Any] {
+         return sanitizeDictionary(dictionary)
+      }
+      if let array = value as? [Any] {
+         return array.map { sanitizeValue($0) }
+      }
+      return value
+   }
+   
+   private func sanitizeDictionary(_ dictionary: [String: Any]) -> [String: Any] {
+      var sanitized: [String: Any] = [:]
+      
+      for (key, value) in dictionary {
+         if optionalProperties.contains(key), value is NSNull {
+            continue
+         }
+         sanitized[key] = sanitizeValue(value)
+      }
+      
+      return sanitized
+   }
+   
    func createError(code: String, subcode: String, message: String, params: Dictionary<String, Any> = [:]) -> String? {
       if let json = try? JSONSerialization.data(withJSONObject: ["code": code, "subcode": subcode, "message": message, "params": params]) {
          return String(data: json, encoding: .utf8)
