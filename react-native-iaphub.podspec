@@ -14,7 +14,7 @@ Pod::Spec.new do |s|
   s.source       = { :git => "https://github.com/iaphub/react-native-iaphub.git", :tag => "#{s.version}" }
 
   s.source_files = "ios/**/*.{h,m,mm,swift}"
-  s.dependency "Iaphub", "4.6.5"
+  s.dependency "Iaphub", "4.6.7"
 
   # iOS deployment target: bump if new arch is on
   s.platforms = is_new_arch_enabled ? { ios: "13.4" } : { ios: "9.0" }
