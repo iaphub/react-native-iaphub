@@ -145,17 +145,5 @@
         }
       ]
     ]
-  },
-  "codegenConfig": {
-    "name": "NativeIaphub",
-    "type": "modules",
-    "jsSrcsDir": "src/specs",
-    "android": {
-      "javaPackageName": "com.iaphub.RNIaphub"
-    },
-    "ios": {
-      "headerDir": "RNIaphub",
-      "sourceDir": "ios"
-    }
   }
 }
